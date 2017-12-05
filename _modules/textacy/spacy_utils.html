@@ -1,0 +1,397 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>textacy.spacy_utils &mdash; textacy 0.5.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="textacy 0.5.0 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> textacy
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api_reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../license.html">License</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">textacy</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>textacy.spacy_utils</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for textacy.spacy_utils</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Set of small utility functions that take Spacy objects as input.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span>
+
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">from</span> <span class="nn">spacy.symbols</span> <span class="k">import</span> <span class="n">NOUN</span><span class="p">,</span> <span class="n">PROPN</span><span class="p">,</span> <span class="n">VERB</span>
+<span class="kn">from</span> <span class="nn">spacy.tokens.token</span> <span class="k">import</span> <span class="n">Token</span> <span class="k">as</span> <span class="n">SpacyToken</span>
+<span class="kn">from</span> <span class="nn">spacy.tokens.span</span> <span class="k">import</span> <span class="n">Span</span> <span class="k">as</span> <span class="n">SpacySpan</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">constants</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">text_utils</span>
+
+<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="is_plural_noun"><a class="viewcode-back" href="../../api_reference.html#textacy.spacy_utils.is_plural_noun">[docs]</a><span class="k">def</span> <span class="nf">is_plural_noun</span><span class="p">(</span><span class="n">token</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns True if token is a plural noun, False otherwise.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        token (``spacy.Token``): parent document must have POS information</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        bool</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">token</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">is_tagged</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;token is not POS-tagged&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">token</span><span class="o">.</span><span class="n">pos</span> <span class="o">==</span> <span class="n">NOUN</span> <span class="ow">and</span> <span class="n">token</span><span class="o">.</span><span class="n">lemma</span> <span class="o">!=</span> <span class="n">token</span><span class="o">.</span><span class="n">lower</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="is_negated_verb"><a class="viewcode-back" href="../../api_reference.html#textacy.spacy_utils.is_negated_verb">[docs]</a><span class="k">def</span> <span class="nf">is_negated_verb</span><span class="p">(</span><span class="n">token</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns True if verb is negated by one of its (dependency parse) children,</span>
+<span class="sd">    False otherwise.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        token (``spacy.Token``): parent document must have parse information</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        bool</span>
+
+<span class="sd">    TODO: generalize to other parts of speech; rule-based is pretty lacking,</span>
+<span class="sd">    so will probably require training a model; this is an unsolved research problem</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">token</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">is_parsed</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;token is not parsed&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">token</span><span class="o">.</span><span class="n">pos</span> <span class="o">==</span> <span class="n">VERB</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">dep_</span> <span class="o">==</span> <span class="s1">&#39;neg&#39;</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">token</span><span class="o">.</span><span class="n">children</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="preserve_case"><a class="viewcode-back" href="../../api_reference.html#textacy.spacy_utils.preserve_case">[docs]</a><span class="k">def</span> <span class="nf">preserve_case</span><span class="p">(</span><span class="n">token</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns True if `token` is a proper noun or acronym, False otherwise.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        token (``spacy.Token``): parent document must have POS information</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        bool</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">token</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">is_tagged</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;token is not POS-tagged&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">token</span><span class="o">.</span><span class="n">pos</span> <span class="o">==</span> <span class="n">PROPN</span> <span class="ow">or</span> <span class="n">text_utils</span><span class="o">.</span><span class="n">is_acronym</span><span class="p">(</span><span class="n">token</span><span class="o">.</span><span class="n">text</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="normalized_str"><a class="viewcode-back" href="../../api_reference.html#textacy.spacy_utils.normalized_str">[docs]</a><span class="k">def</span> <span class="nf">normalized_str</span><span class="p">(</span><span class="n">token</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return as-is text for tokens that are proper nouns or acronyms, lemmatized</span>
+<span class="sd">    text for everything else.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        token (``spacy.Token`` or ``spacy.Span``)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="n">SpacyToken</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">token</span><span class="o">.</span><span class="n">text</span> <span class="k">if</span> <span class="n">preserve_case</span><span class="p">(</span><span class="n">token</span><span class="p">)</span> <span class="k">else</span> <span class="n">token</span><span class="o">.</span><span class="n">lemma_</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="n">SpacySpan</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">subtok</span><span class="o">.</span><span class="n">text</span> <span class="k">if</span> <span class="n">preserve_case</span><span class="p">(</span><span class="n">subtok</span><span class="p">)</span> <span class="k">else</span> <span class="n">subtok</span><span class="o">.</span><span class="n">lemma_</span>
+                        <span class="k">for</span> <span class="n">subtok</span> <span class="ow">in</span> <span class="n">token</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="s1">&#39;Input must be a spacy Token or Span, not </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
+            <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="merge_spans"><a class="viewcode-back" href="../../api_reference.html#textacy.spacy_utils.merge_spans">[docs]</a><span class="k">def</span> <span class="nf">merge_spans</span><span class="p">(</span><span class="n">spans</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Merge spans *in-place* within parent doc so that each takes up a single token.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        spans (Iterable[``spacy.Span``])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">span</span> <span class="ow">in</span> <span class="n">spans</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">span</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">span</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">tag_</span><span class="p">,</span> <span class="n">span</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="n">span</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">ent_type_</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">IndexError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s1">&#39;Unable to merge span &quot;</span><span class="si">%s</span><span class="s1">&quot;; skipping...&#39;</span><span class="p">,</span> <span class="n">span</span><span class="o">.</span><span class="n">text</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_main_verbs_of_sent"><a class="viewcode-back" href="../../api_reference.html#textacy.spacy_utils.get_main_verbs_of_sent">[docs]</a><span class="k">def</span> <span class="nf">get_main_verbs_of_sent</span><span class="p">(</span><span class="n">sent</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the main (non-auxiliary) verbs in a sentence.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">tok</span> <span class="k">for</span> <span class="n">tok</span> <span class="ow">in</span> <span class="n">sent</span>
+            <span class="k">if</span> <span class="n">tok</span><span class="o">.</span><span class="n">pos</span> <span class="o">==</span> <span class="n">VERB</span> <span class="ow">and</span> <span class="n">tok</span><span class="o">.</span><span class="n">dep_</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;aux&#39;</span><span class="p">,</span> <span class="s1">&#39;auxpass&#39;</span><span class="p">}]</span></div>
+
+
+<div class="viewcode-block" id="get_subjects_of_verb"><a class="viewcode-back" href="../../api_reference.html#textacy.spacy_utils.get_subjects_of_verb">[docs]</a><span class="k">def</span> <span class="nf">get_subjects_of_verb</span><span class="p">(</span><span class="n">verb</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return all subjects of a verb according to the dependency parse.&quot;&quot;&quot;</span>
+    <span class="n">subjs</span> <span class="o">=</span> <span class="p">[</span><span class="n">tok</span> <span class="k">for</span> <span class="n">tok</span> <span class="ow">in</span> <span class="n">verb</span><span class="o">.</span><span class="n">lefts</span>
+             <span class="k">if</span> <span class="n">tok</span><span class="o">.</span><span class="n">dep_</span> <span class="ow">in</span> <span class="n">constants</span><span class="o">.</span><span class="n">SUBJ_DEPS</span><span class="p">]</span>
+    <span class="c1"># get additional conjunct subjects</span>
+    <span class="n">subjs</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">tok</span> <span class="k">for</span> <span class="n">subj</span> <span class="ow">in</span> <span class="n">subjs</span> <span class="k">for</span> <span class="n">tok</span> <span class="ow">in</span> <span class="n">_get_conjuncts</span><span class="p">(</span><span class="n">subj</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">subjs</span></div>
+
+
+<div class="viewcode-block" id="get_objects_of_verb"><a class="viewcode-back" href="../../api_reference.html#textacy.spacy_utils.get_objects_of_verb">[docs]</a><span class="k">def</span> <span class="nf">get_objects_of_verb</span><span class="p">(</span><span class="n">verb</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return all objects of a verb according to the dependency parse,</span>
+<span class="sd">    including open clausal complements.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">objs</span> <span class="o">=</span> <span class="p">[</span><span class="n">tok</span> <span class="k">for</span> <span class="n">tok</span> <span class="ow">in</span> <span class="n">verb</span><span class="o">.</span><span class="n">rights</span>
+            <span class="k">if</span> <span class="n">tok</span><span class="o">.</span><span class="n">dep_</span> <span class="ow">in</span> <span class="n">constants</span><span class="o">.</span><span class="n">OBJ_DEPS</span><span class="p">]</span>
+    <span class="c1"># get open clausal complements (xcomp)</span>
+    <span class="n">objs</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">tok</span> <span class="k">for</span> <span class="n">tok</span> <span class="ow">in</span> <span class="n">verb</span><span class="o">.</span><span class="n">rights</span>
+                <span class="k">if</span> <span class="n">tok</span><span class="o">.</span><span class="n">dep_</span> <span class="o">==</span> <span class="s1">&#39;xcomp&#39;</span><span class="p">)</span>
+    <span class="c1"># get additional conjunct objects</span>
+    <span class="n">objs</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">tok</span> <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objs</span> <span class="k">for</span> <span class="n">tok</span> <span class="ow">in</span> <span class="n">_get_conjuncts</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">objs</span></div>
+
+
+<span class="k">def</span> <span class="nf">_get_conjuncts</span><span class="p">(</span><span class="n">tok</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return conjunct dependents of the leftmost conjunct in a coordinated phrase,</span>
+<span class="sd">    e.g. &quot;Burton, [Dan], and [Josh] ...&quot;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">right</span> <span class="k">for</span> <span class="n">right</span> <span class="ow">in</span> <span class="n">tok</span><span class="o">.</span><span class="n">rights</span>
+            <span class="k">if</span> <span class="n">right</span><span class="o">.</span><span class="n">dep_</span> <span class="o">==</span> <span class="s1">&#39;conj&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="get_span_for_compound_noun"><a class="viewcode-back" href="../../api_reference.html#textacy.spacy_utils.get_span_for_compound_noun">[docs]</a><span class="k">def</span> <span class="nf">get_span_for_compound_noun</span><span class="p">(</span><span class="n">noun</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return document indexes spanning all (adjacent) tokens</span>
+<span class="sd">    in a compound noun.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">min_i</span> <span class="o">=</span> <span class="n">noun</span><span class="o">.</span><span class="n">i</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">takewhile</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">dep_</span> <span class="o">==</span> <span class="s1">&#39;compound&#39;</span><span class="p">,</span>
+                                                        <span class="nb">reversed</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">noun</span><span class="o">.</span><span class="n">lefts</span><span class="p">))))</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">min_i</span><span class="p">,</span> <span class="n">noun</span><span class="o">.</span><span class="n">i</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_span_for_verb_auxiliaries"><a class="viewcode-back" href="../../api_reference.html#textacy.spacy_utils.get_span_for_verb_auxiliaries">[docs]</a><span class="k">def</span> <span class="nf">get_span_for_verb_auxiliaries</span><span class="p">(</span><span class="n">verb</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return document indexes spanning all (adjacent) tokens</span>
+<span class="sd">    around a verb that are auxiliary verbs or negations.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">min_i</span> <span class="o">=</span> <span class="n">verb</span><span class="o">.</span><span class="n">i</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">takewhile</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">dep_</span> <span class="ow">in</span> <span class="n">constants</span><span class="o">.</span><span class="n">AUX_DEPS</span><span class="p">,</span>
+                                                        <span class="nb">reversed</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">verb</span><span class="o">.</span><span class="n">lefts</span><span class="p">))))</span>
+    <span class="n">max_i</span> <span class="o">=</span> <span class="n">verb</span><span class="o">.</span><span class="n">i</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">takewhile</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">dep_</span> <span class="ow">in</span> <span class="n">constants</span><span class="o">.</span><span class="n">AUX_DEPS</span><span class="p">,</span>
+                                                        <span class="n">verb</span><span class="o">.</span><span class="n">rights</span><span class="p">))</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">min_i</span><span class="p">,</span> <span class="n">max_i</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016 Chartbeat, Inc..
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.5.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

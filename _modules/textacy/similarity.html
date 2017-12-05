@@ -1,0 +1,488 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>textacy.similarity &mdash; textacy 0.5.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="textacy 0.5.0 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> textacy
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api_reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../license.html">License</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">textacy</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>textacy.similarity</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for textacy.similarity</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Collection of semantic similarity metrics.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span>
+
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">cytoolz</span> <span class="k">import</span> <span class="n">itertoolz</span>
+<span class="kn">from</span> <span class="nn">Levenshtein</span> <span class="k">import</span> <span class="p">(</span><span class="n">distance</span> <span class="k">as</span> <span class="n">_levenshtein</span><span class="p">,</span>
+                         <span class="n">hamming</span> <span class="k">as</span> <span class="n">_hamming</span><span class="p">,</span>
+                         <span class="n">jaro_winkler</span> <span class="k">as</span> <span class="n">_jaro_winkler</span><span class="p">,</span>
+                         <span class="n">ratio</span> <span class="k">as</span> <span class="n">_ratio</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pyemd</span> <span class="k">import</span> <span class="n">emd</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="k">import</span> <span class="n">pairwise_distances</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">compat</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">extract</span>
+<span class="kn">from</span> <span class="nn">.doc</span> <span class="k">import</span> <span class="n">Doc</span>
+
+
+<span class="n">NONWORDCHARS_REGEX</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\W+&#39;</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span> <span class="o">|</span> <span class="n">re</span><span class="o">.</span><span class="n">UNICODE</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="word_movers"><a class="viewcode-back" href="../../api_reference.html#textacy.similarity.word_movers">[docs]</a><span class="k">def</span> <span class="nf">word_movers</span><span class="p">(</span><span class="n">doc1</span><span class="p">,</span> <span class="n">doc2</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;cosine&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Measure the semantic similarity between two documents using Word Movers</span>
+<span class="sd">    Distance.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        doc1 (:class:`textacy.Doc` or :class:`spacy.Doc`)</span>
+<span class="sd">        doc2 (:class:`textacy.Doc` or :class:`spacy.Doc`)</span>
+<span class="sd">        metric ({&#39;cosine&#39;, &#39;euclidean&#39;, &#39;l1&#39;, &#39;l2&#39;, &#39;manhattan&#39;})</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: Similarity between ``doc1`` and ``doc2`` in the interval [0.0, 1.0],</span>
+<span class="sd">        where larger values correspond to more similar documents.</span>
+
+<span class="sd">    References:</span>
+<span class="sd">        - Ofir Pele and Michael Werman, &quot;A linear time histogram metric for improved</span>
+<span class="sd">          SIFT matching,&quot; in Computer Vision - ECCV 2008, Marseille, France, 2008.</span>
+<span class="sd">        - Ofir Pele and Michael Werman, &quot;Fast and robust earth mover&#39;s distances,&quot;</span>
+<span class="sd">          in Proc. 2009 IEEE 12th Int. Conf. on Computer Vision, Kyoto, Japan, 2009.</span>
+<span class="sd">        - Kusner, Matt J., et al. &quot;From word embeddings to document distances.&quot;</span>
+<span class="sd">          Proceedings of the 32nd International Conference on Machine Learning</span>
+<span class="sd">          (ICML 2015). 2015. http://jmlr.org/proceedings/papers/v37/kusnerb15.pdf</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">word_idxs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+    <span class="n">n</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">word_vecs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">itertoolz</span><span class="o">.</span><span class="n">concatv</span><span class="p">(</span><span class="n">extract</span><span class="o">.</span><span class="n">words</span><span class="p">(</span><span class="n">doc1</span><span class="p">),</span> <span class="n">extract</span><span class="o">.</span><span class="n">words</span><span class="p">(</span><span class="n">doc2</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">word</span><span class="o">.</span><span class="n">has_vector</span> <span class="ow">and</span> <span class="n">word_idxs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">word</span><span class="o">.</span><span class="n">orth</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> <span class="o">==</span> <span class="n">n</span><span class="p">:</span>
+            <span class="n">word_vecs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">word</span><span class="o">.</span><span class="n">vector</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">distance_mat</span> <span class="o">=</span> <span class="n">pairwise_distances</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">word_vecs</span><span class="p">),</span> <span class="n">metric</span><span class="o">=</span><span class="n">metric</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">double</span><span class="p">)</span>
+    <span class="n">distance_mat</span> <span class="o">/=</span> <span class="n">distance_mat</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+
+    <span class="n">vec1</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">(</span>
+        <span class="n">word_idxs</span><span class="p">[</span><span class="n">word</span><span class="o">.</span><span class="n">orth</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">extract</span><span class="o">.</span><span class="n">words</span><span class="p">(</span><span class="n">doc1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">word</span><span class="o">.</span><span class="n">has_vector</span><span class="p">)</span>
+    <span class="n">vec1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">vec1</span><span class="p">[</span><span class="n">word_idx</span><span class="p">]</span> <span class="k">for</span> <span class="n">word_idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">word_idxs</span><span class="p">))])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">double</span><span class="p">)</span>
+    <span class="n">vec1</span> <span class="o">/=</span> <span class="n">vec1</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>  <span class="c1"># normalize word counts</span>
+
+    <span class="n">vec2</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">(</span>
+        <span class="n">word_idxs</span><span class="p">[</span><span class="n">word</span><span class="o">.</span><span class="n">orth</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">extract</span><span class="o">.</span><span class="n">words</span><span class="p">(</span><span class="n">doc2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">word</span><span class="o">.</span><span class="n">has_vector</span><span class="p">)</span>
+    <span class="n">vec2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">vec2</span><span class="p">[</span><span class="n">word_idx</span><span class="p">]</span> <span class="k">for</span> <span class="n">word_idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">word_idxs</span><span class="p">))])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">double</span><span class="p">)</span>
+    <span class="n">vec2</span> <span class="o">/=</span> <span class="n">vec2</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>  <span class="c1"># normalize word counts</span>
+
+    <span class="k">return</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">emd</span><span class="p">(</span><span class="n">vec1</span><span class="p">,</span> <span class="n">vec2</span><span class="p">,</span> <span class="n">distance_mat</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="word2vec"><a class="viewcode-back" href="../../api_reference.html#textacy.similarity.word2vec">[docs]</a><span class="k">def</span> <span class="nf">word2vec</span><span class="p">(</span><span class="n">obj1</span><span class="p">,</span> <span class="n">obj2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Measure the semantic similarity between one Doc or spacy Doc, Span, Token,</span>
+<span class="sd">    or Lexeme and another like object using the cosine distance between the</span>
+<span class="sd">    objects&#39; (average) word2vec vectors.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        obj1 (``textacy.Doc``, ``spacy.Doc``, ``spacy.Span``, ``spacy.Token``, or ``spacy.Lexeme``)</span>
+<span class="sd">        obj2 (``textacy.Doc``, ``spacy.Doc``, ``spacy.Span``, ``spacy.Token``, or ``spacy.Lexeme``)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">        float: similarity between `obj1` and `obj2` in the interval [0.0, 1.0],</span>
+<span class="sd">        where larger values correspond to more similar objects</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj1</span><span class="p">,</span> <span class="n">Doc</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj2</span><span class="p">,</span> <span class="n">Doc</span><span class="p">):</span>
+        <span class="n">obj1</span> <span class="o">=</span> <span class="n">obj1</span><span class="o">.</span><span class="n">spacy_doc</span>
+        <span class="n">obj2</span> <span class="o">=</span> <span class="n">obj2</span><span class="o">.</span><span class="n">spacy_doc</span>
+    <span class="k">return</span> <span class="n">obj1</span><span class="o">.</span><span class="n">similarity</span><span class="p">(</span><span class="n">obj2</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="jaccard"><a class="viewcode-back" href="../../api_reference.html#textacy.similarity.jaccard">[docs]</a><span class="k">def</span> <span class="nf">jaccard</span><span class="p">(</span><span class="n">obj1</span><span class="p">,</span> <span class="n">obj2</span><span class="p">,</span> <span class="n">fuzzy_match</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">match_threshold</span><span class="o">=</span><span class="mf">0.8</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Measure the semantic similarity between two strings or sequences of strings</span>
+<span class="sd">    using Jaccard distance, with optional fuzzy matching of not-identical pairs</span>
+<span class="sd">    when `obj1` and `obj2` are sequences of strings.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        obj1 (str or Sequence[str])</span>
+<span class="sd">        obj2 (str or Sequence[str]): if str, both inputs are treated as sequences</span>
+<span class="sd">            of *characters*, in which case fuzzy matching is not permitted</span>
+<span class="sd">        fuzzy_match (bool): if True, allow for fuzzy matching in addition to the</span>
+<span class="sd">            usual identical matching of pairs between input vectors</span>
+<span class="sd">        match_threshold (float): value in the interval [0.0, 1.0]; fuzzy comparisons</span>
+<span class="sd">            with a score &gt;= this value will be considered matches</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: similarity between `obj1` and `obj2` in the interval [0.0, 1.0],</span>
+<span class="sd">        where larger values correspond to more similar strings or sequences</span>
+<span class="sd">        of strings</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: if `fuzzy_match` is True but `obj1` and `obj2` are strings</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">match_threshold</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">1</span> <span class="o">&lt;=</span> <span class="n">match_threshold</span> <span class="o">&lt;=</span> <span class="mi">100</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="s1">&#39;`match_threshold` should be a float in [0.0, 1.0]; &#39;</span>
+            <span class="s1">&#39;it was automatically converted from the provided int in [0, 100]&#39;</span><span class="p">)</span>
+        <span class="n">match_threshold</span> <span class="o">/=</span> <span class="mi">100</span>
+    <span class="n">set1</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">obj1</span><span class="p">)</span>
+    <span class="n">set2</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">obj2</span><span class="p">)</span>
+    <span class="n">intersection</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">set1</span> <span class="o">&amp;</span> <span class="n">set2</span><span class="p">)</span>
+    <span class="n">union</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">set1</span> <span class="o">|</span> <span class="n">set2</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">fuzzy_match</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span>
+            <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj1</span><span class="p">,</span> <span class="n">compat</span><span class="o">.</span><span class="n">string_types</span><span class="p">)</span> <span class="ow">and</span>
+            <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj2</span><span class="p">,</span> <span class="n">compat</span><span class="o">.</span><span class="n">string_types</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">item1</span> <span class="ow">in</span> <span class="n">set1</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">set2</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">max</span><span class="p">(</span><span class="n">token_sort_ratio</span><span class="p">(</span><span class="n">item1</span><span class="p">,</span> <span class="n">item2</span><span class="p">)</span> <span class="k">for</span> <span class="n">item2</span> <span class="ow">in</span> <span class="n">set2</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">match_threshold</span><span class="p">:</span>
+                <span class="n">intersection</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">item2</span> <span class="ow">in</span> <span class="n">set2</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">set1</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">max</span><span class="p">(</span><span class="n">token_sort_ratio</span><span class="p">(</span><span class="n">item2</span><span class="p">,</span> <span class="n">item1</span><span class="p">)</span> <span class="k">for</span> <span class="n">item1</span> <span class="ow">in</span> <span class="n">set1</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">match_threshold</span><span class="p">:</span>
+                <span class="n">intersection</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">elif</span> <span class="n">fuzzy_match</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;fuzzy matching not possible with str inputs&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">intersection</span> <span class="o">/</span> <span class="n">union</span></div>
+
+
+<div class="viewcode-block" id="hamming"><a class="viewcode-back" href="../../api_reference.html#textacy.similarity.hamming">[docs]</a><span class="k">def</span> <span class="nf">hamming</span><span class="p">(</span><span class="n">str1</span><span class="p">,</span> <span class="n">str2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Measure the similarity between two strings using Hamming distance, which</span>
+<span class="sd">    simply gives the number of characters in the strings that are different i.e.</span>
+<span class="sd">    the number of substitution edits needed to change one string into the other.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        str1 (str)</span>
+<span class="sd">        str2 (str)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: similarity between `str1` and `str2` in the interval [0.0, 1.0],</span>
+<span class="sd">        where larger values correspond to more similar strings</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        This uses a *modified* Hamming distance in that it permits strings</span>
+<span class="sd">        of different lengths to be compared.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">len_str1</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">str1</span><span class="p">)</span>
+    <span class="n">len_str2</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">str2</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">len_str1</span> <span class="o">==</span> <span class="n">len_str2</span><span class="p">:</span>
+        <span class="n">distance</span> <span class="o">=</span> <span class="n">_hamming</span><span class="p">(</span><span class="n">str1</span><span class="p">,</span> <span class="n">str2</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># make sure str1 is as long as or longer than str2</span>
+        <span class="k">if</span> <span class="n">len_str2</span> <span class="o">&gt;</span> <span class="n">len_str1</span><span class="p">:</span>
+            <span class="n">str1</span><span class="p">,</span> <span class="n">str2</span> <span class="o">=</span> <span class="n">str2</span><span class="p">,</span> <span class="n">str1</span>
+            <span class="n">len_str1</span><span class="p">,</span> <span class="n">len_str2</span> <span class="o">=</span> <span class="n">len_str2</span><span class="p">,</span> <span class="n">len_str1</span>
+        <span class="c1"># distance is # of different chars + difference in str lengths</span>
+        <span class="n">distance</span> <span class="o">=</span> <span class="n">len_str1</span> <span class="o">-</span> <span class="n">len_str2</span>
+        <span class="n">distance</span> <span class="o">+=</span> <span class="n">_hamming</span><span class="p">(</span><span class="n">str1</span><span class="p">[:</span><span class="n">len_str2</span><span class="p">],</span> <span class="n">str2</span><span class="p">)</span>
+    <span class="n">distance</span> <span class="o">/=</span> <span class="n">len_str1</span>
+    <span class="k">return</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">distance</span></div>
+
+
+<div class="viewcode-block" id="levenshtein"><a class="viewcode-back" href="../../api_reference.html#textacy.similarity.levenshtein">[docs]</a><span class="k">def</span> <span class="nf">levenshtein</span><span class="p">(</span><span class="n">str1</span><span class="p">,</span> <span class="n">str2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Measure the similarity between two strings using Levenshtein distance, which</span>
+<span class="sd">    gives the minimum number of character insertions, deletions, and substitutions</span>
+<span class="sd">    needed to change one string into the other.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        str1 (str)</span>
+<span class="sd">        str2 (str)</span>
+<span class="sd">        normalize (bool): if True, divide Levenshtein distance by the total number</span>
+<span class="sd">            of characters in the longest string; otherwise leave the distance as-is</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: similarity between `str1` and `str2` in the interval [0.0, 1.0],</span>
+<span class="sd">        where larger values correspond to more similar strings</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">distance</span> <span class="o">=</span> <span class="n">_levenshtein</span><span class="p">(</span><span class="n">str1</span><span class="p">,</span> <span class="n">str2</span><span class="p">)</span>
+    <span class="n">distance</span> <span class="o">/=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">str1</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">str2</span><span class="p">))</span>
+    <span class="k">return</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">distance</span></div>
+
+
+<div class="viewcode-block" id="jaro_winkler"><a class="viewcode-back" href="../../api_reference.html#textacy.similarity.jaro_winkler">[docs]</a><span class="k">def</span> <span class="nf">jaro_winkler</span><span class="p">(</span><span class="n">str1</span><span class="p">,</span> <span class="n">str2</span><span class="p">,</span> <span class="n">prefix_weight</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Measure the similarity between two strings using Jaro-Winkler similarity</span>
+<span class="sd">    metric, a modification of Jaro metric giving more weight to a shared prefix.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        str1 (str)</span>
+<span class="sd">        str2 (str)</span>
+<span class="sd">        prefix_weight (float): the inverse value of common prefix length needed</span>
+<span class="sd">            to consider the strings identical</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: similarity between `str1` and `str2` in the interval [0.0, 1.0],</span>
+<span class="sd">        where larger values correspond to more similar strings</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_jaro_winkler</span><span class="p">(</span><span class="n">str1</span><span class="p">,</span> <span class="n">str2</span><span class="p">,</span> <span class="n">prefix_weight</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="token_sort_ratio"><a class="viewcode-back" href="../../api_reference.html#textacy.similarity.token_sort_ratio">[docs]</a><span class="k">def</span> <span class="nf">token_sort_ratio</span><span class="p">(</span><span class="n">str1</span><span class="p">,</span> <span class="n">str2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Measure of similarity between two strings based on minimal edit distance,</span>
+<span class="sd">    where ordering of words in each string is normalized before comparing.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        str1 (str)</span>
+<span class="sd">        str2 (str)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: similarity between ``str1`` and ``str2`` in the interval [0.0, 1.0],</span>
+<span class="sd">        where larger values correspond to more similar strings.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">str1</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">str2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span>
+    <span class="n">str1</span> <span class="o">=</span> <span class="n">_force_unicode</span><span class="p">(</span><span class="n">str1</span><span class="p">)</span>
+    <span class="n">str2</span> <span class="o">=</span> <span class="n">_force_unicode</span><span class="p">(</span><span class="n">str2</span><span class="p">)</span>
+    <span class="n">str1_proc</span> <span class="o">=</span> <span class="n">_process_and_sort</span><span class="p">(</span><span class="n">str1</span><span class="p">)</span>
+    <span class="n">str2_proc</span> <span class="o">=</span> <span class="n">_process_and_sort</span><span class="p">(</span><span class="n">str2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_ratio</span><span class="p">(</span><span class="n">str1_proc</span><span class="p">,</span> <span class="n">str2_proc</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_force_unicode</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Force ``s`` into unicode, or die trying.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">compat</span><span class="o">.</span><span class="n">unicode_</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">s</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">compat</span><span class="o">.</span><span class="n">bytes_</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">compat</span><span class="o">.</span><span class="n">bytes_to_unicode</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">compat</span><span class="o">.</span><span class="n">unicode_</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_process_and_sort</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return a processed string with tokens sorted then re-joined.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">_process</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">()))</span>
+
+
+<span class="k">def</span> <span class="nf">_process</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Remove all characters but letters and numbers, strip whitespace,</span>
+<span class="sd">    and force everything to lower-case.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">s</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">NONWORDCHARS_REGEX</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016 Chartbeat, Inc..
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.5.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

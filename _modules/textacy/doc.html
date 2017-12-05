@@ -1,0 +1,898 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>textacy.doc &mdash; textacy 0.5.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="textacy 0.5.0 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> textacy
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api_reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../license.html">License</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">textacy</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>textacy.doc</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for textacy.doc</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Load, process, iterate, transform, and save text content paired with metadata</span>
+<span class="sd">-- a document.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span>
+
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">types</span>
+
+<span class="kn">from</span> <span class="nn">cytoolz</span> <span class="k">import</span> <span class="n">itertoolz</span>
+<span class="kn">from</span> <span class="nn">spacy</span> <span class="k">import</span> <span class="n">attrs</span>
+<span class="kn">from</span> <span class="nn">spacy.language</span> <span class="k">import</span> <span class="n">Language</span> <span class="k">as</span> <span class="n">SpacyLang</span>
+<span class="kn">from</span> <span class="nn">spacy.tokens.doc</span> <span class="k">import</span> <span class="n">Doc</span> <span class="k">as</span> <span class="n">SpacyDoc</span>
+<span class="kn">from</span> <span class="nn">spacy.tokens.span</span> <span class="k">import</span> <span class="n">Span</span> <span class="k">as</span> <span class="n">SpacySpan</span>
+<span class="kn">from</span> <span class="nn">spacy.tokens.token</span> <span class="k">import</span> <span class="n">Token</span> <span class="k">as</span> <span class="n">SpacyToken</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">cache</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">compat</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">constants</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">extract</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">fileio</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">network</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">spacy_utils</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">text_utils</span>
+
+
+<div class="viewcode-block" id="Doc"><a class="viewcode-back" href="../../api_reference.html#textacy.doc.Doc">[docs]</a><span class="k">class</span> <span class="nc">Doc</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A text document parsed by spaCy and, optionally, paired with key metadata.</span>
+<span class="sd">    Transform :class:`Doc` into an easily-customized list of terms, a bag-of-words</span>
+<span class="sd">    or (more general) bag-of-terms, or a semantic network; save and load parsed</span>
+<span class="sd">    content and metadata to and from disk; index, slice, and iterate through</span>
+<span class="sd">    tokens and sentences; and more.</span>
+
+<span class="sd">    Initialize from a text and (optional) metadata::</span>
+
+<span class="sd">        &gt;&gt;&gt; content = &#39;&#39;&#39;</span>
+<span class="sd">        ...     The apparent symmetry between the quark and lepton families of</span>
+<span class="sd">        ...     the Standard Model (SM) are, at the very least, suggestive of</span>
+<span class="sd">        ...     a more fundamental relationship between them. In some Beyond the</span>
+<span class="sd">        ...     Standard Model theories, such interactions are mediated by</span>
+<span class="sd">        ...     leptoquarks (LQs): hypothetical color-triplet bosons with both</span>
+<span class="sd">        ...     lepton and baryon number and fractional electric charge.&#39;&#39;&#39;</span>
+<span class="sd">        &gt;&gt;&gt; metadata = {</span>
+<span class="sd">        ...     &#39;title&#39;: &#39;A Search for 2nd-generation Leptoquarks at √s = 7 TeV&#39;,</span>
+<span class="sd">        ...     &#39;author&#39;: &#39;Burton DeWilde&#39;,</span>
+<span class="sd">        ...     &#39;pub_date&#39;: &#39;2012-08-01&#39;}</span>
+<span class="sd">        &gt;&gt;&gt; doc = textacy.Doc(content, metadata=metadata)</span>
+<span class="sd">        &gt;&gt;&gt; print(doc)</span>
+<span class="sd">        Doc(71 tokens; &quot;The apparent symmetry between the quark and lep...&quot;)</span>
+
+<span class="sd">    Transform into other, common formats::</span>
+
+<span class="sd">        &gt;&gt;&gt; doc.to_bag_of_words(lemmatize=False, as_strings=False)</span>
+<span class="sd">        {205123: 1, 21382: 1, 17929: 1, 175499: 2, 396: 1, 29774: 1, 27472: 1,</span>
+<span class="sd">         4498: 1, 1814: 1, 1176: 1, 49050: 1, 287836: 1, 1510365: 1, 6239: 2,</span>
+<span class="sd">         3553: 1, 5607: 1, 4776: 1, 49580: 1, 6701: 1, 12078: 2, 63216: 1,</span>
+<span class="sd">         6738: 1, 83061: 1, 5243: 1, 1599: 1}</span>
+<span class="sd">        &gt;&gt;&gt; doc.to_bag_of_terms(ngrams=2, named_entities=True,</span>
+<span class="sd">        ...                     lemmatize=True, as_strings=True)</span>
+<span class="sd">        {&#39;apparent symmetry&#39;: 1, &#39;baryon number&#39;: 1, &#39;electric charge&#39;: 1,</span>
+<span class="sd">         &#39;fractional electric&#39;: 1, &#39;fundamental relationship&#39;: 1,</span>
+<span class="sd">         &#39;hypothetical color&#39;: 1, &#39;lepton family&#39;: 1, &#39;model theory&#39;: 1,</span>
+<span class="sd">         &#39;standard model&#39;: 2, &#39;triplet boson&#39;: 1}</span>
+
+<span class="sd">    Doc as sequence of tokens, emulating spaCy&#39;s &quot;sequence API&quot;::</span>
+
+<span class="sd">        &gt;&gt;&gt; doc[49]  # spacy.Token</span>
+<span class="sd">        leptoquarks</span>
+<span class="sd">        &gt;&gt;&gt; doc[:3]  # spacy.Span</span>
+<span class="sd">        The apparent symmetry</span>
+
+<span class="sd">    Save to and load from disk::</span>
+
+<span class="sd">        &gt;&gt;&gt; doc.save(&#39;~/Desktop/leptoquarks.pkl&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; doc = textacy.Doc.load(&#39;~/Desktop/leptoquarks.pkl&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; print(doc)</span>
+<span class="sd">        Doc(71 tokens; &quot;The apparent symmetry between the quark and lep...&quot;)</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        content (str or ``spacy.Doc``): Document content as (unicode) text or an</span>
+<span class="sd">            already-parsed ``spacy.Doc``. If str, content is processed by models</span>
+<span class="sd">            loaded with a ``spacy.Language`` and assigned to :attr:`spacy_doc`.</span>
+<span class="sd">        metadata (dict): Dictionary of relevant information about content. This</span>
+<span class="sd">            can be helpful when identifying and filtering documents, as well as</span>
+<span class="sd">            when engineering features for model inputs.</span>
+<span class="sd">        lang (str or ``spacy.Language`` or callable): Language of document content.</span>
+<span class="sd">            If known, pass a standard 2-letter language code (e.g. &quot;en&quot;), or the</span>
+<span class="sd">            name of a spacy model for the desired language (e.g. &quot;en_core_web_md&quot;),</span>
+<span class="sd">            or an already-instantiated ``spacy.Language`` object. If not known,</span>
+<span class="sd">            pass a function/callable that takes unicode text as input and outputs</span>
+<span class="sd">            a standard 2-letter language code.</span>
+
+<span class="sd">            The given or detected language str is used to instantiate a corresponding</span>
+<span class="sd">            ``spacy.Language`` with all models loaded by default, and the appropriate</span>
+<span class="sd">            2-letter lang code is assigned to :attr:`Doc.lang`.</span>
+
+<span class="sd">            **Note:** The ``spacy.Language`` object parses ``content``</span>
+<span class="sd">            (if str) and sets the :attr:`spacy_vocab` and :attr:`spacy_stringstore`</span>
+<span class="sd">            attributes. See https://spacy.io/usage/models#section-available for</span>
+<span class="sd">            available spacy models.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        lang (str): 2-letter code for language of ``Doc``.</span>
+<span class="sd">        metadata (dict): Dictionary of relevant information about content.</span>
+<span class="sd">        spacy_doc (``spacy.Doc``): https://spacy.io/api/doc</span>
+<span class="sd">        spacy_vocab (``spacy.Vocab``): https://spacy.io/api/vocab</span>
+<span class="sd">        spacy_stringstore (``spacy.StringStore``): https://spacy.io/api/stringstore</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">content</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lang</span><span class="o">=</span><span class="n">text_utils</span><span class="o">.</span><span class="n">detect_language</span><span class="p">):</span>
+
+        <span class="c1"># Doc instantiated from text, so must be parsed with a spacy.Language</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">compat</span><span class="o">.</span><span class="n">unicode_</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lang</span><span class="p">,</span> <span class="n">SpacyLang</span><span class="p">):</span>
+                <span class="n">spacy_lang</span> <span class="o">=</span> <span class="n">lang</span>
+                <span class="n">langstr</span> <span class="o">=</span> <span class="n">spacy_lang</span><span class="o">.</span><span class="n">lang</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lang</span><span class="p">,</span> <span class="n">compat</span><span class="o">.</span><span class="n">unicode_</span><span class="p">):</span>
+                <span class="n">spacy_lang</span> <span class="o">=</span> <span class="n">cache</span><span class="o">.</span><span class="n">load_spacy</span><span class="p">(</span><span class="n">lang</span><span class="p">)</span>
+                <span class="n">langstr</span> <span class="o">=</span> <span class="n">spacy_lang</span><span class="o">.</span><span class="n">lang</span>
+            <span class="k">elif</span> <span class="n">callable</span><span class="p">(</span><span class="n">lang</span><span class="p">):</span>
+                <span class="n">langstr</span> <span class="o">=</span> <span class="n">lang</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+                <span class="n">spacy_lang</span> <span class="o">=</span> <span class="n">cache</span><span class="o">.</span><span class="n">load_spacy</span><span class="p">(</span><span class="n">langstr</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                    <span class="s1">&#39;`lang` must be </span><span class="si">{}</span><span class="s1">, not </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="p">{</span><span class="n">compat</span><span class="o">.</span><span class="n">unicode_</span><span class="p">,</span> <span class="n">SpacyLang</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">FunctionType</span><span class="p">},</span> <span class="nb">type</span><span class="p">(</span><span class="n">lang</span><span class="p">)))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spacy_vocab</span> <span class="o">=</span> <span class="n">spacy_lang</span><span class="o">.</span><span class="n">vocab</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spacy_stringstore</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_vocab</span><span class="o">.</span><span class="n">strings</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spacy_doc</span> <span class="o">=</span> <span class="n">spacy_lang</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+        <span class="c1"># Doc instantiated from an already-parsed spacy.Doc</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">SpacyDoc</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spacy_vocab</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">vocab</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spacy_stringstore</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_vocab</span><span class="o">.</span><span class="n">strings</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spacy_doc</span> <span class="o">=</span> <span class="n">content</span>
+            <span class="n">langstr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_vocab</span><span class="o">.</span><span class="n">lang</span>
+            <span class="c1"># these checks are probably unnecessary, but in case a user</span>
+            <span class="c1"># has done something strange, we should complain...</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lang</span><span class="p">,</span> <span class="n">SpacyLang</span><span class="p">):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_vocab</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">lang</span><span class="o">.</span><span class="n">vocab</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="s1">&#39;`spacy.Vocab` used to parse `content` must be the same &#39;</span>
+                        <span class="s1">&#39;as the one associated with the `lang` param&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lang</span><span class="p">,</span> <span class="n">compat</span><span class="o">.</span><span class="n">unicode_</span><span class="p">):</span>
+                <span class="c1"># a `lang` as str could be a specific spacy model name,</span>
+                <span class="c1"># e.g. &quot;en_core_web_sm&quot;, while `langstr` would only be &quot;en&quot;</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">lang</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">langstr</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="s1">&#39;lang of spacy model used to parse `content` (</span><span class="si">{}</span><span class="s1">) &#39;</span>
+                        <span class="s1">&#39;must be the same as the `lang` param (</span><span class="si">{}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">lang</span><span class="p">,</span> <span class="n">langstr</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">callable</span><span class="p">(</span><span class="n">lang</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                    <span class="s1">&#39;`lang` must be </span><span class="si">{}</span><span class="s1">, not </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="p">{</span><span class="n">compat</span><span class="o">.</span><span class="n">unicode_</span><span class="p">,</span> <span class="n">SpacyLang</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">FunctionType</span><span class="p">},</span> <span class="nb">type</span><span class="p">(</span><span class="n">lang</span><span class="p">)))</span>
+        <span class="c1"># oops, user has made some sort of mistake</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s1">&#39;`Doc` must be initialized with </span><span class="si">{}</span><span class="s1"> content, not &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="p">{</span><span class="n">compat</span><span class="o">.</span><span class="n">unicode_</span><span class="p">,</span> <span class="n">SpacyDoc</span><span class="p">},</span> <span class="nb">type</span><span class="p">(</span><span class="n">content</span><span class="p">)))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">spacy_doc</span><span class="o">.</span><span class="n">user_data</span><span class="p">[</span><span class="s1">&#39;textacy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;lang&#39;</span><span class="p">:</span> <span class="n">langstr</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spacy_doc</span><span class="o">.</span><span class="n">user_data</span><span class="p">[</span><span class="s1">&#39;textacy&#39;</span><span class="p">][</span><span class="s1">&#39;metadata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">metadata</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_counted_ngrams</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_counts</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">snippet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">[:</span><span class="mi">50</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">snippet</span><span class="p">)</span> <span class="o">==</span> <span class="mi">50</span><span class="p">:</span>
+            <span class="n">snippet</span> <span class="o">=</span> <span class="n">snippet</span><span class="p">[:</span><span class="mi">47</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;...&#39;</span>
+        <span class="k">return</span> <span class="s1">&#39;Doc(</span><span class="si">{}</span><span class="s1"> tokens; &quot;</span><span class="si">{}</span><span class="s1">&quot;)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spacy_doc</span><span class="p">),</span> <span class="n">snippet</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_tokens</span>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_doc</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">tok</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_doc</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">tok</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;:class:`Doc` metadata, stored in ``SpacyDoc.user_data``.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_doc</span><span class="o">.</span><span class="n">user_data</span><span class="p">[</span><span class="s1">&#39;textacy&#39;</span><span class="p">][</span><span class="s1">&#39;metadata&#39;</span><span class="p">]</span>
+
+    <span class="nd">@metadata</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spacy_doc</span><span class="o">.</span><span class="n">user_data</span><span class="p">[</span><span class="s1">&#39;textacy&#39;</span><span class="p">][</span><span class="s1">&#39;metadata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">lang</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;:class:`Doc` language, stored in ``SpacyDoc.user_data``.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_doc</span><span class="o">.</span><span class="n">user_data</span><span class="p">[</span><span class="s1">&#39;textacy&#39;</span><span class="p">][</span><span class="s1">&#39;lang&#39;</span><span class="p">]</span>
+
+    <span class="c1">##########</span>
+    <span class="c1"># FILEIO #</span>
+
+<div class="viewcode-block" id="Doc.save"><a class="viewcode-back" href="../../api_reference.html#textacy.doc.Doc.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Save :class:`Doc` content and metadata to disk, as a ``pickle`` file.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filepath (str): Full path to file on disk where document content and</span>
+<span class="sd">                metadata are to be saved.</span>
+
+<span class="sd">        See Also:</span>
+<span class="sd">            :meth:`Doc.load()`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fileio</span><span class="o">.</span><span class="n">write_spacy_docs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spacy_doc</span><span class="p">,</span> <span class="n">filepath</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Doc.load"><a class="viewcode-back" href="../../api_reference.html#textacy.doc.Doc.load">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filepath</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load pickled content and metadata from disk, and initialize a :class:`Doc`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filepath (str): Full path to file on disk where document content and</span>
+<span class="sd">                metadata are saved.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :class:`Doc`</span>
+
+<span class="sd">        See Also:</span>
+<span class="sd">            :meth:`Doc.save()`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">spacy_doc</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">fileio</span><span class="o">.</span><span class="n">read_spacy_docs</span><span class="p">(</span><span class="n">filepath</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">spacy_doc</span><span class="p">,</span>
+                   <span class="n">lang</span><span class="o">=</span><span class="n">spacy_doc</span><span class="o">.</span><span class="n">user_data</span><span class="p">[</span><span class="s1">&#39;textacy&#39;</span><span class="p">][</span><span class="s1">&#39;lang&#39;</span><span class="p">],</span>
+                   <span class="n">metadata</span><span class="o">=</span><span class="n">spacy_doc</span><span class="o">.</span><span class="n">user_data</span><span class="p">[</span><span class="s1">&#39;textacy&#39;</span><span class="p">][</span><span class="s1">&#39;metadata&#39;</span><span class="p">])</span></div>
+
+    <span class="c1">####################</span>
+    <span class="c1"># BASIC COMPONENTS #</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">tokens</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Yield the document&#39;s tokens, as tokenized by spaCy. Equivalent to</span>
+<span class="sd">        iterating directly: ``for token in Doc: &lt;do stuff&gt;``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">tok</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_doc</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">tok</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">sents</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Yield the document&#39;s sentences, as segmented by spaCy.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">sent</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_doc</span><span class="o">.</span><span class="n">sents</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">sent</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_tokens</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The number of tokens in the document -- including punctuation.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spacy_doc</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_sents</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The number of sentences in the document.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_doc</span><span class="o">.</span><span class="n">sents</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Doc.merge"><a class="viewcode-back" href="../../api_reference.html#textacy.doc.Doc.merge">[docs]</a>    <span class="k">def</span> <span class="nf">merge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spans</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Merge spans *in-place* within :class:`Doc` so that each takes up a single</span>
+<span class="sd">        token. Note: All cached counts on this doc are cleared after a merge.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            spans (Iterable[``spacy.Span``]): for example, the results from</span>
+<span class="sd">                :func:`extract.named_entities() &lt;textacy.extract.named_entities&gt;`</span>
+<span class="sd">                or :func:`extract.pos_regex_matches() &lt;textacy.extract.pos_regex_matches&gt;`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">spacy_utils</span><span class="o">.</span><span class="n">merge_spans</span><span class="p">(</span><span class="n">spans</span><span class="p">)</span>
+        <span class="c1"># reset counts, since merging spans invalidates existing counts</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_counts</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_counted_ngrams</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Doc.count"><a class="viewcode-back" href="../../api_reference.html#textacy.doc.Doc.count">[docs]</a>    <span class="k">def</span> <span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">term</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the number of occurrences (i.e. count) of ``term`` in :class:`Doc`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            term (str or int or ``spacy.Token`` or ``spacy.Span``): The term to</span>
+<span class="sd">                be counted can be given as a string, a unique integer id, a</span>
+<span class="sd">                spacy token, or a spacy span. Counts for the same term given in</span>
+<span class="sd">                different forms are the same!</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: Count of ``term`` in :class:`Doc`.</span>
+
+<span class="sd">        .. tip:: Counts are cached. The first time a single word&#39;s count is</span>
+<span class="sd">           looked up, *all* words&#39; counts are saved, resulting in a slower</span>
+<span class="sd">           runtime the first time but orders of magnitude faster runtime for</span>
+<span class="sd">           subsequent calls for this or any other word. Similarly, if a</span>
+<span class="sd">           bigram&#39;s count is looked up, all bigrams&#39; counts are stored — etc.</span>
+<span class="sd">           If spans are merged using :meth:`Doc.merge()`, all cached counts are</span>
+<span class="sd">           deleted, since merging spans will invalidate many counts. Better to</span>
+<span class="sd">           merge first, count second!</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># figure out what object we&#39;re dealing with here; convert as necessary</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">term</span><span class="p">,</span> <span class="n">compat</span><span class="o">.</span><span class="n">unicode_</span><span class="p">):</span>
+            <span class="n">term_text</span> <span class="o">=</span> <span class="n">term</span>
+            <span class="n">term_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_stringstore</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">term_text</span><span class="p">)</span>
+            <span class="n">term_len</span> <span class="o">=</span> <span class="n">term_text</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">term</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="n">term_id</span> <span class="o">=</span> <span class="n">term</span>
+            <span class="n">term_text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_stringstore</span><span class="p">[</span><span class="n">term_id</span><span class="p">]</span>
+            <span class="n">term_len</span> <span class="o">=</span> <span class="n">term_text</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">term</span><span class="p">,</span> <span class="n">SpacyToken</span><span class="p">):</span>
+            <span class="n">term_text</span> <span class="o">=</span> <span class="n">term</span><span class="o">.</span><span class="n">text</span>
+            <span class="n">term_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_stringstore</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">term_text</span><span class="p">)</span>
+            <span class="n">term_len</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">term</span><span class="p">,</span> <span class="n">SpacySpan</span><span class="p">):</span>
+            <span class="n">term_text</span> <span class="o">=</span> <span class="n">term</span><span class="o">.</span><span class="n">text</span>
+            <span class="n">term_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_stringstore</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">term_text</span><span class="p">)</span>
+            <span class="n">term_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">term</span><span class="p">)</span>
+        <span class="c1"># we haven&#39;t counted terms of this length; let&#39;s do that now</span>
+        <span class="k">if</span> <span class="n">term_len</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_counted_ngrams</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">term_len</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_counts</span> <span class="o">+=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">(</span>
+                    <span class="n">word</span><span class="o">.</span><span class="n">orth</span>
+                    <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">extract</span><span class="o">.</span><span class="n">words</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                              <span class="n">filter_stops</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                              <span class="n">filter_punct</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                              <span class="n">filter_nums</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_counts</span> <span class="o">+=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">spacy_stringstore</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ngram</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">ngram</span> <span class="ow">in</span> <span class="n">extract</span><span class="o">.</span><span class="n">ngrams</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">term_len</span><span class="p">,</span>
+                                                <span class="n">filter_stops</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                                <span class="n">filter_punct</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                                <span class="n">filter_nums</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_counted_ngrams</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">term_len</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_counts</span><span class="p">[</span><span class="n">term_id</span><span class="p">]</span></div>
+
+    <span class="c1">###############</span>
+    <span class="c1"># DOC AS TEXT #</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">text</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the document&#39;s raw text.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_doc</span><span class="o">.</span><span class="n">text_with_ws</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">tokenized_text</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return text as an ordered, nested list of tokens per sentence.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[[</span><span class="n">token</span><span class="o">.</span><span class="n">text</span> <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">sent</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">sent</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_doc</span><span class="o">.</span><span class="n">sents</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">pos_tagged_text</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return text as an ordered, nested list of (token, POS) pairs per sentence.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[[(</span><span class="n">token</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="n">token</span><span class="o">.</span><span class="n">pos_</span><span class="p">)</span> <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">sent</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">sent</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_doc</span><span class="o">.</span><span class="n">sents</span><span class="p">]</span>
+
+    <span class="c1">#################</span>
+    <span class="c1"># TRANSFORM DOC #</span>
+
+<div class="viewcode-block" id="Doc.to_terms_list"><a class="viewcode-back" href="../../api_reference.html#textacy.doc.Doc.to_terms_list">[docs]</a>    <span class="k">def</span> <span class="nf">to_terms_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ngrams</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">named_entities</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                      <span class="n">normalize</span><span class="o">=</span><span class="s1">&#39;lemma&#39;</span><span class="p">,</span> <span class="n">as_strings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Transform :class:`Doc` into a sequence of ngrams and/or named entities, which</span>
+<span class="sd">        aren&#39;t necessarily in order of appearance, where each term appears in</span>
+<span class="sd">        the list with the same frequency that it appears in :class:`Doc`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            ngrams (int or Set[int]): n of which n-grams to include; ``(1, 2, 3)``</span>
+<span class="sd">                (default) includes unigrams (words), bigrams, and trigrams; `2`</span>
+<span class="sd">                if only bigrams are wanted; falsy (e.g. False) to not include any</span>
+<span class="sd">            named_entities (bool): if True (default), include named entities</span>
+<span class="sd">                in the terms list; note: if ngrams are also included, named</span>
+<span class="sd">                entities are added *first*, and any ngrams that exactly overlap</span>
+<span class="sd">                with an entity are skipped to prevent double-counting</span>
+<span class="sd">            normalize (str or callable): if &#39;lemma&#39;, lemmatize terms; if &#39;lower&#39;,</span>
+<span class="sd">                lowercase terms; if false-y, use the form of terms as they appear</span>
+<span class="sd">                in doc; if a callable, must accept a ``spacy.Token`` or ``spacy.Span``</span>
+<span class="sd">                and return a str, e.g. :func:`textacy.spacy_utils.normalized_str()`</span>
+<span class="sd">            as_strings (bool): if True, terms are returned as strings; if False</span>
+<span class="sd">                (default), terms are returned as their unique integer ids</span>
+<span class="sd">            kwargs:</span>
+<span class="sd">                - filter_stops (bool)</span>
+<span class="sd">                - filter_punct (bool)</span>
+<span class="sd">                - filter_nums (bool)</span>
+<span class="sd">                - include_pos (str or Set[str])</span>
+<span class="sd">                - exclude_pos (str or Set[str])</span>
+<span class="sd">                - min_freq (int)</span>
+<span class="sd">                - include_types (str or Set[str])</span>
+<span class="sd">                - exclude_types (str or Set[str]</span>
+<span class="sd">                - drop_determiners (bool)</span>
+
+<span class="sd">                see :func:`extract.words &lt;textacy.extract.words&gt;`,</span>
+<span class="sd">                :func:`extract.ngrams &lt;textacy.extract.ngrams&gt;`,</span>
+<span class="sd">                and :func:`extract.named_entities &lt;textacy.extract.named_entities&gt;`</span>
+<span class="sd">                for more information on these parameters</span>
+
+<span class="sd">        Yields:</span>
+<span class="sd">            int or str: the next term in the terms list, either as a unique</span>
+<span class="sd">            integer id or as a string</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: if neither ``named_entities`` nor ``ngrams`` are included</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            Despite the name, this is a generator function; to get an</span>
+<span class="sd">            actual list of terms, call ``list(doc.to_terms_list())``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">named_entities</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">ngrams</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;either `named_entities` or `ngrams` must be included&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ngrams</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ngrams</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="n">ngrams</span> <span class="o">=</span> <span class="p">(</span><span class="n">ngrams</span><span class="p">,)</span>
+        <span class="k">if</span> <span class="n">named_entities</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">ne_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;include_types&#39;</span><span class="p">:</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;include_types&#39;</span><span class="p">),</span>
+                <span class="s1">&#39;exclude_types&#39;</span><span class="p">:</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;exclude_types&#39;</span><span class="p">),</span>
+                <span class="s1">&#39;drop_determiners&#39;</span><span class="p">:</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;drop_determiners&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+                <span class="s1">&#39;min_freq&#39;</span><span class="p">:</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;min_freq&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)}</span>
+            <span class="c1"># if numeric ngrams are to be filtered, we should filter numeric entities</span>
+            <span class="k">if</span> <span class="n">ngrams</span> <span class="ow">and</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;filter_nums&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">ne_kwargs</span><span class="p">[</span><span class="s1">&#39;exclude_types&#39;</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ne_kwargs</span><span class="p">[</span><span class="s1">&#39;exclude_types&#39;</span><span class="p">],</span> <span class="p">(</span><span class="nb">set</span><span class="p">,</span> <span class="nb">frozenset</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+                        <span class="n">ne_kwargs</span><span class="p">[</span><span class="s1">&#39;exclude_types&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">ne_kwargs</span><span class="p">[</span><span class="s1">&#39;exclude_types&#39;</span><span class="p">])</span>
+                        <span class="n">ne_kwargs</span><span class="p">[</span><span class="s1">&#39;exclude_types&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">constants</span><span class="o">.</span><span class="n">NUMERIC_NE_TYPES</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">ne_kwargs</span><span class="p">[</span><span class="s1">&#39;exclude_types&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">NUMERIC_NE_TYPES</span>
+        <span class="k">if</span> <span class="n">ngrams</span><span class="p">:</span>
+            <span class="n">ngram_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;filter_stops&#39;</span><span class="p">:</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;filter_stops&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+                <span class="s1">&#39;filter_punct&#39;</span><span class="p">:</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;filter_punct&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+                <span class="s1">&#39;filter_nums&#39;</span><span class="p">:</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;filter_nums&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+                <span class="s1">&#39;include_pos&#39;</span><span class="p">:</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;include_pos&#39;</span><span class="p">),</span>
+                <span class="s1">&#39;exclude_pos&#39;</span><span class="p">:</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;exclude_pos&#39;</span><span class="p">),</span>
+                <span class="s1">&#39;min_freq&#39;</span><span class="p">:</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;min_freq&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)}</span>
+            <span class="c1"># if numeric entities are to be filtered, we should filter numeric ngrams</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">named_entities</span> <span class="ow">and</span> <span class="n">ne_kwargs</span><span class="p">[</span><span class="s1">&#39;exclude_types&#39;</span><span class="p">]</span> <span class="ow">and</span>
+                    <span class="nb">any</span><span class="p">(</span><span class="n">ne_type</span> <span class="ow">in</span> <span class="n">ne_kwargs</span><span class="p">[</span><span class="s1">&#39;exclude_types&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">ne_type</span> <span class="ow">in</span> <span class="n">constants</span><span class="o">.</span><span class="n">NUMERIC_NE_TYPES</span><span class="p">)):</span>
+                <span class="n">ngram_kwargs</span><span class="p">[</span><span class="s1">&#39;filter_nums&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="n">terms</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># special case: ensure that named entities aren&#39;t double-counted when</span>
+        <span class="c1"># adding words or ngrams that were already added as named entities</span>
+        <span class="k">if</span> <span class="n">named_entities</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> <span class="n">ngrams</span><span class="p">:</span>
+            <span class="n">ents</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">extract</span><span class="o">.</span><span class="n">named_entities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">ne_kwargs</span><span class="p">))</span>
+            <span class="n">ent_idxs</span> <span class="o">=</span> <span class="p">{(</span><span class="n">ent</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">ent</span><span class="o">.</span><span class="n">end</span><span class="p">)</span> <span class="k">for</span> <span class="n">ent</span> <span class="ow">in</span> <span class="n">ents</span><span class="p">}</span>
+            <span class="n">terms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ents</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">ngrams</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">terms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="p">(</span><span class="n">word</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">extract</span><span class="o">.</span><span class="n">words</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">ngram_kwargs</span><span class="p">)</span>
+                         <span class="k">if</span> <span class="p">(</span><span class="n">word</span><span class="o">.</span><span class="n">i</span><span class="p">,</span> <span class="n">word</span><span class="o">.</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ent_idxs</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">terms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="p">(</span><span class="n">ngram</span> <span class="k">for</span> <span class="n">ngram</span> <span class="ow">in</span> <span class="n">extract</span><span class="o">.</span><span class="n">ngrams</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="o">**</span><span class="n">ngram_kwargs</span><span class="p">)</span>
+                         <span class="k">if</span> <span class="p">(</span><span class="n">ngram</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">ngram</span><span class="o">.</span><span class="n">end</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ent_idxs</span><span class="p">))</span>
+        <span class="c1"># otherwise, no need to check for overlaps</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">named_entities</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">terms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">extract</span><span class="o">.</span><span class="n">named_entities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">ne_kwargs</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">ngrams</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">terms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">extract</span><span class="o">.</span><span class="n">words</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">ngram_kwargs</span><span class="p">))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">terms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">extract</span><span class="o">.</span><span class="n">ngrams</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="o">**</span><span class="n">ngram_kwargs</span><span class="p">))</span>
+
+        <span class="n">terms</span> <span class="o">=</span> <span class="n">itertoolz</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">terms</span><span class="p">)</span>
+
+        <span class="c1"># convert token and span objects into integer ids</span>
+        <span class="k">if</span> <span class="n">as_strings</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">normalize</span> <span class="o">==</span> <span class="s1">&#39;lemma&#39;</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">terms</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="k">yield</span> <span class="n">term</span><span class="o">.</span><span class="n">lemma</span>
+                    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                        <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_stringstore</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">term</span><span class="o">.</span><span class="n">lemma_</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">normalize</span> <span class="o">==</span> <span class="s1">&#39;lower&#39;</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">terms</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="k">yield</span> <span class="n">term</span><span class="o">.</span><span class="n">lower</span>
+                    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                        <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_stringstore</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">term</span><span class="o">.</span><span class="n">lower_</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="ow">not</span> <span class="n">normalize</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">terms</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="k">yield</span> <span class="n">term</span><span class="o">.</span><span class="n">orth</span>
+                    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                        <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_stringstore</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">term</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">terms</span><span class="p">:</span>
+                    <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_stringstore</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">normalize</span><span class="p">(</span><span class="n">term</span><span class="p">))</span>
+
+        <span class="c1"># convert token and span objects into strings</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">normalize</span> <span class="o">==</span> <span class="s1">&#39;lemma&#39;</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">terms</span><span class="p">:</span>
+                    <span class="k">yield</span> <span class="n">term</span><span class="o">.</span><span class="n">lemma_</span>
+            <span class="k">elif</span> <span class="n">normalize</span> <span class="o">==</span> <span class="s1">&#39;lower&#39;</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">terms</span><span class="p">:</span>
+                    <span class="k">yield</span> <span class="n">term</span><span class="o">.</span><span class="n">lower_</span>
+            <span class="k">elif</span> <span class="ow">not</span> <span class="n">normalize</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">terms</span><span class="p">:</span>
+                    <span class="k">yield</span> <span class="n">term</span><span class="o">.</span><span class="n">text</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">terms</span><span class="p">:</span>
+                    <span class="k">yield</span> <span class="n">normalize</span><span class="p">(</span><span class="n">term</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Doc.to_bag_of_words"><a class="viewcode-back" href="../../api_reference.html#textacy.doc.Doc.to_bag_of_words">[docs]</a>    <span class="k">def</span> <span class="nf">to_bag_of_words</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="s1">&#39;lemma&#39;</span><span class="p">,</span> <span class="n">weighting</span><span class="o">=</span><span class="s1">&#39;count&#39;</span><span class="p">,</span> <span class="n">as_strings</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Transform :class:`Doc` into a bag-of-words: the set of unique words in</span>
+<span class="sd">        :class:`Doc` mapped to their absolute, relative, or binary frequency of</span>
+<span class="sd">        occurrence.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            normalize (str): if &#39;lemma&#39;, lemmatize words before counting; if</span>
+<span class="sd">                &#39;lower&#39;, lowercase words before counting; otherwise, words are</span>
+<span class="sd">                counted using the form with which they they appear in doc</span>
+<span class="sd">            weighting ({&#39;count&#39;, &#39;freq&#39;, &#39;binary&#39;}): Type of weight to assign to</span>
+<span class="sd">                words. If &#39;count&#39; (default), weights are the absolute number of</span>
+<span class="sd">                occurrences (count) of word in doc. If &#39;binary&#39;, all counts are</span>
+<span class="sd">                set equal to 1. If &#39;freq&#39;, word counts are normalized by the</span>
+<span class="sd">                total token count, giving their relative frequency of occurrence.</span>
+<span class="sd">                Note: The resulting set of frequencies won&#39;t (necessarily) sum</span>
+<span class="sd">                to 1.0, since punctuation and stop words are filtered out after</span>
+<span class="sd">                counts are normalized.</span>
+<span class="sd">            as_strings (bool): if True, words are returned as strings; if False</span>
+<span class="sd">                (default), words are returned as their unique integer ids</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: mapping of a unique word id or string (depending on the value</span>
+<span class="sd">            of ``as_strings``) to its absolute, relative, or binary frequency</span>
+<span class="sd">            of occurrence (depending on the value of ``weighting``).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">weighting</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;count&#39;</span><span class="p">,</span> <span class="s1">&#39;freq&#39;</span><span class="p">,</span> <span class="s1">&#39;binary&#39;</span><span class="p">}:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;weighting &quot;</span><span class="si">{}</span><span class="s1">&quot; is invalid&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">weighting</span><span class="p">))</span>
+        <span class="n">count_by</span> <span class="o">=</span> <span class="p">(</span><span class="n">attrs</span><span class="o">.</span><span class="n">LEMMA</span> <span class="k">if</span> <span class="n">normalize</span> <span class="o">==</span> <span class="s1">&#39;lemma&#39;</span> <span class="k">else</span>
+                    <span class="n">attrs</span><span class="o">.</span><span class="n">LOWER</span> <span class="k">if</span> <span class="n">normalize</span> <span class="o">==</span> <span class="s1">&#39;lower&#39;</span> <span class="k">else</span>
+                    <span class="n">attrs</span><span class="o">.</span><span class="n">ORTH</span><span class="p">)</span>
+        <span class="n">word_to_weight</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_doc</span><span class="o">.</span><span class="n">count_by</span><span class="p">(</span><span class="n">count_by</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">weighting</span> <span class="o">==</span> <span class="s1">&#39;freq&#39;</span><span class="p">:</span>
+            <span class="n">n_tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_tokens</span>
+            <span class="n">word_to_weight</span> <span class="o">=</span> <span class="p">{</span><span class="n">id_</span><span class="p">:</span> <span class="n">weight</span> <span class="o">/</span> <span class="n">n_tokens</span>
+                              <span class="k">for</span> <span class="n">id_</span><span class="p">,</span> <span class="n">weight</span> <span class="ow">in</span> <span class="n">word_to_weight</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="k">elif</span> <span class="n">weighting</span> <span class="o">==</span> <span class="s1">&#39;binary&#39;</span><span class="p">:</span>
+            <span class="n">word_to_weight</span> <span class="o">=</span> <span class="p">{</span><span class="n">word</span><span class="p">:</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">word_to_weight</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span>
+
+        <span class="n">bow</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">as_strings</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">id_</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">word_to_weight</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">lexeme</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_vocab</span><span class="p">[</span><span class="n">id_</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">lexeme</span><span class="o">.</span><span class="n">is_stop</span> <span class="ow">or</span> <span class="n">lexeme</span><span class="o">.</span><span class="n">is_punct</span> <span class="ow">or</span> <span class="n">lexeme</span><span class="o">.</span><span class="n">is_space</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">bow</span><span class="p">[</span><span class="n">id_</span><span class="p">]</span> <span class="o">=</span> <span class="n">count</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">id_</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">word_to_weight</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">lexeme</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_vocab</span><span class="p">[</span><span class="n">id_</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">lexeme</span><span class="o">.</span><span class="n">is_stop</span> <span class="ow">or</span> <span class="n">lexeme</span><span class="o">.</span><span class="n">is_punct</span> <span class="ow">or</span> <span class="n">lexeme</span><span class="o">.</span><span class="n">is_space</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">bow</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">spacy_stringstore</span><span class="p">[</span><span class="n">id_</span><span class="p">]]</span> <span class="o">=</span> <span class="n">count</span>
+        <span class="k">return</span> <span class="n">bow</span></div>
+
+<div class="viewcode-block" id="Doc.to_bag_of_terms"><a class="viewcode-back" href="../../api_reference.html#textacy.doc.Doc.to_bag_of_terms">[docs]</a>    <span class="k">def</span> <span class="nf">to_bag_of_terms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ngrams</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">named_entities</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="n">normalize</span><span class="o">=</span><span class="s1">&#39;lemma&#39;</span><span class="p">,</span> <span class="n">weighting</span><span class="o">=</span><span class="s1">&#39;count&#39;</span><span class="p">,</span> <span class="n">as_strings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Transform :class:`Doc` into a bag-of-terms: the set of unique terms in</span>
+<span class="sd">        :class:`Doc` mapped to their frequency of occurrence, where &quot;terms&quot;</span>
+<span class="sd">        includes ngrams and/or named entities.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            ngrams (int or Set[int]): n of which n-grams to include; ``(1, 2, 3)``</span>
+<span class="sd">                (default) includes unigrams (words), bigrams, and trigrams; `2`</span>
+<span class="sd">                if only bigrams are wanted; falsy (e.g. False) to not include any</span>
+<span class="sd">            named_entities (bool): if True (default), include named entities;</span>
+<span class="sd">                note: if ngrams are also included, any ngrams that exactly</span>
+<span class="sd">                overlap with an entity are skipped to prevent double-counting</span>
+<span class="sd">            normalize (str or callable): if &#39;lemma&#39;, lemmatize terms; if &#39;lower&#39;,</span>
+<span class="sd">                lowercase terms; if false-y, use the form of terms as they appear</span>
+<span class="sd">                in doc; if a callable, must accept a ``spacy.Token`` or ``spacy.Span``</span>
+<span class="sd">                and return a str, e.g. :func:`textacy.spacy_utils.normalized_str()`</span>
+<span class="sd">            weighting ({&#39;count&#39;, &#39;freq&#39;, &#39;binary&#39;}): Type of weight to assign to</span>
+<span class="sd">                terms. If &#39;count&#39; (default), weights are the absolute number of</span>
+<span class="sd">                occurrences (count) of term in doc. If &#39;binary&#39;, all counts are</span>
+<span class="sd">                set equal to 1. If &#39;freq&#39;, term counts are normalized by the</span>
+<span class="sd">                total token count, giving their relative frequency of occurrence.</span>
+<span class="sd">            as_strings (bool): if True, words are returned as strings; if False</span>
+<span class="sd">                (default), words are returned as their unique integer ids</span>
+<span class="sd">            kwargs:</span>
+<span class="sd">                - filter_stops (bool)</span>
+<span class="sd">                - filter_punct (bool)</span>
+<span class="sd">                - filter_nums (bool)</span>
+<span class="sd">                - include_pos (str or Set[str])</span>
+<span class="sd">                - exclude_pos (str or Set[str])</span>
+<span class="sd">                - min_freq (int)</span>
+<span class="sd">                - include_types (str or Set[str])</span>
+<span class="sd">                - exclude_types (str or Set[str]</span>
+<span class="sd">                - drop_determiners (bool)</span>
+
+<span class="sd">                See :func:`extract.words() &lt;textacy.extract.words&gt;`,</span>
+<span class="sd">                :func:`extract.ngrams() &lt;textacy.extract.ngrams&gt;`,</span>
+<span class="sd">                and :func:`extract.named_entities() &lt;textacy.extract.named_entities&gt;`</span>
+<span class="sd">                for more information on these parameters.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: mapping of a unique term id or string (depending on the value</span>
+<span class="sd">            of ``as_strings``) to its absolute, relative, or binary frequency</span>
+<span class="sd">            of occurrence (depending on the value of ``weighting``).</span>
+
+<span class="sd">        See Also:</span>
+<span class="sd">            :meth:`Doc.to_terms_list() &lt;Doc.to_terms_list&gt;`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">weighting</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;count&#39;</span><span class="p">,</span> <span class="s1">&#39;freq&#39;</span><span class="p">,</span> <span class="s1">&#39;binary&#39;</span><span class="p">}:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;weighting &quot;</span><span class="si">{}</span><span class="s1">&quot; is invalid&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">weighting</span><span class="p">))</span>
+        <span class="n">terms_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_terms_list</span><span class="p">(</span>
+            <span class="n">ngrams</span><span class="o">=</span><span class="n">ngrams</span><span class="p">,</span> <span class="n">named_entities</span><span class="o">=</span><span class="n">named_entities</span><span class="p">,</span>
+            <span class="n">normalize</span><span class="o">=</span><span class="n">normalize</span><span class="p">,</span> <span class="n">as_strings</span><span class="o">=</span><span class="n">as_strings</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">bot</span> <span class="o">=</span> <span class="n">itertoolz</span><span class="o">.</span><span class="n">frequencies</span><span class="p">(</span><span class="n">terms_list</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">weighting</span> <span class="o">==</span> <span class="s1">&#39;freq&#39;</span><span class="p">:</span>
+            <span class="n">n_tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_tokens</span>
+            <span class="n">bot</span> <span class="o">=</span> <span class="p">{</span><span class="n">term</span><span class="p">:</span> <span class="n">weight</span> <span class="o">/</span> <span class="n">n_tokens</span> <span class="k">for</span> <span class="n">term</span><span class="p">,</span> <span class="n">weight</span> <span class="ow">in</span> <span class="n">bot</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="k">elif</span> <span class="n">weighting</span> <span class="o">==</span> <span class="s1">&#39;binary&#39;</span><span class="p">:</span>
+            <span class="n">bot</span> <span class="o">=</span> <span class="p">{</span><span class="n">term</span><span class="p">:</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">bot</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span>
+        <span class="k">return</span> <span class="n">bot</span></div>
+
+<div class="viewcode-block" id="Doc.to_semantic_network"><a class="viewcode-back" href="../../api_reference.html#textacy.doc.Doc.to_semantic_network">[docs]</a>    <span class="k">def</span> <span class="nf">to_semantic_network</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nodes</span><span class="o">=</span><span class="s1">&#39;words&#39;</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="s1">&#39;lemma&#39;</span><span class="p">,</span>
+                            <span class="n">edge_weighting</span><span class="o">=</span><span class="s1">&#39;default&#39;</span><span class="p">,</span> <span class="n">window_width</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Transform :class:`Doc` into a semantic network, where nodes are either</span>
+<span class="sd">        &#39;words&#39; or &#39;sents&#39; and edges between nodes may be weighted in different ways.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            nodes ({&#39;words&#39;, &#39;sents&#39;}): type of doc component to use as nodes</span>
+<span class="sd">                in the semantic network</span>
+<span class="sd">            normalize (str or callable): if &#39;lemma&#39;, lemmatize terms; if &#39;lower&#39;,</span>
+<span class="sd">                lowercase terms; if false-y, use the form of terms as they appear</span>
+<span class="sd">                in doc; if a callable, must accept a ``spacy.Token`` or ``spacy.Span``</span>
+<span class="sd">                (if ``nodes`` = &#39;words&#39; or &#39;sents&#39;, respectively) and return a</span>
+<span class="sd">                str, e.g. :func:`textacy.spacy_utils.normalized_str()`</span>
+<span class="sd">            edge_weighting (str): type of weighting to apply to edges</span>
+<span class="sd">                between nodes; if ``nodes == &#39;words&#39;``, options are {&#39;cooc_freq&#39;, &#39;binary&#39;},</span>
+<span class="sd">                if ``nodes == &#39;sents&#39;``, options are {&#39;cosine&#39;, &#39;jaccard&#39;}; if</span>
+<span class="sd">                &#39;default&#39;, &#39;cooc_freq&#39; or &#39;cosine&#39; will be automatically used</span>
+<span class="sd">            window_width (int): size of sliding window over terms that</span>
+<span class="sd">                determines which are said to co-occur; only applicable if &#39;words&#39;</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            ``networkx.Graph``: where nodes represent either terms or sentences</span>
+<span class="sd">            in doc; edges, the relationships between them.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: if ``nodes`` is neither &#39;words&#39; nor &#39;sents&#39;.</span>
+
+<span class="sd">        See Also:</span>
+<span class="sd">            - :func:`terms_to_semantic_network() &lt;textacy.network.terms_to_semantic_network&gt;`</span>
+<span class="sd">            - :func:`sents_to_semantic_network() &lt;textacy.network.sents_to_semantic_network&gt;`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">nodes</span> <span class="o">==</span> <span class="s1">&#39;words&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">edge_weighting</span> <span class="o">==</span> <span class="s1">&#39;default&#39;</span><span class="p">:</span>
+                <span class="n">edge_weighting</span> <span class="o">=</span> <span class="s1">&#39;cooc_freq&#39;</span>
+            <span class="k">return</span> <span class="n">network</span><span class="o">.</span><span class="n">terms_to_semantic_network</span><span class="p">(</span>
+                <span class="nb">list</span><span class="p">(</span><span class="n">extract</span><span class="o">.</span><span class="n">words</span><span class="p">(</span><span class="bp">self</span><span class="p">)),</span>
+                <span class="n">normalize</span><span class="o">=</span><span class="n">normalize</span><span class="p">,</span>
+                <span class="n">window_width</span><span class="o">=</span><span class="n">window_width</span><span class="p">,</span>
+                <span class="n">edge_weighting</span><span class="o">=</span><span class="n">edge_weighting</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">nodes</span> <span class="o">==</span> <span class="s1">&#39;sents&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">edge_weighting</span> <span class="o">==</span> <span class="s1">&#39;default&#39;</span><span class="p">:</span>
+                <span class="n">edge_weighting</span> <span class="o">=</span> <span class="s1">&#39;cosine&#39;</span>
+            <span class="k">return</span> <span class="n">network</span><span class="o">.</span><span class="n">sents_to_semantic_network</span><span class="p">(</span>
+                <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sents</span><span class="p">),</span>
+                <span class="n">normalize</span><span class="o">=</span><span class="n">normalize</span><span class="p">,</span>
+                <span class="n">edge_weighting</span><span class="o">=</span><span class="n">edge_weighting</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;nodes &quot;</span><span class="si">{}</span><span class="s1">&quot; not valid; must be in </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">nodes</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;words&#39;</span><span class="p">,</span> <span class="s1">&#39;sents&#39;</span><span class="p">})</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016 Chartbeat, Inc..
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.5.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

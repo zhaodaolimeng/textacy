@@ -1,0 +1,401 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>textacy.text_utils &mdash; textacy 0.5.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="textacy 0.5.0 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> textacy
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api_reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../license.html">License</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">textacy</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>textacy.text_utils</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for textacy.text_utils</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Set of small utility functions that take text strings as input.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">cld2</span> <span class="k">import</span> <span class="n">detect</span> <span class="k">as</span> <span class="n">cld2_detect</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">compat</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">constants</span>
+
+<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="detect_language"><a class="viewcode-back" href="../../api_reference.html#textacy.text_utils.detect_language">[docs]</a><span class="k">def</span> <span class="nf">detect_language</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Detect the most likely language of a text and return its 2-letter code</span>
+<span class="sd">    (see https://cloud.google.com/translate/v2/using_rest#language-params).</span>
+<span class="sd">    Uses the `cld2-cffi &lt;https://pypi.python.org/pypi/cld2-cffi&gt;`_ package;</span>
+<span class="sd">    to take advantage of optional params, call :func:`cld2.detect()` directly.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        text (str)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">cld2_detect</span>
+    <span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
+            <span class="s1">&#39;`cld2-cffi` must be installed to use textacy</span><span class="se">\&#39;</span><span class="s1">s automatic language detection; &#39;</span>
+            <span class="s1">&#39;you may do so via `pip install cld2-cffi` or `pip install textacy[lang]`.&#39;</span>
+            <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">compat</span><span class="o">.</span><span class="n">is_python2</span><span class="p">:</span>
+        <span class="n">is_reliable</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">best_guesses</span> <span class="o">=</span> <span class="n">cld2_detect</span><span class="p">(</span><span class="n">compat</span><span class="o">.</span><span class="n">unicode_to_bytes</span><span class="p">(</span><span class="n">text</span><span class="p">),</span> <span class="n">bestEffort</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">is_reliable</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">best_guesses</span> <span class="o">=</span> <span class="n">cld2_detect</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">bestEffort</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">is_reliable</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+            <span class="s1">&#39;Text language detected with low confidence; best guesses: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+            <span class="n">best_guesses</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">best_guesses</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="is_acronym"><a class="viewcode-back" href="../../api_reference.html#textacy.text_utils.is_acronym">[docs]</a><span class="k">def</span> <span class="nf">is_acronym</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Pass single token as a string, return True/False if is/is not valid acronym.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        token (str): single word to check for acronym-ness</span>
+<span class="sd">        exclude (Set[str]): if technically valid but not actually good acronyms</span>
+<span class="sd">            are known in advance, pass them in as a set of strings; matching</span>
+<span class="sd">            tokens will return False</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        bool</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># exclude certain valid acronyms from consideration</span>
+    <span class="k">if</span> <span class="n">exclude</span> <span class="ow">and</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">exclude</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="c1"># don&#39;t allow empty strings</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">token</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="c1"># don&#39;t allow spaces</span>
+    <span class="k">if</span> <span class="s1">&#39; &#39;</span> <span class="ow">in</span> <span class="n">token</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="c1"># 2-character acronyms can&#39;t have lower-case letters</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">token</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">token</span><span class="o">.</span><span class="n">isupper</span><span class="p">():</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="c1"># acronyms can&#39;t be all digits</span>
+    <span class="k">if</span> <span class="n">token</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="c1"># acronyms must have at least one upper-case letter or start/end with a digit</span>
+    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">char</span><span class="o">.</span><span class="n">isupper</span><span class="p">()</span> <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">token</span><span class="p">)</span> <span class="ow">and</span>
+            <span class="ow">not</span> <span class="p">(</span><span class="n">token</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span> <span class="ow">or</span> <span class="n">token</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">())):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="c1"># acronyms must have between 2 and 10 alphanumeric characters</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="mi">2</span> <span class="o">&lt;=</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">token</span> <span class="k">if</span> <span class="n">char</span><span class="o">.</span><span class="n">isalnum</span><span class="p">())</span> <span class="o">&lt;=</span> <span class="mi">10</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="c1"># only certain combinations of letters, digits, and &#39;&amp;/.-&#39; allowed</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">constants</span><span class="o">.</span><span class="n">ACRONYM_REGEX</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">token</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="keyword_in_context"><a class="viewcode-back" href="../../api_reference.html#textacy.text_utils.keyword_in_context">[docs]</a><span class="k">def</span> <span class="nf">keyword_in_context</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">keyword</span><span class="p">,</span> <span class="n">ignore_case</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                       <span class="n">window_width</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">print_only</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Search for ``keyword`` in ``text`` via regular expression, return or print strings</span>
+<span class="sd">    spanning ``window_width`` characters before and after each occurrence of keyword.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        text (str): text in which to search for ``keyword``</span>
+<span class="sd">        keyword (str): technically, any valid regular expression string should work,</span>
+<span class="sd">            but usually this is a single word or short phrase: &quot;spam&quot;, &quot;spam and eggs&quot;;</span>
+<span class="sd">            to account for variations, use regex: &quot;[Ss]pam (and|&amp;) [Ee]ggs?&quot;</span>
+
+<span class="sd">            N.B. If keyword contains special characters, be sure to escape them!!!</span>
+<span class="sd">        ignore_case (bool): if True, ignore letter case in `keyword` matching</span>
+<span class="sd">        window_width (int): number of characters on either side of</span>
+<span class="sd">            `keyword` to include as &quot;context&quot;</span>
+<span class="sd">        print_only (bool): if True, print out all results with nice</span>
+<span class="sd">            formatting; if False, return all (pre, kw, post) matches as generator</span>
+<span class="sd">            of raw strings</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        generator(Tuple[str, str, str]), or None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">flags</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span> <span class="k">if</span> <span class="n">ignore_case</span> <span class="ow">is</span> <span class="kc">True</span> <span class="k">else</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">print_only</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">keyword</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">flags</span><span class="p">):</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{pre}</span><span class="s1"> </span><span class="si">{kw}</span><span class="s1"> </span><span class="si">{post}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">pre</span><span class="o">=</span><span class="n">text</span><span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">match</span><span class="o">.</span><span class="n">start</span><span class="p">()</span> <span class="o">-</span> <span class="n">window_width</span><span class="p">):</span> <span class="n">match</span><span class="o">.</span><span class="n">start</span><span class="p">()]</span><span class="o">.</span><span class="n">rjust</span><span class="p">(</span><span class="n">window_width</span><span class="p">),</span>
+                <span class="n">kw</span><span class="o">=</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(),</span>
+                <span class="n">post</span><span class="o">=</span><span class="n">text</span><span class="p">[</span><span class="n">match</span><span class="o">.</span><span class="n">end</span><span class="p">():</span> <span class="n">match</span><span class="o">.</span><span class="n">end</span><span class="p">()</span> <span class="o">+</span> <span class="n">window_width</span><span class="p">]</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="n">window_width</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">((</span><span class="n">text</span><span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">match</span><span class="o">.</span><span class="n">start</span><span class="p">()</span> <span class="o">-</span> <span class="n">window_width</span><span class="p">):</span> <span class="n">match</span><span class="o">.</span><span class="n">start</span><span class="p">()],</span>
+                 <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(),</span>
+                 <span class="n">text</span><span class="p">[</span><span class="n">match</span><span class="o">.</span><span class="n">end</span><span class="p">():</span> <span class="n">match</span><span class="o">.</span><span class="n">end</span><span class="p">()</span> <span class="o">+</span> <span class="n">window_width</span><span class="p">])</span>
+                <span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">keyword</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">flags</span><span class="p">))</span></div>
+
+
+<span class="n">KWIC</span> <span class="o">=</span> <span class="n">keyword_in_context</span>
+<span class="sd">&quot;&quot;&quot;Alias of :func:`keyword_in_context &lt;textacy.text_utils.keyword_in_context&gt;`.&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="clean_terms"><a class="viewcode-back" href="../../api_reference.html#textacy.text_utils.clean_terms">[docs]</a><span class="k">def</span> <span class="nf">clean_terms</span><span class="p">(</span><span class="n">terms</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Clean up a sequence of single- or multi-word strings: strip leading/trailing</span>
+<span class="sd">    junk chars, handle dangling parens and odd hyphenation, etc.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        terms (Iterable[str]): sequence of terms such as &quot;presidency&quot;, &quot;epic failure&quot;,</span>
+<span class="sd">            or &quot;George W. Bush&quot; that may be _unclean_ for whatever reason</span>
+
+<span class="sd">    Yields:</span>
+<span class="sd">        str: next term in `terms` but with the cruft cleaned up, excluding terms</span>
+<span class="sd">        that were _entirely_ cruft</span>
+
+<span class="sd">    Warning:</span>
+<span class="sd">        Terms with (intentionally) unusual punctuation may get &quot;cleaned&quot;</span>
+<span class="sd">        into a form that changes or obscures the original meaning of the term.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># get rid of leading/trailing junk characters</span>
+    <span class="n">terms</span> <span class="o">=</span> <span class="p">(</span><span class="n">constants</span><span class="o">.</span><span class="n">LEAD_TAIL_CRUFT_TERM_RE</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">term</span><span class="p">)</span>
+             <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">terms</span><span class="p">)</span>
+    <span class="n">terms</span> <span class="o">=</span> <span class="p">(</span><span class="n">constants</span><span class="o">.</span><span class="n">LEAD_HYPHEN_TERM_RE</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\1&#39;</span><span class="p">,</span> <span class="n">term</span><span class="p">)</span>
+             <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">terms</span><span class="p">)</span>
+    <span class="c1"># handle dangling/backwards parens, don&#39;t allow &#39;(&#39; or &#39;)&#39; to appear without the other</span>
+    <span class="n">terms</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="n">term</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">&#39;)&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="n">term</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">term</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;)&#39;</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">term</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">)</span>
+             <span class="k">else</span> <span class="n">term</span> <span class="k">if</span> <span class="s1">&#39;(&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">term</span>
+             <span class="k">else</span> <span class="n">constants</span><span class="o">.</span><span class="n">DANGLING_PARENS_TERM_RE</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\1\2\3&#39;</span><span class="p">,</span> <span class="n">term</span><span class="p">)</span>
+             <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">terms</span><span class="p">)</span>
+    <span class="c1"># handle oddly separated hyphenated words</span>
+    <span class="n">terms</span> <span class="o">=</span> <span class="p">(</span><span class="n">term</span> <span class="k">if</span> <span class="s1">&#39;-&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">term</span>
+             <span class="k">else</span> <span class="n">constants</span><span class="o">.</span><span class="n">NEG_DIGIT_TERM_RE</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\1\2&#39;</span><span class="p">,</span> <span class="n">constants</span><span class="o">.</span><span class="n">WEIRD_HYPHEN_SPACE_TERM_RE</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\1&#39;</span><span class="p">,</span> <span class="n">term</span><span class="p">))</span>
+             <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">terms</span><span class="p">)</span>
+    <span class="c1"># handle oddly separated apostrophe&#39;d words</span>
+    <span class="n">terms</span> <span class="o">=</span> <span class="p">(</span><span class="n">constants</span><span class="o">.</span><span class="n">WEIRD_APOSTR_SPACE_TERM_RE</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\1\2&#39;</span><span class="p">,</span> <span class="n">term</span><span class="p">)</span>
+             <span class="k">if</span> <span class="s2">&quot;&#39;&quot;</span> <span class="ow">in</span> <span class="n">term</span> <span class="k">else</span> <span class="n">term</span>
+             <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">terms</span><span class="p">)</span>
+    <span class="c1"># normalize whitespace</span>
+    <span class="n">terms</span> <span class="o">=</span> <span class="p">(</span><span class="n">constants</span><span class="o">.</span><span class="n">NONBREAKING_SPACE_REGEX</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="n">term</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+             <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">terms</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">terms</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\w&#39;</span><span class="p">,</span> <span class="n">term</span><span class="p">):</span>
+            <span class="k">yield</span> <span class="n">term</span></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016 Chartbeat, Inc..
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.5.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

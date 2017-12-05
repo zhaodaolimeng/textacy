@@ -1,0 +1,456 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>textacy.fileio.write &mdash; textacy 0.5.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../search.html"/>
+    <link rel="top" title="textacy 0.5.0 documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> textacy
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">textacy</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>textacy.fileio.write</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for textacy.fileio.write</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Functions for writing content to disk in common formats.&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span>
+
+<span class="kn">import</span> <span class="nn">io</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">contextlib</span> <span class="k">import</span> <span class="n">closing</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">import</span> <span class="nn">scipy.sparse</span> <span class="k">as</span> <span class="nn">sp</span>
+<span class="kn">from</span> <span class="nn">spacy.tokens.doc</span> <span class="k">import</span> <span class="n">Doc</span> <span class="k">as</span> <span class="n">SpacyDoc</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="k">import</span> <span class="n">tqdm</span>
+
+<span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">compat</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="k">import</span> <span class="n">make_dirs</span><span class="p">,</span> <span class="n">open_sesame</span>
+
+
+<div class="viewcode-block" id="write_file"><a class="viewcode-back" href="../../../api_reference.html#textacy.fileio.write.write_file">[docs]</a><span class="k">def</span> <span class="nf">write_file</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;wt&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">auto_make_dirs</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Write ``content`` to disk at ``filepath``. Files with appropriate extensions</span>
+<span class="sd">    are compressed with gzip or bz2 automatically. Any intermediate folders</span>
+<span class="sd">    not found on disk may automatically be created.</span>
+
+<span class="sd">    See Also:</span>
+<span class="sd">        :func:`open_sesame() &lt;textacy.fileio.utils.open_sesame&gt;`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="n">open_sesame</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">,</span>
+                     <span class="n">auto_make_dirs</span><span class="o">=</span><span class="n">auto_make_dirs</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">content</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="write_file_lines"><a class="viewcode-back" href="../../../api_reference.html#textacy.fileio.write.write_file_lines">[docs]</a><span class="k">def</span> <span class="nf">write_file_lines</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;wt&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                     <span class="n">auto_make_dirs</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Write the content in ``lines`` to disk at ``filepath``, line by line. Files</span>
+<span class="sd">    with appropriate extensions are compressed with gzip or bz2 automatically.</span>
+<span class="sd">    Any intermediate folders not found on disk may automatically be created.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">newline</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="k">if</span> <span class="s1">&#39;t&#39;</span> <span class="ow">in</span> <span class="n">mode</span> <span class="k">else</span> <span class="n">compat</span><span class="o">.</span><span class="n">unicode_to_bytes</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">open_sesame</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">,</span>
+                     <span class="n">auto_make_dirs</span><span class="o">=</span><span class="n">auto_make_dirs</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span> <span class="o">+</span> <span class="n">newline</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="write_json"><a class="viewcode-back" href="../../../api_reference.html#textacy.fileio.write.write_json">[docs]</a><span class="k">def</span> <span class="nf">write_json</span><span class="p">(</span><span class="n">json_object</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;wt&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">auto_make_dirs</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+               <span class="n">indent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">separators</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;:&#39;</span><span class="p">),</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Write JSON object all at once to disk at ``filepath``.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        json_object (json): valid JSON object to be written</span>
+<span class="sd">        filepath (str): /path/to/file on disk to which json object will be written,</span>
+<span class="sd">            such as a JSON array; for example::</span>
+
+<span class="sd">                [</span>
+<span class="sd">                    {&quot;title&quot;: &quot;Harrison Bergeron&quot;, &quot;text&quot;: &quot;The year was 2081, and everybody was finally equal.&quot;},</span>
+<span class="sd">                    {&quot;title&quot;: &quot;2BR02B&quot;, &quot;text&quot;: &quot;Everything was perfectly swell.&quot;}</span>
+<span class="sd">                ]</span>
+
+<span class="sd">        mode (str)</span>
+<span class="sd">        encoding (str)</span>
+<span class="sd">        auto_make_dirs (bool)</span>
+<span class="sd">        indent (int or str)</span>
+<span class="sd">        ensure_ascii (bool)</span>
+<span class="sd">        separators (tuple[str])</span>
+<span class="sd">        sort_keys (bool)</span>
+
+<span class="sd">    See Also:</span>
+<span class="sd">        https://docs.python.org/3/library/json.html#json.dump</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="n">open_sesame</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">,</span>
+                     <span class="n">auto_make_dirs</span><span class="o">=</span><span class="n">auto_make_dirs</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">json_object</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="n">indent</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="n">ensure_ascii</span><span class="p">,</span>
+                           <span class="n">separators</span><span class="o">=</span><span class="n">separators</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="n">sort_keys</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="write_json_lines"><a class="viewcode-back" href="../../../api_reference.html#textacy.fileio.write.write_json_lines">[docs]</a><span class="k">def</span> <span class="nf">write_json_lines</span><span class="p">(</span><span class="n">json_objects</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;wt&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                     <span class="n">auto_make_dirs</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                     <span class="n">separators</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;:&#39;</span><span class="p">),</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Iterate over a stream of JSON objects, writing each to a separate line in</span>
+<span class="sd">    file ``filepath`` but without a top-level JSON object (e.g. array).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        json_objects (iterable[json]): iterable of valid JSON objects to be written</span>
+<span class="sd">        filepath (str): /path/to/file on disk to which JSON objects will be written,</span>
+<span class="sd">            where each line in the file is its own json object; for example::</span>
+
+<span class="sd">                {&quot;title&quot;: &quot;Harrison Bergeron&quot;, &quot;text&quot;: &quot;The year was 2081, and everybody was finally equal.&quot;}\n</span>
+<span class="sd">                {&quot;title&quot;: &quot;2BR02B&quot;, &quot;text&quot;: &quot;Everything was perfectly swell.&quot;}</span>
+
+<span class="sd">        mode (str)</span>
+<span class="sd">        encoding (str)</span>
+<span class="sd">        auto_make_dirs (bool)</span>
+<span class="sd">        ensure_ascii (bool)</span>
+<span class="sd">        separators (tuple[str])</span>
+<span class="sd">        sort_keys (bool)</span>
+
+<span class="sd">    See Also:</span>
+<span class="sd">        https://docs.python.org/3/library/json.html#json.dump</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">newline</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="k">if</span> <span class="s1">&#39;t&#39;</span> <span class="ow">in</span> <span class="n">mode</span> <span class="k">else</span> <span class="n">compat</span><span class="o">.</span><span class="n">unicode_to_bytes</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">open_sesame</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">,</span>
+                     <span class="n">auto_make_dirs</span><span class="o">=</span><span class="n">auto_make_dirs</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">json_object</span> <span class="ow">in</span> <span class="n">json_objects</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">json_object</span><span class="p">,</span>
+                               <span class="n">ensure_ascii</span><span class="o">=</span><span class="n">ensure_ascii</span><span class="p">,</span>
+                               <span class="n">separators</span><span class="o">=</span><span class="n">separators</span><span class="p">,</span>
+                               <span class="n">sort_keys</span><span class="o">=</span><span class="n">sort_keys</span><span class="p">)</span> <span class="o">+</span> <span class="n">newline</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="write_csv"><a class="viewcode-back" href="../../../api_reference.html#textacy.fileio.write.write_csv">[docs]</a><span class="k">def</span> <span class="nf">write_csv</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">auto_make_dirs</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+              <span class="n">dialect</span><span class="o">=</span><span class="s1">&#39;excel&#39;</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Iterate over a sequence of rows, where each row is an iterable of strings</span>
+<span class="sd">    and/or numbers, writing each to a separate line in file ``filepath`` with</span>
+<span class="sd">    individual values separated by ``delimiter``.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        rows (Iterable[Iterable]): iterable of iterables of strings and/or</span>
+<span class="sd">            numbers to write to disk; for example::</span>
+
+<span class="sd">                [[&#39;That was a great movie!&#39;, 0.9],</span>
+<span class="sd">                 [&#39;The movie was okay, I guess.&#39;, 0.2],</span>
+<span class="sd">                 [&#39;Worst. Movie. Ever.&#39;, -1.0]]</span>
+
+<span class="sd">        filepath (str): /path/to/file on disk where rows will be written</span>
+<span class="sd">        encoding (str)</span>
+<span class="sd">        auto_make_dirs (bool)</span>
+<span class="sd">        dialect (str): a grouping of formatting parameters that determine how</span>
+<span class="sd">            the tabular data is parsed when reading/writing</span>
+<span class="sd">        delimiter (str): 1-character string used to separate fields in a row</span>
+
+<span class="sd">    See Also:</span>
+<span class="sd">        https://docs.python.org/3/library/csv.html#csv.writer</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        Here, CSV is used as a catch-all term for *any* delimited file</span>
+<span class="sd">        format, and ``delimiter=&#39;,&#39;`` is merely the function&#39;s default value.</span>
+<span class="sd">        Other common delimited formats are TSV (tab-separated-value, with</span>
+<span class="sd">        ``delimiter=&#39;\\t&#39;``) and PSV (pipe-separated-value, with ``delimiter=&#39;|&#39;``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="n">open_sesame</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;wt&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">csv_writer</span> <span class="o">=</span> <span class="n">compat</span><span class="o">.</span><span class="n">csv</span><span class="o">.</span><span class="n">writer</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">dialect</span><span class="o">=</span><span class="n">dialect</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="n">delimiter</span><span class="p">)</span>
+        <span class="n">csv_writer</span><span class="o">.</span><span class="n">writerows</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="write_spacy_docs"><a class="viewcode-back" href="../../../api_reference.html#textacy.fileio.write.write_spacy_docs">[docs]</a><span class="k">def</span> <span class="nf">write_spacy_docs</span><span class="p">(</span><span class="n">spacy_docs</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">auto_make_dirs</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Serialize a sequence of ``spacy.Doc`` s to disk at ``filepath`` using pickle.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        spacy_docs (``spacy.Doc`` or iterable(``spacy.Doc``)): a single spacy doc</span>
+<span class="sd">            or a sequence of spacy docs to serialize to disk at ``filepath``</span>
+<span class="sd">        filepath (str): /path/to/file on disk to which spacy docs will be streamed</span>
+<span class="sd">        auto_make_dirs (bool)</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        The docs are pickled together, as a list, so they are all loaded</span>
+<span class="sd">        into memory before saving. Mind your RAM usage!</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spacy_docs</span><span class="p">,</span> <span class="n">SpacyDoc</span><span class="p">):</span>
+        <span class="n">spacy_docs</span> <span class="o">=</span> <span class="p">[</span><span class="n">spacy_docs</span><span class="p">]</span>
+    <span class="k">with</span> <span class="n">open_sesame</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;wb&#39;</span><span class="p">,</span> <span class="n">auto_make_dirs</span><span class="o">=</span><span class="n">auto_make_dirs</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">compat</span><span class="o">.</span><span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">spacy_docs</span><span class="p">),</span> <span class="n">f</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="write_sparse_matrix"><a class="viewcode-back" href="../../../api_reference.html#textacy.fileio.write.write_sparse_matrix">[docs]</a><span class="k">def</span> <span class="nf">write_sparse_matrix</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">compressed</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Write a ``scipy.sparse.csr_matrix`` or ``scipy.sparse.csc_matrix`` to disk</span>
+<span class="sd">    at ``filepath``, optionally compressed.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        matrix (``scipy.sparse.csr_matrix`` or ``scipy.sparse.csr_matrix``)</span>
+<span class="sd">        filepath (str): /path/to/file on disk to which matrix objects will be written;</span>
+<span class="sd">            if ``filepath`` does not end in ``.npz``, that extension is</span>
+<span class="sd">            automatically appended to the name</span>
+<span class="sd">        compressed (bool): if True, save arrays into a single file in compressed</span>
+<span class="sd">            .npz format</span>
+
+<span class="sd">    See Also:</span>
+<span class="sd">        - http://docs.scipy.org/doc/numpy-1.10.0/reference/generated/numpy.savez.html</span>
+<span class="sd">        - http://docs.scipy.org/doc/numpy-1.10.0/reference/generated/numpy.savez_compressed.html</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">csc_matrix</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">csr_matrix</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;input matrix must be a scipy sparse csr or csc matrix&#39;</span><span class="p">)</span>
+    <span class="n">make_dirs</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">compressed</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">savez</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span>
+                 <span class="n">data</span><span class="o">=</span><span class="n">matrix</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">indices</span><span class="o">=</span><span class="n">matrix</span><span class="o">.</span><span class="n">indices</span><span class="p">,</span>
+                 <span class="n">indptr</span><span class="o">=</span><span class="n">matrix</span><span class="o">.</span><span class="n">indptr</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">savez_compressed</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span>
+                            <span class="n">data</span><span class="o">=</span><span class="n">matrix</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">indices</span><span class="o">=</span><span class="n">matrix</span><span class="o">.</span><span class="n">indices</span><span class="p">,</span>
+                            <span class="n">indptr</span><span class="o">=</span><span class="n">matrix</span><span class="o">.</span><span class="n">indptr</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="write_streaming_download_file"><a class="viewcode-back" href="../../../api_reference.html#textacy.fileio.write.write_streaming_download_file">[docs]</a><span class="k">def</span> <span class="nf">write_streaming_download_file</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;wt&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                  <span class="n">auto_make_dirs</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">chunk_size</span><span class="o">=</span><span class="mi">1024</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Download content from ``url`` in a stream; write successive chunks of size</span>
+<span class="sd">    ``chunk_size`` bytes to disk at ``filepath``. Files with appropriate extensions</span>
+<span class="sd">    are compressed with gzip or bz2 automatically. Any intermediate folders</span>
+<span class="sd">    not found on disk may automatically be created.</span>
+
+<span class="sd">    See Also:</span>
+<span class="sd">        :func:`open_sesame() &lt;textacy.fileio.utils.open_sesame&gt;`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">decode_unicode</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="s1">&#39;t&#39;</span> <span class="ow">in</span> <span class="n">mode</span> <span class="k">else</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">auto_make_dirs</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">make_dirs</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
+    <span class="c1"># always close the connection</span>
+    <span class="k">with</span> <span class="n">closing</span><span class="p">(</span><span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span> <span class="k">as</span> <span class="n">r</span><span class="p">:</span>
+        <span class="c1"># set fallback encoding if unable to infer from headers</span>
+        <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">encoding</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">r</span><span class="o">.</span><span class="n">encoding</span> <span class="o">=</span> <span class="s1">&#39;utf-8&#39;</span>
+        <span class="k">with</span> <span class="n">io</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">pbar</span> <span class="o">=</span> <span class="n">tqdm</span><span class="p">(</span>
+                <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="n">unit_scale</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">total</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;content-length&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)))</span>
+            <span class="n">chunks</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">iter_content</span><span class="p">(</span>
+                <span class="n">chunk_size</span><span class="o">=</span><span class="n">chunk_size</span><span class="p">,</span> <span class="n">decode_unicode</span><span class="o">=</span><span class="n">decode_unicode</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">chunks</span><span class="p">:</span>
+                <span class="c1"># needed (?) to filter out &quot;keep-alive&quot; new chunks</span>
+                <span class="k">if</span> <span class="n">chunk</span><span class="p">:</span>
+                    <span class="n">pbar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">chunk</span><span class="p">))</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016 Chartbeat, Inc..
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'0.5.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

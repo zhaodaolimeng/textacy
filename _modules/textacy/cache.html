@@ -1,0 +1,394 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>textacy.cache &mdash; textacy 0.5.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="textacy 0.5.0 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> textacy
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api_reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../license.html">License</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">textacy</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>textacy.cache</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for textacy.cache</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Functions to load and cache language data and other NLP resources.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span>
+
+<span class="kn">import</span> <span class="nn">csv</span>
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">io</span>
+<span class="kn">import</span> <span class="nn">inspect</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">import</span> <span class="nn">spacy</span>
+<span class="kn">from</span> <span class="nn">cachetools</span> <span class="k">import</span> <span class="n">cached</span><span class="p">,</span> <span class="n">LRUCache</span>
+<span class="kn">from</span> <span class="nn">cachetools.keys</span> <span class="k">import</span> <span class="n">hashkey</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">compat</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">data_dir</span> <span class="k">as</span> <span class="n">DEFAULT_DATA_DIR</span>
+
+<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_get_size</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">seen</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Recursively find the actual size of an object, in bytes.</span>
+
+<span class="sd">    Taken as-is (with a tweak in function name) from https://github.com/bosswissam/pysize.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">getsizeof</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">seen</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">obj_id</span> <span class="o">=</span> <span class="nb">id</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">obj_id</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span>
+    <span class="c1"># Important mark as seen *before* entering recursion to gracefully handle</span>
+    <span class="c1"># self-referential objects</span>
+    <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">obj_id</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s1">&#39;__dict__&#39;</span><span class="p">):</span>
+        <span class="k">for</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__mro__</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;__dict__&#39;</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">:</span>
+                <span class="n">d</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">&#39;__dict__&#39;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isgetsetdescriptor</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="ow">or</span> <span class="n">inspect</span><span class="o">.</span><span class="n">ismemberdescriptor</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
+                    <span class="n">size</span> <span class="o">+=</span> <span class="n">_get_size</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">,</span> <span class="n">seen</span><span class="p">)</span>
+                <span class="k">break</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="n">size</span> <span class="o">+=</span> <span class="nb">sum</span><span class="p">((</span><span class="n">_get_size</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">seen</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+        <span class="n">size</span> <span class="o">+=</span> <span class="nb">sum</span><span class="p">((</span><span class="n">_get_size</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">seen</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+    <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s1">&#39;__iter__&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">)):</span>
+        <span class="n">size</span> <span class="o">+=</span> <span class="nb">sum</span><span class="p">((</span><span class="n">_get_size</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">seen</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">obj</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">size</span>
+
+
+<span class="n">LRU_CACHE</span> <span class="o">=</span> <span class="n">LRUCache</span><span class="p">(</span><span class="mi">2147483648</span><span class="p">,</span> <span class="n">getsizeof</span><span class="o">=</span><span class="n">_get_size</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;:class:`cachetools.LRUCache`: Least Recently Used (LRU) cache, with 2GB max size.&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="clear"><a class="viewcode-back" href="../../api_reference.html#textacy.cache.clear">[docs]</a><span class="k">def</span> <span class="nf">clear</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Clear textacy&#39;s cache of loaded data.&quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">LRU_CACHE</span>
+    <span class="n">LRU_CACHE</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="load_spacy"><a class="viewcode-back" href="../../api_reference.html#textacy.cache.load_spacy">[docs]</a><span class="nd">@cached</span><span class="p">(</span><span class="n">LRU_CACHE</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">hashkey</span><span class="p">,</span> <span class="s1">&#39;spacy&#39;</span><span class="p">))</span>
+<span class="k">def</span> <span class="nf">load_spacy</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load a spaCy pipeline (model weights as binary data, ordered sequence of</span>
+<span class="sd">    component functions, and language-specific data) for tokenizing and annotating</span>
+<span class="sd">    text. An LRU cache saves pipelines in memory, up to 2GB.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        name (str or :class:`pathlib.Path`): spaCy model to load, i.e. a shortcut</span>
+<span class="sd">            link, full package name, or path to model directory.</span>
+<span class="sd">        disable (Tuple[str]): Names of pipeline components to disable, if any.</span>
+
+<span class="sd">            .. note:: Although spaCy&#39;s API specifies this argument as a list,</span>
+<span class="sd">               here we require a tuple. Pipelines are stored in the LRU cache</span>
+<span class="sd">               with unique identifiers generated from the hash of the function</span>
+<span class="sd">               name and args, and lists aren&#39;t hashable.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        ``spacy.&lt;lang&gt;.&lt;Language&gt;``: A Language object with the loaded model.</span>
+
+<span class="sd">    .. seealso:: https://spacy.io/api/top-level#spacy.load</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">disable</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">disable</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Loading &quot;</span><span class="si">%s</span><span class="s1">&quot; spaCy pipeline&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">spacy</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="n">disable</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="load_hyphenator"><a class="viewcode-back" href="../../api_reference.html#textacy.cache.load_hyphenator">[docs]</a><span class="nd">@cached</span><span class="p">(</span><span class="n">LRU_CACHE</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">hashkey</span><span class="p">,</span> <span class="s1">&#39;hyphenator&#39;</span><span class="p">))</span>
+<span class="k">def</span> <span class="nf">load_hyphenator</span><span class="p">(</span><span class="n">lang</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load an object that hyphenates words at valid points, as used in LaTex typesetting.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        lang (str): Standard 2-letter language abbreviation. To get a list of</span>
+<span class="sd">            valid values::</span>
+
+<span class="sd">                &gt;&gt;&gt; import pyphen; pyphen.LANGUAGES</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        :class:`pyphen.Pyphen()`</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        While hyphenation points always fall on syllable divisions,</span>
+<span class="sd">        not all syllable divisions are valid hyphenation points. But it&#39;s decent.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">pyphen</span>
+    <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Loading &quot;</span><span class="si">%s</span><span class="s1">&quot; language hyphenator&#39;</span><span class="p">,</span> <span class="n">lang</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">pyphen</span><span class="o">.</span><span class="n">Pyphen</span><span class="p">(</span><span class="n">lang</span><span class="o">=</span><span class="n">lang</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="load_depechemood"><a class="viewcode-back" href="../../api_reference.html#textacy.cache.load_depechemood">[docs]</a><span class="nd">@cached</span><span class="p">(</span><span class="n">LRU_CACHE</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">hashkey</span><span class="p">,</span> <span class="s1">&#39;depechemood&#39;</span><span class="p">))</span>
+<span class="k">def</span> <span class="nf">load_depechemood</span><span class="p">(</span><span class="n">data_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">weighting</span><span class="o">=</span><span class="s1">&#39;normfreq&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load DepecheMood lexicon text file from disk, munge into nested dictionary</span>
+<span class="sd">    for convenient lookup by lemma#POS. NB: English only!</span>
+
+<span class="sd">    Each version of DepecheMood is built starting from word-by-document matrices</span>
+<span class="sd">    either using raw frequencies (DepecheMood_freq.txt), normalized frequencies</span>
+<span class="sd">    (DepecheMood_normfreq.txt) or tf-idf (DepecheMood_tfidf.txt). The files are</span>
+<span class="sd">    tab-separated; each row contains one Lemma#PoS followed by the scores for the</span>
+<span class="sd">    following emotions: AFRAID, AMUSED, ANGRY, ANNOYED, DONT_CARE, HAPPY, INSPIRED, SAD.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data_dir (str): Directory on disk where DepecheMood lexicon text fields,</span>
+<span class="sd">            i.e. the location of the &#39;DepecheMood_V1.0&#39; directory created when</span>
+<span class="sd">            unzipping the DM dataset.</span>
+<span class="sd">        weighting ({&#39;freq&#39;, &#39;normfreq&#39;, &#39;tfidf&#39;}): Type of word</span>
+<span class="sd">            weighting used in building DepecheMood matrix.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict[dict]: Top-level keys are Lemma#POS strings, values are nested dicts</span>
+<span class="sd">        with emotion names as keys and weights as floats.</span>
+
+<span class="sd">    References:</span>
+<span class="sd">        Staiano, J., &amp; Guerini, M. (2014). &quot;DepecheMood: a Lexicon for Emotion</span>
+<span class="sd">        Analysis from Crowd-Annotated News&quot;. Proceedings of ACL-2014. (arXiv:1405.1605)</span>
+<span class="sd">        Data available at https://github.com/marcoguerini/DepecheMood/releases .</span>
+
+<span class="sd">    See Also:</span>
+<span class="sd">        :func:`download_depechemood &lt;textacy.lexicon_methods.download_depechemood&gt;`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">data_dir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">data_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">DEFAULT_DATA_DIR</span><span class="p">,</span> <span class="s1">&#39;depechemood&#39;</span><span class="p">,</span> <span class="s1">&#39;DepecheMood_V1.0&#39;</span><span class="p">)</span>
+    <span class="n">fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+        <span class="n">data_dir</span><span class="p">,</span> <span class="s1">&#39;DepecheMood_</span><span class="si">{weighting}</span><span class="s1">.txt&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">weighting</span><span class="o">=</span><span class="n">weighting</span><span class="p">))</span>
+    <span class="n">delimiter</span> <span class="o">=</span> <span class="n">compat</span><span class="o">.</span><span class="n">bytes_</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">compat</span><span class="o">.</span><span class="n">is_python2</span> <span class="k">else</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span>  <span class="c1"># HACK: Py2&#39;s csv module fail</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">io</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;rt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">csvfile</span><span class="p">:</span>
+            <span class="n">csvreader</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">reader</span><span class="p">(</span><span class="n">csvfile</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="n">delimiter</span><span class="p">)</span>
+            <span class="n">rows</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">csvreader</span><span class="p">)</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">IOError</span><span class="p">):</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span>
+            <span class="s1">&#39;Unable to load DepecheMood from </span><span class="si">%s</span><span class="s1">.&#39;</span>
+            <span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">Have you downloaded the data? If not, you can use the &#39;</span>
+            <span class="s1">&#39;`textacy.lexicon_methods.download_depechemood()` function.&#39;</span>
+            <span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">If so, have you given the correct `data_dir`? The directory &#39;</span>
+            <span class="s1">&#39;should have a `DepecheMood_V1.0` subdirectory, within which are &#39;</span>
+            <span class="s1">&#39;three text files and a README.&#39;</span><span class="p">,</span>
+            <span class="n">data_dir</span><span class="p">)</span>
+        <span class="k">raise</span>
+    <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Loading DepecheMood lexicon from </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
+    <span class="n">cols</span> <span class="o">=</span> <span class="n">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="p">{</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="p">{</span><span class="n">cols</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span> <span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">9</span><span class="p">)}</span>
+            <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">[</span><span class="mi">1</span><span class="p">:]}</span></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016 Chartbeat, Inc..
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.5.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

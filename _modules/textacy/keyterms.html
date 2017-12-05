@@ -1,0 +1,946 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>textacy.keyterms &mdash; textacy 0.5.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="textacy 0.5.0 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> textacy
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api_reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../license.html">License</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">textacy</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>textacy.keyterms</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for textacy.keyterms</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Functions for unsupervised automatic key term extraction, both specific algorithms</span>
+<span class="sd">(SGRank, TextRank, SingleRank) and a generalization of semantic network-based methods.</span>
+<span class="sd">Also includes a function to aggregate common key term variants of the same idea.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span>
+
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">operator</span>
+<span class="kn">from</span> <span class="nn">decimal</span> <span class="k">import</span> <span class="n">Decimal</span>
+
+<span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">cytoolz</span> <span class="k">import</span> <span class="n">itertoolz</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">extract</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">network</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">similarity</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">vsm</span>
+
+<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="sgrank"><a class="viewcode-back" href="../../api_reference.html#textacy.keyterms.sgrank">[docs]</a><span class="k">def</span> <span class="nf">sgrank</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">ngrams</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="n">normalize</span><span class="o">=</span><span class="s1">&#39;lemma&#39;</span><span class="p">,</span> <span class="n">window_width</span><span class="o">=</span><span class="mi">1500</span><span class="p">,</span>
+           <span class="n">n_keyterms</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">idf</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract key terms from a document using the [SGRank]_ algorithm.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        doc (``textacy.Doc`` or ``spacy.Doc``)</span>
+<span class="sd">        ngrams (int or Set[int]): n of which n-grams to include; ``(1, 2, 3, 4, 5, 6)``</span>
+<span class="sd">                (default) includes all ngrams from 1 to 6; `2`</span>
+<span class="sd">                if only bigrams are wanted</span>
+<span class="sd">        normalize (str or callable): If &#39;lemma&#39;, lemmatize terms; if &#39;lower&#39;,</span>
+<span class="sd">            lowercase terms; if None, use the form of terms as they appeared in</span>
+<span class="sd">            ``doc``; if a callable, must accept a ``spacy.Span`` and return a str,</span>
+<span class="sd">            e.g. :func:`textacy.spacy_utils.normalized_str()`</span>
+<span class="sd">        window_width (int): Width of sliding window in which term</span>
+<span class="sd">            co-occurrences are determined to occur. Note: Larger values may</span>
+<span class="sd">            dramatically increase runtime, owing to the larger number of</span>
+<span class="sd">            co-occurrence combinations that must be counted.</span>
+<span class="sd">        n_keyterms (int or float): Number of top-ranked terms to return as</span>
+<span class="sd">            keyterms. If int, represents the absolute number; if float, must be</span>
+<span class="sd">            in the open interval (0.0, 1.0), and is converted to an integer by</span>
+<span class="sd">            ``int(round(len(doc) * n_keyterms))``</span>
+<span class="sd">        idf (dict): Mapping of ``normalize(term)`` to inverse document frequency</span>
+<span class="sd">            for re-weighting of unigrams (n-grams with n &gt; 1 have df assumed = 1).</span>
+<span class="sd">            Results are typically better with idf information.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        List[Tuple[str, float]]: sorted list of top ``n_keyterms`` key terms and</span>
+<span class="sd">        their corresponding SGRank scores</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If ``n_keyterms`` is a float but not in (0.0, 1.0] or</span>
+<span class="sd">            ``window_width`` &lt; 2.</span>
+
+<span class="sd">    References:</span>
+<span class="sd">        .. [SGRank] Danesh, Sumner, and Martin. &quot;SGRank: Combining Statistical and</span>
+<span class="sd">           Graphical Methods to Improve the State of the Art in Unsupervised Keyphrase</span>
+<span class="sd">           Extraction&quot;. Lexical and Computational Semantics (* SEM 2015) (2015): 117.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n_toks</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n_keyterms</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="mf">0.0</span> <span class="o">&lt;</span> <span class="n">n_keyterms</span> <span class="o">&lt;=</span> <span class="mf">1.0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;`n_keyterms` must be an int, or a float between 0.0 and 1.0&#39;</span><span class="p">)</span>
+        <span class="n">n_keyterms</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">n_toks</span> <span class="o">*</span> <span class="n">n_keyterms</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">window_width</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;`window_width` must be &gt;= 2&#39;</span><span class="p">)</span>
+    <span class="n">window_width</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">n_toks</span><span class="p">,</span> <span class="n">window_width</span><span class="p">)</span>
+    <span class="n">min_term_freq</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">n_toks</span> <span class="o">//</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ngrams</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="n">ngrams</span> <span class="o">=</span> <span class="p">(</span><span class="n">ngrams</span><span class="p">,)</span>
+
+    <span class="c1"># build full list of candidate terms</span>
+    <span class="c1"># if inverse doc freqs available, include nouns, adjectives, and verbs;</span>
+    <span class="c1"># otherwise, just include nouns and adjectives</span>
+    <span class="c1"># (without IDF downweighting, verbs dominate the results in a bad way)</span>
+    <span class="n">include_pos</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;NOUN&#39;</span><span class="p">,</span> <span class="s1">&#39;PROPN&#39;</span><span class="p">,</span> <span class="s1">&#39;ADJ&#39;</span><span class="p">,</span> <span class="s1">&#39;VERB&#39;</span><span class="p">}</span> <span class="k">if</span> <span class="n">idf</span> <span class="k">else</span> <span class="p">{</span><span class="s1">&#39;NOUN&#39;</span><span class="p">,</span> <span class="s1">&#39;PROPN&#39;</span><span class="p">,</span> <span class="s1">&#39;ADJ&#39;</span><span class="p">}</span>
+    <span class="n">terms</span> <span class="o">=</span> <span class="n">itertoolz</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+        <span class="n">extract</span><span class="o">.</span><span class="n">ngrams</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">filter_stops</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">filter_punct</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">filter_nums</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                       <span class="n">include_pos</span><span class="o">=</span><span class="n">include_pos</span><span class="p">,</span> <span class="n">min_freq</span><span class="o">=</span><span class="n">min_term_freq</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">ngrams</span><span class="p">)</span>
+
+    <span class="c1"># get normalized term strings, as desired</span>
+    <span class="c1"># paired with positional index in document and length in a 3-tuple</span>
+    <span class="k">if</span> <span class="n">normalize</span> <span class="o">==</span> <span class="s1">&#39;lemma&#39;</span><span class="p">:</span>
+        <span class="n">terms</span> <span class="o">=</span> <span class="p">[(</span><span class="n">term</span><span class="o">.</span><span class="n">lemma_</span><span class="p">,</span> <span class="n">term</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">term</span><span class="p">))</span> <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">terms</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">normalize</span> <span class="o">==</span> <span class="s1">&#39;lower&#39;</span><span class="p">:</span>
+        <span class="n">terms</span> <span class="o">=</span> <span class="p">[(</span><span class="n">term</span><span class="o">.</span><span class="n">lower_</span><span class="p">,</span> <span class="n">term</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">term</span><span class="p">))</span> <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">terms</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="n">normalize</span><span class="p">:</span>
+        <span class="n">terms</span> <span class="o">=</span> <span class="p">[(</span><span class="n">term</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="n">term</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">term</span><span class="p">))</span> <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">terms</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">terms</span> <span class="o">=</span> <span class="p">[(</span><span class="n">normalize</span><span class="p">(</span><span class="n">term</span><span class="p">),</span> <span class="n">term</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">term</span><span class="p">))</span> <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">terms</span><span class="p">]</span>
+
+    <span class="c1"># pre-filter terms to the top N ranked by TF or modified TF*IDF</span>
+    <span class="n">n_prefilter_kts</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">n_keyterms</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+    <span class="n">term_text_counts</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">(</span><span class="n">term</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">terms</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">idf</span><span class="p">:</span>
+        <span class="n">mod_tfidfs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">term</span><span class="p">:</span> <span class="n">count</span> <span class="o">*</span> <span class="n">idf</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">term</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="s1">&#39; &#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">term</span> <span class="k">else</span> <span class="n">count</span>
+            <span class="k">for</span> <span class="n">term</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">term_text_counts</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="n">terms_set</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">term</span> <span class="k">for</span> <span class="n">term</span><span class="p">,</span> <span class="n">_</span>
+            <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">mod_tfidfs</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)[:</span><span class="n">n_prefilter_kts</span><span class="p">]}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">terms_set</span> <span class="o">=</span> <span class="p">{</span><span class="n">term</span> <span class="k">for</span> <span class="n">term</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">term_text_counts</span><span class="o">.</span><span class="n">most_common</span><span class="p">(</span><span class="n">n_prefilter_kts</span><span class="p">)}</span>
+    <span class="n">terms</span> <span class="o">=</span> <span class="p">[</span><span class="n">term</span> <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">terms</span> <span class="k">if</span> <span class="n">term</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">terms_set</span><span class="p">]</span>
+
+    <span class="c1"># compute term weights from statistical attributes:</span>
+    <span class="c1"># not subsumed frequency, position of first occurrence, and num words</span>
+    <span class="n">term_weights</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">seen_terms</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">n_toks_plus_1</span> <span class="o">=</span> <span class="n">n_toks</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">terms</span><span class="p">:</span>
+        <span class="n">term_text</span> <span class="o">=</span> <span class="n">term</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1"># we only want the *first* occurrence of a unique term (by its text)</span>
+        <span class="k">if</span> <span class="n">term_text</span> <span class="ow">in</span> <span class="n">seen_terms</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">seen_terms</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">term_text</span><span class="p">)</span>
+        <span class="n">pos_first_occ_factor</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">n_toks_plus_1</span> <span class="o">/</span> <span class="p">(</span><span class="n">term</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="c1"># TODO: assess how best to scale term len</span>
+        <span class="n">term_len</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">term</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>  <span class="c1"># term[2]</span>
+        <span class="n">term_count</span> <span class="o">=</span> <span class="n">term_text_counts</span><span class="p">[</span><span class="n">term_text</span><span class="p">]</span>
+        <span class="n">subsum_count</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">term_text_counts</span><span class="p">[</span><span class="n">t2</span><span class="p">]</span> <span class="k">for</span> <span class="n">t2</span> <span class="ow">in</span> <span class="n">terms_set</span>
+                           <span class="k">if</span> <span class="n">t2</span> <span class="o">!=</span> <span class="n">term_text</span> <span class="ow">and</span> <span class="n">term_text</span> <span class="ow">in</span> <span class="n">t2</span><span class="p">)</span>
+        <span class="n">term_freq_factor</span> <span class="o">=</span> <span class="n">term_count</span> <span class="o">-</span> <span class="n">subsum_count</span>
+        <span class="k">if</span> <span class="n">idf</span> <span class="ow">and</span> <span class="n">term</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">term_freq_factor</span> <span class="o">*=</span> <span class="n">idf</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">term_text</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">term_weights</span><span class="p">[</span><span class="n">term_text</span><span class="p">]</span> <span class="o">=</span> <span class="n">term_freq_factor</span> <span class="o">*</span> <span class="n">pos_first_occ_factor</span> <span class="o">*</span> <span class="n">term_len</span>
+
+    <span class="c1"># filter terms to only those with positive weights</span>
+    <span class="n">terms</span> <span class="o">=</span> <span class="p">[</span><span class="n">term</span> <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">terms</span> <span class="k">if</span> <span class="n">term_weights</span><span class="p">[</span><span class="n">term</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">n_coocs</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">))</span>
+    <span class="n">sum_logdists</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="nb">float</span><span class="p">))</span>
+
+    <span class="c1"># iterate over windows</span>
+    <span class="n">log_</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span>  <span class="c1"># localize this, for performance</span>
+    <span class="k">for</span> <span class="n">start_ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_toks</span><span class="p">):</span>
+        <span class="n">end_ind</span> <span class="o">=</span> <span class="n">start_ind</span> <span class="o">+</span> <span class="n">window_width</span>
+        <span class="n">window_terms</span> <span class="o">=</span> <span class="p">(</span><span class="n">term</span> <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">terms</span>
+                        <span class="k">if</span> <span class="n">start_ind</span> <span class="o">&lt;=</span> <span class="n">term</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">end_ind</span><span class="p">)</span>
+        <span class="c1"># get all token combinations within window</span>
+        <span class="k">for</span> <span class="n">t1</span><span class="p">,</span> <span class="n">t2</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">combinations</span><span class="p">(</span><span class="n">window_terms</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+            <span class="n">n_coocs</span><span class="p">[</span><span class="n">t1</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="n">t2</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">sum_logdists</span><span class="p">[</span><span class="n">t1</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="n">t2</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">+=</span> <span class="n">log_</span><span class="p">(</span><span class="n">window_width</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">t1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">t2</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">end_ind</span> <span class="o">&gt;</span> <span class="n">n_toks</span><span class="p">:</span>
+            <span class="k">break</span>
+
+    <span class="c1"># compute edge weights between co-occurring terms (nodes)</span>
+    <span class="n">edge_weights</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="nb">float</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">t1</span><span class="p">,</span> <span class="n">t2s</span> <span class="ow">in</span> <span class="n">sum_logdists</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">t2</span> <span class="ow">in</span> <span class="n">t2s</span><span class="p">:</span>
+            <span class="n">edge_weights</span><span class="p">[</span><span class="n">t1</span><span class="p">][</span><span class="n">t2</span><span class="p">]</span> <span class="o">=</span> <span class="p">((</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">sum_logdists</span><span class="p">[</span><span class="n">t1</span><span class="p">][</span><span class="n">t2</span><span class="p">])</span> <span class="o">/</span> <span class="n">n_coocs</span><span class="p">[</span><span class="n">t1</span><span class="p">][</span><span class="n">t2</span><span class="p">])</span> <span class="o">*</span> <span class="n">term_weights</span><span class="p">[</span><span class="n">t1</span><span class="p">]</span> <span class="o">*</span> <span class="n">term_weights</span><span class="p">[</span><span class="n">t2</span><span class="p">]</span>
+    <span class="c1"># normalize edge weights by sum of outgoing edge weights per term (node)</span>
+    <span class="n">norm_edge_weights</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">t1</span><span class="p">,</span> <span class="n">t2s</span> <span class="ow">in</span> <span class="n">edge_weights</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">sum_edge_weights</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">t2s</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        <span class="n">norm_edge_weights</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">t1</span><span class="p">,</span> <span class="n">t2</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;weight&#39;</span><span class="p">:</span> <span class="n">weight</span> <span class="o">/</span> <span class="n">sum_edge_weights</span><span class="p">})</span>
+                                 <span class="k">for</span> <span class="n">t2</span><span class="p">,</span> <span class="n">weight</span> <span class="ow">in</span> <span class="n">t2s</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+
+    <span class="c1"># build the weighted directed graph from edges, rank nodes by pagerank</span>
+    <span class="n">graph</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">()</span>
+    <span class="n">graph</span><span class="o">.</span><span class="n">add_edges_from</span><span class="p">(</span><span class="n">norm_edge_weights</span><span class="p">)</span>
+    <span class="n">term_ranks</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">pagerank_scipy</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">term_ranks</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)[:</span><span class="n">n_keyterms</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="textrank"><a class="viewcode-back" href="../../api_reference.html#textacy.keyterms.textrank">[docs]</a><span class="k">def</span> <span class="nf">textrank</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="s1">&#39;lemma&#39;</span><span class="p">,</span> <span class="n">n_keyterms</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convenience function for calling :func:`key_terms_from_semantic_network &lt;textacy.keyterms.key_terms_from_semantic_network&gt;`</span>
+<span class="sd">    with the parameter values used in the [TextRank]_ algorithm.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        doc (``textacy.Doc`` or ``spacy.Doc``)</span>
+<span class="sd">        normalize (str or callable): if &#39;lemma&#39;, lemmatize terms; if &#39;lower&#39;,</span>
+<span class="sd">            lowercase terms; if None, use the form of terms as they appeared in</span>
+<span class="sd">            ``doc``; if a callable, must accept a ``spacy.Token`` and return a str,</span>
+<span class="sd">            e.g. :func:`textacy.spacy_utils.normalized_str()`</span>
+<span class="sd">        n_keyterms (int or float): if int, number of top-ranked terms</span>
+<span class="sd">            to return as keyterms; if float, must be in the open interval (0, 1),</span>
+<span class="sd">            representing the fraction of top-ranked terms to return as keyterms</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        See :func:`key_terms_from_semantic_network`.</span>
+
+<span class="sd">    References:</span>
+<span class="sd">        .. [TextRank] Mihalcea, R., &amp; Tarau, P. (2004, July). TextRank: Bringing</span>
+<span class="sd">           order into texts. Association for Computational Linguistics.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">key_terms_from_semantic_network</span><span class="p">(</span>
+        <span class="n">doc</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="n">normalize</span><span class="p">,</span> <span class="n">window_width</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">edge_weighting</span><span class="o">=</span><span class="s1">&#39;binary&#39;</span><span class="p">,</span>
+        <span class="n">ranking_algo</span><span class="o">=</span><span class="s1">&#39;pagerank&#39;</span><span class="p">,</span> <span class="n">join_key_words</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">n_keyterms</span><span class="o">=</span><span class="n">n_keyterms</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="singlerank"><a class="viewcode-back" href="../../api_reference.html#textacy.keyterms.singlerank">[docs]</a><span class="k">def</span> <span class="nf">singlerank</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="s1">&#39;lemma&#39;</span><span class="p">,</span> <span class="n">n_keyterms</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convenience function for calling :func:`key_terms_from_semantic_network &lt;textacy.keyterms.key_terms_from_semantic_network&gt;`</span>
+<span class="sd">    with the parameter values used in the [SingleRank]_ algorithm.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        doc (``textacy.Doc`` or ``spacy.Doc``)</span>
+<span class="sd">        normalize (str or callable): if &#39;lemma&#39;, lemmatize terms; if &#39;lower&#39;,</span>
+<span class="sd">            lowercase terms; if None, use the form of terms as they appeared in</span>
+<span class="sd">            ``doc``; if a callable, must accept a ``spacy.Token`` and return a str,</span>
+<span class="sd">            e.g. :func:`textacy.spacy_utils.normalized_str()`</span>
+<span class="sd">        n_keyterms (int or float): if int, number of top-ranked terms</span>
+<span class="sd">            to return as keyterms; if float, must be in the open interval (0, 1),</span>
+<span class="sd">            representing the fraction of top-ranked terms to return as keyterms</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        see :func:`key_terms_from_semantic_network`.</span>
+
+<span class="sd">    References:</span>
+<span class="sd">        .. [SingleRank] Hasan, K. S., &amp; Ng, V. (2010, August). Conundrums in unsupervised</span>
+<span class="sd">           keyphrase extraction: making sense of the state-of-the-art. In Proceedings</span>
+<span class="sd">           of the 23rd International Conference on Computational Linguistics:</span>
+<span class="sd">           Posters (pp. 365-373). Association for Computational Linguistics.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">key_terms_from_semantic_network</span><span class="p">(</span>
+        <span class="n">doc</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="n">normalize</span><span class="p">,</span> <span class="n">window_width</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">edge_weighting</span><span class="o">=</span><span class="s1">&#39;cooc_freq&#39;</span><span class="p">,</span>
+        <span class="n">ranking_algo</span><span class="o">=</span><span class="s1">&#39;pagerank&#39;</span><span class="p">,</span> <span class="n">join_key_words</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_keyterms</span><span class="o">=</span><span class="n">n_keyterms</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="key_terms_from_semantic_network"><a class="viewcode-back" href="../../api_reference.html#textacy.keyterms.key_terms_from_semantic_network">[docs]</a><span class="k">def</span> <span class="nf">key_terms_from_semantic_network</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="s1">&#39;lemma&#39;</span><span class="p">,</span>
+                                    <span class="n">window_width</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">edge_weighting</span><span class="o">=</span><span class="s1">&#39;binary&#39;</span><span class="p">,</span>
+                                    <span class="n">ranking_algo</span><span class="o">=</span><span class="s1">&#39;pagerank&#39;</span><span class="p">,</span> <span class="n">join_key_words</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                    <span class="n">n_keyterms</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract key terms from a document by ranking nodes in a semantic network of</span>
+<span class="sd">    terms, connected by edges and weights specified by parameters.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        doc (``textacy.Doc`` or ``spacy.Doc``)</span>
+<span class="sd">        normalize (str or callable): if &#39;lemma&#39;, lemmatize terms; if &#39;lower&#39;,</span>
+<span class="sd">            lowercase terms; if None, use the form of terms as they appeared in</span>
+<span class="sd">            ``doc``; if a callable, must accept a ``spacy.Token`` and return a str,</span>
+<span class="sd">            e.g. :func:`textacy.spacy_utils.normalized_str()`</span>
+<span class="sd">        window_width (int): width of sliding window in which term</span>
+<span class="sd">            co-occurrences are said to occur</span>
+<span class="sd">        edge_weighting (&#39;binary&#39;, &#39;cooc_freq&#39;}): method used to</span>
+<span class="sd">            determine weights of edges between nodes in the semantic network;</span>
+<span class="sd">            if &#39;binary&#39;, edge weight is set to 1 for any two terms co-occurring</span>
+<span class="sd">            within `window_width` terms; if &#39;cooc_freq&#39;, edge weight is set to</span>
+<span class="sd">            the number of times that any two terms co-occur</span>
+<span class="sd">        ranking_algo ({&#39;pagerank&#39;, &#39;divrank&#39;, &#39;bestcoverage&#39;}):</span>
+<span class="sd">            algorithm with which to rank nodes in the semantic network;</span>
+<span class="sd">            `pagerank` is the canonical (and default) algorithm, but it prioritizes</span>
+<span class="sd">            node centrality at the expense of node diversity; the other two</span>
+<span class="sd">            attempt to balance centrality with diversity</span>
+<span class="sd">        join_key_words (bool): if True, join consecutive key words</span>
+<span class="sd">            together into longer key terms, taking the sum of the constituent words&#39;</span>
+<span class="sd">            scores as the joined key term&#39;s combined score</span>
+<span class="sd">        n_keyterms (int or float): if int, number of top-ranked terms</span>
+<span class="sd">            to return as keyterms; if float, must be in the open interval (0, 1),</span>
+<span class="sd">            is converted to an integer by ``round(len(doc) * n_keyterms)``</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        List[Tuple[str, float]]: sorted list of top ``n_keyterms`` key terms and</span>
+<span class="sd">        their corresponding ranking scores</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: if ``n_keyterms`` is a float but not in (0.0, 1.0]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n_keyterms</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="mf">0.0</span> <span class="o">&lt;</span> <span class="n">n_keyterms</span> <span class="o">&lt;=</span> <span class="mf">1.0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;`n_keyterms` must be an int, or a float between 0.0 and 1.0&#39;</span><span class="p">)</span>
+        <span class="n">n_keyterms</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span> <span class="o">*</span> <span class="n">n_keyterms</span><span class="p">))</span>
+
+    <span class="n">include_pos</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;NOUN&#39;</span><span class="p">,</span> <span class="s1">&#39;PROPN&#39;</span><span class="p">,</span> <span class="s1">&#39;ADJ&#39;</span><span class="p">}</span>
+    <span class="k">if</span> <span class="n">normalize</span> <span class="o">==</span> <span class="s1">&#39;lemma&#39;</span><span class="p">:</span>
+        <span class="n">word_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">word</span><span class="o">.</span><span class="n">lemma_</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">doc</span><span class="p">]</span>
+        <span class="n">good_word_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">word</span><span class="o">.</span><span class="n">lemma_</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">doc</span>
+                          <span class="k">if</span> <span class="ow">not</span> <span class="n">word</span><span class="o">.</span><span class="n">is_stop</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">word</span><span class="o">.</span><span class="n">is_punct</span> <span class="ow">and</span> <span class="n">word</span><span class="o">.</span><span class="n">pos_</span> <span class="ow">in</span> <span class="n">include_pos</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">normalize</span> <span class="o">==</span> <span class="s1">&#39;lower&#39;</span><span class="p">:</span>
+        <span class="n">word_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">word</span><span class="o">.</span><span class="n">lower_</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">doc</span><span class="p">]</span>
+        <span class="n">good_word_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">word</span><span class="o">.</span><span class="n">lower_</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">doc</span>
+                          <span class="k">if</span> <span class="ow">not</span> <span class="n">word</span><span class="o">.</span><span class="n">is_stop</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">word</span><span class="o">.</span><span class="n">is_punct</span> <span class="ow">and</span> <span class="n">word</span><span class="o">.</span><span class="n">pos_</span> <span class="ow">in</span> <span class="n">include_pos</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="n">normalize</span><span class="p">:</span>
+        <span class="n">word_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">word</span><span class="o">.</span><span class="n">text</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">doc</span><span class="p">]</span>
+        <span class="n">good_word_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">word</span><span class="o">.</span><span class="n">text</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">doc</span>
+                          <span class="k">if</span> <span class="ow">not</span> <span class="n">word</span><span class="o">.</span><span class="n">is_stop</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">word</span><span class="o">.</span><span class="n">is_punct</span> <span class="ow">and</span> <span class="n">word</span><span class="o">.</span><span class="n">pos_</span> <span class="ow">in</span> <span class="n">include_pos</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">word_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">normalize</span><span class="p">(</span><span class="n">word</span><span class="p">)</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">doc</span><span class="p">]</span>
+        <span class="n">good_word_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">normalize</span><span class="p">(</span><span class="n">word</span><span class="p">)</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">doc</span>
+                          <span class="k">if</span> <span class="ow">not</span> <span class="n">word</span><span class="o">.</span><span class="n">is_stop</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">word</span><span class="o">.</span><span class="n">is_punct</span> <span class="ow">and</span> <span class="n">word</span><span class="o">.</span><span class="n">pos_</span> <span class="ow">in</span> <span class="n">include_pos</span><span class="p">]</span>
+
+    <span class="c1"># HACK: omit empty strings, which happen as a bug in spacy as of v1.5</span>
+    <span class="c1"># and may well happen with ``normalize`` as a callable</span>
+    <span class="c1"># an empty string should never be considered a keyterm</span>
+    <span class="n">good_word_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">word</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">good_word_list</span> <span class="k">if</span> <span class="n">word</span><span class="p">]</span>
+    <span class="n">graph</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">terms_to_semantic_network</span><span class="p">(</span>
+        <span class="n">good_word_list</span><span class="p">,</span> <span class="n">window_width</span><span class="o">=</span><span class="n">window_width</span><span class="p">,</span> <span class="n">edge_weighting</span><span class="o">=</span><span class="n">edge_weighting</span><span class="p">)</span>
+
+    <span class="c1"># rank nodes by algorithm, and sort in descending order</span>
+    <span class="k">if</span> <span class="n">ranking_algo</span> <span class="o">==</span> <span class="s1">&#39;pagerank&#39;</span><span class="p">:</span>
+        <span class="n">word_ranks</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">pagerank_scipy</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="s1">&#39;weight&#39;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">ranking_algo</span> <span class="o">==</span> <span class="s1">&#39;divrank&#39;</span><span class="p">:</span>
+        <span class="n">word_ranks</span> <span class="o">=</span> <span class="n">rank_nodes_by_divrank</span><span class="p">(</span>
+            <span class="n">graph</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lambda_</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;lambda_&#39;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">),</span> <span class="n">alpha</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;alpha&#39;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">ranking_algo</span> <span class="o">==</span> <span class="s1">&#39;bestcoverage&#39;</span><span class="p">:</span>
+        <span class="n">word_ranks</span> <span class="o">=</span> <span class="n">rank_nodes_by_bestcoverage</span><span class="p">(</span>
+            <span class="n">graph</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="n">n_keyterms</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">alpha</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;alpha&#39;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">))</span>
+
+    <span class="c1"># bail out here if all we wanted was key *words* and not *terms*</span>
+    <span class="k">if</span> <span class="n">join_key_words</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[(</span><span class="n">word</span><span class="p">,</span> <span class="n">score</span><span class="p">)</span> <span class="k">for</span> <span class="n">word</span><span class="p">,</span> <span class="n">score</span> <span class="ow">in</span>
+                <span class="nb">sorted</span><span class="p">(</span><span class="n">word_ranks</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)[:</span><span class="n">n_keyterms</span><span class="p">]]</span>
+
+    <span class="n">top_n</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">0.25</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">word_ranks</span><span class="p">))</span>
+    <span class="n">top_word_ranks</span> <span class="o">=</span> <span class="p">{</span><span class="n">word</span><span class="p">:</span> <span class="n">rank</span> <span class="k">for</span> <span class="n">word</span><span class="p">,</span> <span class="n">rank</span> <span class="ow">in</span>
+                      <span class="nb">sorted</span><span class="p">(</span><span class="n">word_ranks</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)[:</span><span class="n">top_n</span><span class="p">]}</span>
+
+    <span class="c1"># join consecutive key words into key terms</span>
+    <span class="n">seen_joined_key_terms</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">joined_key_terms</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">word_list</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">word</span><span class="p">:</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">top_word_ranks</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">words</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
+            <span class="n">term</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">words</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">seen_joined_key_terms</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">seen_joined_key_terms</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">term</span><span class="p">)</span>
+            <span class="n">joined_key_terms</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">term</span><span class="p">,</span> <span class="nb">sum</span><span class="p">(</span><span class="n">word_ranks</span><span class="p">[</span><span class="n">word</span><span class="p">]</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">words</span><span class="p">)))</span>
+
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">joined_key_terms</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)[:</span><span class="n">n_keyterms</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="most_discriminating_terms"><a class="viewcode-back" href="../../api_reference.html#textacy.keyterms.most_discriminating_terms">[docs]</a><span class="k">def</span> <span class="nf">most_discriminating_terms</span><span class="p">(</span><span class="n">terms_lists</span><span class="p">,</span> <span class="n">bool_array_grp1</span><span class="p">,</span>
+                              <span class="n">max_n_terms</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">top_n_terms</span><span class="o">=</span><span class="mi">25</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given a collection of documents assigned to 1 of 2 exclusive groups, get the</span>
+<span class="sd">    `top_n_terms` most discriminating terms for group1-and-not-group2 and</span>
+<span class="sd">    group2-and-not-group1.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        terms_lists (Iterable[Iterable[str]]): a sequence of documents, each as a</span>
+<span class="sd">            sequence of (str) terms; used as input to :func:`doc_term_matrix()`</span>
+<span class="sd">        bool_array_grp1 (Iterable[bool]): an ordered sequence of True/False values,</span>
+<span class="sd">            where True corresponds to documents falling into &quot;group 1&quot; and False</span>
+<span class="sd">            corresponds to those in &quot;group 2&quot;</span>
+<span class="sd">        max_n_terms (int): only consider terms whose document frequency is within</span>
+<span class="sd">            the top `max_n_terms` out of all distinct terms; must be &gt; 0</span>
+<span class="sd">        top_n_terms (int or float): if int (must be &gt; 0), the total number of most</span>
+<span class="sd">            discriminating terms to return for each group; if float (must be in</span>
+<span class="sd">            the interval (0, 1)), the fraction of `max_n_terms` to return for each group</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        List[str]: top `top_n_terms` most discriminating terms for grp1-not-grp2</span>
+
+<span class="sd">        List[str]: top `top_n_terms` most discriminating terms for grp2-not-grp1</span>
+
+<span class="sd">    References:</span>
+<span class="sd">        King, Gary, Patrick Lam, and Margaret Roberts. &quot;Computer-Assisted Keyword</span>
+<span class="sd">        and Document Set Discovery from Unstructured Text.&quot; (2014).</span>
+<span class="sd">        http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.458.1445&amp;rep=rep1&amp;type=pdf</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">alpha_grp1</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">alpha_grp2</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">top_n_terms</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="n">top_n_terms</span> <span class="o">=</span> <span class="n">top_n_terms</span> <span class="o">*</span> <span class="n">max_n_terms</span>
+    <span class="n">bool_array_grp1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">bool_array_grp1</span><span class="p">)</span>
+    <span class="n">bool_array_grp2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">invert</span><span class="p">(</span><span class="n">bool_array_grp1</span><span class="p">)</span>
+
+    <span class="n">vectorizer</span> <span class="o">=</span> <span class="n">vsm</span><span class="o">.</span><span class="n">Vectorizer</span><span class="p">(</span>
+        <span class="n">weighting</span><span class="o">=</span><span class="s1">&#39;tf&#39;</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">sublinear_tf</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">smooth_idf</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">min_df</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">max_df</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span> <span class="n">min_ic</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">max_n_terms</span><span class="o">=</span><span class="n">max_n_terms</span><span class="p">)</span>
+    <span class="n">dtm</span> <span class="o">=</span> <span class="n">vectorizer</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">terms_lists</span><span class="p">)</span>
+    <span class="n">id2term</span> <span class="o">=</span> <span class="n">vectorizer</span><span class="o">.</span><span class="n">id_to_term</span>
+
+    <span class="c1"># get doc freqs for all terms in grp1 documents</span>
+    <span class="n">dtm_grp1</span> <span class="o">=</span> <span class="n">dtm</span><span class="p">[</span><span class="n">bool_array_grp1</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="n">n_docs_grp1</span> <span class="o">=</span> <span class="n">dtm_grp1</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">doc_freqs_grp1</span> <span class="o">=</span> <span class="n">vsm</span><span class="o">.</span><span class="n">get_doc_freqs</span><span class="p">(</span><span class="n">dtm_grp1</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1"># get doc freqs for all terms in grp2 documents</span>
+    <span class="n">dtm_grp2</span> <span class="o">=</span> <span class="n">dtm</span><span class="p">[</span><span class="n">bool_array_grp2</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="n">n_docs_grp2</span> <span class="o">=</span> <span class="n">dtm_grp2</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">doc_freqs_grp2</span> <span class="o">=</span> <span class="n">vsm</span><span class="o">.</span><span class="n">get_doc_freqs</span><span class="p">(</span><span class="n">dtm_grp2</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1"># get terms that occur in a larger fraction of grp1 docs than grp2 docs</span>
+    <span class="n">term_ids_grp1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">doc_freqs_grp1</span> <span class="o">/</span> <span class="n">n_docs_grp1</span> <span class="o">&gt;</span> <span class="n">doc_freqs_grp2</span> <span class="o">/</span> <span class="n">n_docs_grp2</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># get terms that occur in a larger fraction of grp2 docs than grp1 docs</span>
+    <span class="n">term_ids_grp2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">doc_freqs_grp1</span> <span class="o">/</span> <span class="n">n_docs_grp1</span> <span class="o">&lt;</span> <span class="n">doc_freqs_grp2</span> <span class="o">/</span> <span class="n">n_docs_grp2</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># get grp1 terms doc freqs in and not-in grp1 and grp2 docs, plus marginal totals</span>
+    <span class="n">grp1_terms_grp1_df</span> <span class="o">=</span> <span class="n">doc_freqs_grp1</span><span class="p">[</span><span class="n">term_ids_grp1</span><span class="p">]</span>
+    <span class="n">grp1_terms_grp2_df</span> <span class="o">=</span> <span class="n">doc_freqs_grp2</span><span class="p">[</span><span class="n">term_ids_grp1</span><span class="p">]</span>
+    <span class="c1"># grp1_terms_grp1_not_df = n_docs_grp1 - grp1_terms_grp1_df</span>
+    <span class="c1"># grp1_terms_grp2_not_df = n_docs_grp2 - grp1_terms_grp2_df</span>
+    <span class="c1"># grp1_terms_total_df = grp1_terms_grp1_df + grp1_terms_grp2_df</span>
+    <span class="c1"># grp1_terms_total_not_df = grp1_terms_grp1_not_df + grp1_terms_grp2_not_df</span>
+
+    <span class="c1"># get grp2 terms doc freqs in and not-in grp2 and grp1 docs, plus marginal totals</span>
+    <span class="n">grp2_terms_grp2_df</span> <span class="o">=</span> <span class="n">doc_freqs_grp2</span><span class="p">[</span><span class="n">term_ids_grp2</span><span class="p">]</span>
+    <span class="n">grp2_terms_grp1_df</span> <span class="o">=</span> <span class="n">doc_freqs_grp1</span><span class="p">[</span><span class="n">term_ids_grp2</span><span class="p">]</span>
+    <span class="c1"># grp2_terms_grp2_not_df = n_docs_grp2 - grp2_terms_grp2_df</span>
+    <span class="c1"># grp2_terms_grp1_not_df = n_docs_grp1 - grp2_terms_grp1_df</span>
+    <span class="c1"># grp2_terms_total_df = grp2_terms_grp2_df + grp2_terms_grp1_df</span>
+    <span class="c1"># grp2_terms_total_not_df = grp2_terms_grp2_not_df + grp2_terms_grp1_not_df</span>
+
+    <span class="c1"># get grp1 terms likelihoods, then sort for most discriminating grp1-not-grp2 terms</span>
+    <span class="n">grp1_terms_likelihoods</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">term_id</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">term_ids_grp1</span><span class="p">):</span>
+        <span class="n">term1</span> <span class="o">=</span> <span class="n">Decimal</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span><span class="n">grp1_terms_grp1_df</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">+</span> <span class="n">alpha_grp1</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span> <span class="o">*</span> <span class="n">Decimal</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span><span class="n">grp1_terms_grp2_df</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">+</span> <span class="n">alpha_grp2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span> <span class="o">/</span> <span class="n">Decimal</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span><span class="n">grp1_terms_grp1_df</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">+</span> <span class="n">grp1_terms_grp2_df</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">+</span> <span class="n">alpha_grp1</span> <span class="o">+</span> <span class="n">alpha_grp2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">term2</span> <span class="o">=</span> <span class="n">Decimal</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span><span class="n">n_docs_grp1</span> <span class="o">-</span> <span class="n">grp1_terms_grp1_df</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">+</span> <span class="n">alpha_grp1</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span> <span class="o">*</span> <span class="n">Decimal</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span><span class="n">n_docs_grp2</span> <span class="o">-</span> <span class="n">grp1_terms_grp2_df</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">+</span> <span class="n">alpha_grp2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span> <span class="o">/</span> <span class="n">Decimal</span><span class="p">((</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span><span class="n">n_docs_grp1</span> <span class="o">+</span> <span class="n">n_docs_grp2</span> <span class="o">-</span> <span class="n">grp1_terms_grp1_df</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">-</span> <span class="n">grp1_terms_grp2_df</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">+</span> <span class="n">alpha_grp1</span> <span class="o">+</span> <span class="n">alpha_grp2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="n">grp1_terms_likelihoods</span><span class="p">[</span><span class="n">id2term</span><span class="p">[</span><span class="n">term_id</span><span class="p">]]</span> <span class="o">=</span> <span class="n">term1</span> <span class="o">*</span> <span class="n">term2</span>
+    <span class="n">top_grp1_terms</span> <span class="o">=</span> <span class="p">[</span><span class="n">term</span> <span class="k">for</span> <span class="n">term</span><span class="p">,</span> <span class="n">likelihood</span>
+                      <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">grp1_terms_likelihoods</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span>
+                                <span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)[:</span><span class="n">top_n_terms</span><span class="p">]]</span>
+
+    <span class="c1"># get grp2 terms likelihoods, then sort for most discriminating grp2-not-grp1 terms</span>
+    <span class="n">grp2_terms_likelihoods</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">term_id</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">term_ids_grp2</span><span class="p">):</span>
+        <span class="n">term1</span> <span class="o">=</span> <span class="n">Decimal</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span><span class="n">grp2_terms_grp2_df</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">+</span> <span class="n">alpha_grp2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span> <span class="o">*</span> <span class="n">Decimal</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span><span class="n">grp2_terms_grp1_df</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">+</span> <span class="n">alpha_grp1</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span> <span class="o">/</span> <span class="n">Decimal</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span><span class="n">grp2_terms_grp2_df</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">+</span> <span class="n">grp2_terms_grp1_df</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">+</span> <span class="n">alpha_grp2</span> <span class="o">+</span> <span class="n">alpha_grp1</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">term2</span> <span class="o">=</span> <span class="n">Decimal</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span><span class="n">n_docs_grp2</span> <span class="o">-</span> <span class="n">grp2_terms_grp2_df</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">+</span> <span class="n">alpha_grp2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span> <span class="o">*</span> <span class="n">Decimal</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span><span class="n">n_docs_grp1</span> <span class="o">-</span> <span class="n">grp2_terms_grp1_df</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">+</span> <span class="n">alpha_grp1</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span> <span class="o">/</span> <span class="n">Decimal</span><span class="p">((</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span><span class="n">n_docs_grp2</span> <span class="o">+</span> <span class="n">n_docs_grp1</span> <span class="o">-</span> <span class="n">grp2_terms_grp2_df</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">-</span> <span class="n">grp2_terms_grp1_df</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">+</span> <span class="n">alpha_grp2</span> <span class="o">+</span> <span class="n">alpha_grp1</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="n">grp2_terms_likelihoods</span><span class="p">[</span><span class="n">id2term</span><span class="p">[</span><span class="n">term_id</span><span class="p">]]</span> <span class="o">=</span> <span class="n">term1</span> <span class="o">*</span> <span class="n">term2</span>
+    <span class="n">top_grp2_terms</span> <span class="o">=</span> <span class="p">[</span><span class="n">term</span> <span class="k">for</span> <span class="n">term</span><span class="p">,</span> <span class="n">likelihood</span>
+                      <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">grp2_terms_likelihoods</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span>
+                                <span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)[:</span><span class="n">top_n_terms</span><span class="p">]]</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">top_grp1_terms</span><span class="p">,</span> <span class="n">top_grp2_terms</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="aggregate_term_variants"><a class="viewcode-back" href="../../api_reference.html#textacy.keyterms.aggregate_term_variants">[docs]</a><span class="k">def</span> <span class="nf">aggregate_term_variants</span><span class="p">(</span><span class="n">terms</span><span class="p">,</span>
+                            <span class="n">acro_defs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                            <span class="n">fuzzy_dedupe</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Take a set of unique terms and aggregate terms that are symbolic, lexical,</span>
+<span class="sd">    and ordering variants of each other, as well as acronyms and fuzzy string matches.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        terms (Set[str]): set of unique terms with potential duplicates</span>
+<span class="sd">        acro_defs (dict): if not None, terms that are acronyms will be</span>
+<span class="sd">            aggregated with their definitions and terms that are definitions will</span>
+<span class="sd">            be aggregated with their acronyms</span>
+<span class="sd">        fuzzy_dedupe (bool): if True, fuzzy string matching will be used</span>
+<span class="sd">            to aggregate similar terms of a sufficient length</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        List[Set[str]]: each item is a set of aggregated terms</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        Partly inspired by aggregation of variants discussed in</span>
+<span class="sd">        Park, Youngja, Roy J. Byrd, and Branimir K. Boguraev.</span>
+<span class="sd">        &quot;Automatic glossary extraction: beyond terminology identification.&quot;</span>
+<span class="sd">        Proceedings of the 19th international conference on Computational linguistics-Volume 1.</span>
+<span class="sd">        Association for Computational Linguistics, 2002.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">agg_terms</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">seen_terms</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">terms</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="nb">len</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">seen_terms</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="n">variants</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">term</span><span class="p">])</span>
+        <span class="n">seen_terms</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">term</span><span class="p">)</span>
+
+        <span class="c1"># symbolic variations</span>
+        <span class="k">if</span> <span class="s1">&#39;-&#39;</span> <span class="ow">in</span> <span class="n">term</span><span class="p">:</span>
+            <span class="n">variant</span> <span class="o">=</span> <span class="n">term</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">variant</span> <span class="ow">in</span> <span class="n">terms</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">seen_terms</span><span class="p">):</span>
+                <span class="n">variants</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">variant</span><span class="p">)</span>
+                <span class="n">seen_terms</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">variant</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;/&#39;</span> <span class="ow">in</span> <span class="n">term</span><span class="p">:</span>
+            <span class="n">variant</span> <span class="o">=</span> <span class="n">term</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">variant</span> <span class="ow">in</span> <span class="n">terms</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">seen_terms</span><span class="p">):</span>
+                <span class="n">variants</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">variant</span><span class="p">)</span>
+                <span class="n">seen_terms</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">variant</span><span class="p">)</span>
+
+        <span class="c1"># lexical variations</span>
+        <span class="n">term_words</span> <span class="o">=</span> <span class="n">term</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="c1"># last_word = term_words[-1]</span>
+        <span class="c1"># # assume last word is a noun</span>
+        <span class="c1"># last_word_lemmatized = lemmatizer.lemmatize(last_word, &#39;n&#39;)</span>
+        <span class="c1"># # if the same, either already a lemmatized noun OR a verb; try verb</span>
+        <span class="c1"># if last_word_lemmatized == last_word:</span>
+        <span class="c1">#     last_word_lemmatized = lemmatizer.lemmatize(last_word, &#39;v&#39;)</span>
+        <span class="c1"># # if at least we have a new term... add it</span>
+        <span class="c1"># if last_word_lemmatized != last_word:</span>
+        <span class="c1">#     term_lemmatized = &#39; &#39;.join(term_words[:-1] + [last_word_lemmatized])</span>
+        <span class="c1">#     if term_lemmatized in terms.difference(seen_terms):</span>
+        <span class="c1">#         variants.add(term_lemmatized)</span>
+        <span class="c1">#         seen_terms.add(term_lemmatized)</span>
+
+        <span class="c1"># if term is an acronym, add its definition</span>
+        <span class="c1"># if term is a definition, add its acronym</span>
+        <span class="k">if</span> <span class="n">acro_defs</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">acro</span><span class="p">,</span> <span class="n">def_</span> <span class="ow">in</span> <span class="n">acro_defs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">acro</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">term</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                    <span class="n">variants</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">def_</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+                    <span class="n">seen_terms</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">def_</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+                    <span class="k">break</span>
+                <span class="k">elif</span> <span class="n">def_</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">term</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                    <span class="n">variants</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">acro</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+                    <span class="n">seen_terms</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">acro</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+                    <span class="k">break</span>
+
+        <span class="c1"># if 3+ -word term differs by one word at the start or the end</span>
+        <span class="c1"># of a longer phrase, aggregate</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">term_words</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">term_minus_first_word</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">term_words</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+            <span class="n">term_minus_last_word</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">term_words</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">term_minus_first_word</span> <span class="ow">in</span> <span class="n">terms</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">seen_terms</span><span class="p">):</span>
+                <span class="n">variants</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">term_minus_first_word</span><span class="p">)</span>
+                <span class="n">seen_terms</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">term_minus_first_word</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">term_minus_last_word</span> <span class="ow">in</span> <span class="n">terms</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">seen_terms</span><span class="p">):</span>
+                <span class="n">variants</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">term_minus_last_word</span><span class="p">)</span>
+                <span class="n">seen_terms</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">term_minus_last_word</span><span class="p">)</span>
+            <span class="c1"># check for &quot;X of Y&quot; &lt;=&gt; &quot;Y X&quot; term variants</span>
+            <span class="k">if</span> <span class="s1">&#39; of &#39;</span> <span class="ow">in</span> <span class="n">term</span><span class="p">:</span>
+                <span class="n">split_term</span> <span class="o">=</span> <span class="n">term</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; of &#39;</span><span class="p">)</span>
+                <span class="n">variant</span> <span class="o">=</span> <span class="n">split_term</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">split_term</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">variant</span> <span class="ow">in</span> <span class="n">terms</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">seen_terms</span><span class="p">):</span>
+                    <span class="n">variants</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">variant</span><span class="p">)</span>
+                    <span class="n">seen_terms</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">variant</span><span class="p">)</span>
+
+        <span class="c1"># intense de-duping for sufficiently long terms</span>
+        <span class="k">if</span> <span class="n">fuzzy_dedupe</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">term</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">13</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">other_term</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">terms</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">seen_terms</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="nb">len</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">other_term</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">13</span><span class="p">:</span>
+                    <span class="k">break</span>
+                <span class="n">tsr</span> <span class="o">=</span> <span class="n">similarity</span><span class="o">.</span><span class="n">token_sort_ratio</span><span class="p">(</span><span class="n">term</span><span class="p">,</span> <span class="n">other_term</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">tsr</span> <span class="o">&gt;</span> <span class="mf">0.93</span><span class="p">:</span>
+                    <span class="n">variants</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">other_term</span><span class="p">)</span>
+                    <span class="n">seen_terms</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">other_term</span><span class="p">)</span>
+                    <span class="k">break</span>
+
+        <span class="n">agg_terms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">variants</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">agg_terms</span></div>
+
+
+<div class="viewcode-block" id="rank_nodes_by_bestcoverage"><a class="viewcode-back" href="../../api_reference.html#textacy.keyterms.rank_nodes_by_bestcoverage">[docs]</a><span class="k">def</span> <span class="nf">rank_nodes_by_bestcoverage</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Rank nodes in a network using the [BestCoverage]_ algorithm that attempts to</span>
+<span class="sd">    balance between node centrality and diversity.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        graph (:class:`networkx.Graph &lt;networkx.Graph&gt;`)</span>
+<span class="sd">        k (int): number of results to return for top-k search</span>
+<span class="sd">        c (int): *l* parameter for *l*-step expansion; best if 1 or 2</span>
+<span class="sd">        alpha (float): float in [0.0, 1.0] specifying how much of</span>
+<span class="sd">            central vertex&#39;s score to remove from its *l*-step neighbors;</span>
+<span class="sd">            smaller value puts more emphasis on centrality, larger value puts</span>
+<span class="sd">            more emphasis on diversity</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: top ``k`` nodes as ranked by bestcoverage algorithm; keys as node</span>
+<span class="sd">        identifiers, values as corresponding ranking scores</span>
+
+<span class="sd">    References:</span>
+<span class="sd">        .. [BestCoverage] Küçüktunç, O., Saule, E., Kaya, K., &amp; Çatalyürek, Ü. V.</span>
+<span class="sd">           (2013, May). Diversified recommendation on graphs: pitfalls, measures,</span>
+<span class="sd">           and algorithms. In Proceedings of the 22nd international conference on</span>
+<span class="sd">           World Wide Web (pp. 715-726). International World Wide Web Conferences</span>
+<span class="sd">           Steering Committee. http://www2013.wwwconference.org/proceedings/p715.pdf</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">alpha</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span>
+
+    <span class="n">nodes_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">()))</span>
+
+    <span class="c1"># ranks: array of PageRank values, summing up to 1</span>
+    <span class="n">ranks</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">pagerank_scipy</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.85</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-08</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="s1">&#39;weight&#39;</span><span class="p">)</span>
+    <span class="n">sorted_ranks</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">ranks</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">avg_degree</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">deg</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">deg</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">degree</span><span class="p">())</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes_list</span><span class="p">)</span>
+    <span class="c1"># relaxation parameter, k&#39; in the paper</span>
+    <span class="n">k_prime</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">k</span> <span class="o">*</span> <span class="n">avg_degree</span> <span class="o">*</span> <span class="n">c</span><span class="p">)</span>
+
+    <span class="n">top_k_sorted_ranks</span> <span class="o">=</span> <span class="n">sorted_ranks</span><span class="p">[:</span><span class="n">k_prime</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">get_l_step_expanded_set</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">l</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            vertices (iterable[str]): vertices to be expanded</span>
+<span class="sd">            l (int): how many steps to expand vertices set</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            set: the l-step expanded set of vertices</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># add vertices to s</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">vertices</span><span class="p">)</span>
+        <span class="c1"># s.update(vertices)</span>
+        <span class="c1"># for each step</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">l</span><span class="p">):</span>
+            <span class="c1"># for each node</span>
+            <span class="n">next_vertices</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">vertex</span> <span class="ow">in</span> <span class="n">vertices</span><span class="p">:</span>
+                <span class="c1"># add its neighbors to the next list</span>
+                <span class="n">neighbors</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">vertex</span><span class="p">)</span>
+                <span class="n">next_vertices</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">neighbors</span><span class="p">)</span>
+                <span class="n">s</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">neighbors</span><span class="p">)</span>
+            <span class="n">vertices</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">next_vertices</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">s</span>
+
+    <span class="n">top_k_exp_vertices</span> <span class="o">=</span> <span class="n">get_l_step_expanded_set</span><span class="p">([</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">top_k_sorted_ranks</span><span class="p">],</span> <span class="n">c</span><span class="p">)</span>
+
+    <span class="c1"># compute initial exprel contribution</span>
+    <span class="n">taken</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span>
+    <span class="n">contrib</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">vertex</span> <span class="ow">in</span> <span class="n">nodes_list</span><span class="p">:</span>
+        <span class="c1"># get l-step expanded set</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">get_l_step_expanded_set</span><span class="p">([</span><span class="n">vertex</span><span class="p">],</span> <span class="n">c</span><span class="p">)</span>
+        <span class="c1"># sum up neighbors ranks, i.e. l-step expanded relevance</span>
+        <span class="n">contrib</span><span class="p">[</span><span class="n">vertex</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">ranks</span><span class="p">[</span><span class="n">v</span><span class="p">]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">s</span><span class="p">)</span>
+
+    <span class="n">sum_contrib</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="c1"># greedily select to maximize exprel metric</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">k</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">contrib</span><span class="p">:</span>  <span class="c1"># TODO: check that .items(): not needed</span>
+            <span class="k">break</span>
+        <span class="c1"># find word with highest l-step expanded relevance score</span>
+        <span class="n">max_word_score</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">contrib</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">sum_contrib</span> <span class="o">+=</span> <span class="n">max_word_score</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># contrib[max_word[0]]</span>
+        <span class="n">results</span><span class="p">[</span><span class="n">max_word_score</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">max_word_score</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="c1"># find its l-step expanded set</span>
+        <span class="n">l_step_expanded_set</span> <span class="o">=</span> <span class="n">get_l_step_expanded_set</span><span class="p">([</span><span class="n">max_word_score</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">c</span><span class="p">)</span>
+        <span class="c1"># for each vertex found</span>
+        <span class="k">for</span> <span class="n">vertex</span> <span class="ow">in</span> <span class="n">l_step_expanded_set</span><span class="p">:</span>
+            <span class="c1"># already removed its contribution from neighbors</span>
+            <span class="k">if</span> <span class="n">taken</span><span class="p">[</span><span class="n">vertex</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="c1"># remove the contribution of vertex (or some fraction) from its l-step neighbors</span>
+            <span class="n">s1</span> <span class="o">=</span> <span class="n">get_l_step_expanded_set</span><span class="p">([</span><span class="n">vertex</span><span class="p">],</span> <span class="n">c</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">s1</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">contrib</span><span class="p">[</span><span class="n">w</span><span class="p">]</span> <span class="o">-=</span> <span class="n">alpha</span> <span class="o">*</span> <span class="n">ranks</span><span class="p">[</span><span class="n">vertex</span><span class="p">]</span>
+                <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                    <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                        <span class="s1">&#39;Word </span><span class="si">%s</span><span class="s1"> not in contrib dict! We</span><span class="se">\&#39;</span><span class="s1">re approximating...&#39;</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
+            <span class="n">taken</span><span class="p">[</span><span class="n">vertex</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">contrib</span><span class="p">[</span><span class="n">max_word_score</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">return</span> <span class="n">results</span></div>
+
+
+<div class="viewcode-block" id="rank_nodes_by_divrank"><a class="viewcode-back" href="../../api_reference.html#textacy.keyterms.rank_nodes_by_divrank">[docs]</a><span class="k">def</span> <span class="nf">rank_nodes_by_divrank</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lambda_</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Rank nodes in a network using the [DivRank]_ algorithm that attempts to</span>
+<span class="sd">    balance between node centrality and diversity.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        graph (:class:`networkx.Graph &lt;networkx.Graph&gt;`):</span>
+<span class="sd">        r (:class:`numpy.array`,): the &quot;personalization vector&quot;;</span>
+<span class="sd">            by default, ``r = ones(1, n)/n``</span>
+<span class="sd">        lambda_ (float): must be in [0.0, 1.0]</span>
+<span class="sd">        alpha (float): controls the strength of self-links;</span>
+<span class="sd">            must be in [0.0, 1.0]</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        List[Tuple[str, float]]: list of (node, score) tuples ordered by desc. divrank score</span>
+
+<span class="sd">    References:</span>
+<span class="sd">        .. [DivRank] Mei, Q., Guo, J., &amp; Radev, D. (2010, July). Divrank: the interplay</span>
+<span class="sd">           of prestige and diversity in information networks. In Proceedings of the</span>
+<span class="sd">           16th ACM SIGKDD international conference on Knowledge discovery and data</span>
+<span class="sd">           mining (pp. 1009-1018). ACM. http://clair.si.umich.edu/~radev/papers/SIGKDD2010.pdf</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># check function arguments</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;``graph`` is empty!&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{}</span>
+
+    <span class="c1"># create adjacency matrix, i.e.</span>
+    <span class="c1"># n x n matrix where entry W_ij is the weight of the edge from V_i to V_j</span>
+    <span class="n">W</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">to_numpy_matrix</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="s1">&#39;weight&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">A</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">W</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># create flat prior personalization vector if none given</span>
+    <span class="k">if</span> <span class="n">r</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">n</span> <span class="o">*</span> <span class="p">[</span><span class="mi">1</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">n</span><span class="p">)]])</span>
+
+    <span class="c1"># Specify some constants</span>
+    <span class="n">max_iter</span> <span class="o">=</span> <span class="mi">1000</span>
+    <span class="n">diff</span> <span class="o">=</span> <span class="mf">1e+10</span>
+    <span class="n">tol</span> <span class="o">=</span> <span class="mf">1e-3</span>
+
+    <span class="n">pr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">n</span> <span class="o">*</span> <span class="p">[</span><span class="mi">1</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">n</span><span class="p">)]])</span>
+
+    <span class="c1"># Get p0(v -&gt; u), i.e. transition probability prior to reinforcement</span>
+    <span class="n">tmp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">W</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">idx_nan</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flatnonzero</span><span class="p">(</span><span class="n">tmp</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">W0</span> <span class="o">=</span> <span class="n">W</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">tmp</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
+    <span class="n">W0</span><span class="p">[</span><span class="n">idx_nan</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">del</span> <span class="n">W</span>
+
+    <span class="c1"># DivRank algorithm</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">max_iter</span> <span class="ow">and</span> <span class="n">diff</span> <span class="o">&gt;</span> <span class="n">tol</span><span class="p">:</span>
+        <span class="n">W1</span> <span class="o">=</span> <span class="n">alpha</span> <span class="o">*</span> <span class="n">W0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">pr</span><span class="p">,</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">W1</span> <span class="o">=</span> <span class="n">W1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">W1</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">pr</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:])</span>
+        <span class="n">tmp1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">W1</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">P</span> <span class="o">=</span> <span class="n">W1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">tmp1</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
+        <span class="n">P</span> <span class="o">=</span> <span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">lambda_</span><span class="p">)</span> <span class="o">*</span> <span class="n">P</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">lambda_</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="n">pr_new</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">pr</span><span class="p">,</span> <span class="n">P</span><span class="p">)</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">diff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">pr_new</span> <span class="o">-</span> <span class="n">pr</span><span class="p">))</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">pr</span><span class="p">)</span>
+        <span class="n">pr</span> <span class="o">=</span> <span class="n">pr_new</span>
+
+    <span class="c1"># sort nodes by divrank score</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(((</span><span class="n">i</span><span class="p">,</span> <span class="n">score</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">score</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">())),</span>
+                     <span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># replace node number by node value</span>
+    <span class="n">nodes_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">()))</span>
+    <span class="n">divranks</span> <span class="o">=</span> <span class="p">{</span><span class="n">nodes_list</span><span class="p">[</span><span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]]:</span> <span class="n">result</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">divranks</span></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016 Chartbeat, Inc..
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.5.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

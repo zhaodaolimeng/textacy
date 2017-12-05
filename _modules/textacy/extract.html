@@ -1,0 +1,1056 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>textacy.extract &mdash; textacy 0.5.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="textacy 0.5.0 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> textacy
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api_reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../license.html">License</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">textacy</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>textacy.extract</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for textacy.extract</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Functions to extract various elements of interest from documents already parsed</span>
+<span class="sd">by `spaCy &lt;http://spacy.io/&gt;`_, such as n-grams, named entities, subject-verb-object</span>
+<span class="sd">triples, and acronyms.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span>
+
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">operator</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">cytoolz</span> <span class="k">import</span> <span class="n">itertoolz</span>
+<span class="kn">from</span> <span class="nn">spacy.parts_of_speech</span> <span class="k">import</span> <span class="n">CONJ</span><span class="p">,</span> <span class="n">DET</span><span class="p">,</span> <span class="n">NOUN</span><span class="p">,</span> <span class="n">VERB</span>
+<span class="kn">from</span> <span class="nn">spacy.tokens.span</span> <span class="k">import</span> <span class="n">Span</span> <span class="k">as</span> <span class="n">SpacySpan</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">compat</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">constants</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">spacy_utils</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">text_utils</span>
+
+
+<div class="viewcode-block" id="words"><a class="viewcode-back" href="../../api_reference.html#textacy.extract.words">[docs]</a><span class="k">def</span> <span class="nf">words</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span>
+          <span class="n">filter_stops</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">filter_punct</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">filter_nums</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+          <span class="n">include_pos</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exclude_pos</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">min_freq</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract an ordered sequence of words from a document processed by spaCy,</span>
+<span class="sd">    optionally filtering words by part-of-speech tag and frequency.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        doc (``textacy.Doc``, ``spacy.Doc``, or ``spacy.Span``)</span>
+<span class="sd">        filter_stops (bool): if True, remove stop words from word list</span>
+<span class="sd">        filter_punct (bool): if True, remove punctuation from word list</span>
+<span class="sd">        filter_nums (bool): if True, remove number-like words (e.g. 10, &#39;ten&#39;)</span>
+<span class="sd">            from word list</span>
+<span class="sd">        include_pos (str or Set[str]): remove words whose part-of-speech tag</span>
+<span class="sd">            IS NOT included in this param</span>
+<span class="sd">        exclude_pos (str or Set[str]): remove words whose part-of-speech tag</span>
+<span class="sd">            IS in the specified tags</span>
+<span class="sd">        min_freq (int): remove words that occur in `doc` fewer than</span>
+<span class="sd">            `min_freq` times</span>
+
+<span class="sd">    Yields:</span>
+<span class="sd">        ``spacy.Token``: the next token from ``doc`` passing specified filters</span>
+<span class="sd">        in order of appearance in the document</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        TypeError: if `include_pos` or `exclude_pos` is not a str, a set of str,</span>
+<span class="sd">            or a falsy value</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        Filtering by part-of-speech tag uses the universal POS tag set,</span>
+<span class="sd">        http://universaldependencies.org/u/pos/.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">words_</span> <span class="o">=</span> <span class="p">(</span><span class="n">w</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">doc</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">w</span><span class="o">.</span><span class="n">is_space</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">filter_stops</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">words_</span> <span class="o">=</span> <span class="p">(</span><span class="n">w</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">words_</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">w</span><span class="o">.</span><span class="n">is_stop</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">filter_punct</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">words_</span> <span class="o">=</span> <span class="p">(</span><span class="n">w</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">words_</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">w</span><span class="o">.</span><span class="n">is_punct</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">filter_nums</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">words_</span> <span class="o">=</span> <span class="p">(</span><span class="n">w</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">words_</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">w</span><span class="o">.</span><span class="n">like_num</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">include_pos</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">include_pos</span><span class="p">,</span> <span class="n">compat</span><span class="o">.</span><span class="n">unicode_</span><span class="p">):</span>
+            <span class="n">include_pos</span> <span class="o">=</span> <span class="n">include_pos</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+            <span class="n">words_</span> <span class="o">=</span> <span class="p">(</span><span class="n">w</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">words_</span> <span class="k">if</span> <span class="n">w</span><span class="o">.</span><span class="n">pos_</span> <span class="o">==</span> <span class="n">include_pos</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">include_pos</span><span class="p">,</span> <span class="p">(</span><span class="nb">set</span><span class="p">,</span> <span class="nb">frozenset</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="n">include_pos</span> <span class="o">=</span> <span class="p">{</span><span class="n">pos</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">for</span> <span class="n">pos</span> <span class="ow">in</span> <span class="n">include_pos</span><span class="p">}</span>
+            <span class="n">words_</span> <span class="o">=</span> <span class="p">(</span><span class="n">w</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">words_</span> <span class="k">if</span> <span class="n">w</span><span class="o">.</span><span class="n">pos_</span> <span class="ow">in</span> <span class="n">include_pos</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;invalid `include_pos` type: &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">include_pos</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">exclude_pos</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exclude_pos</span><span class="p">,</span> <span class="n">compat</span><span class="o">.</span><span class="n">unicode_</span><span class="p">):</span>
+            <span class="n">exclude_pos</span> <span class="o">=</span> <span class="n">exclude_pos</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+            <span class="n">words_</span> <span class="o">=</span> <span class="p">(</span><span class="n">w</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">words_</span> <span class="k">if</span> <span class="n">w</span><span class="o">.</span><span class="n">pos_</span> <span class="o">!=</span> <span class="n">exclude_pos</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exclude_pos</span><span class="p">,</span> <span class="p">(</span><span class="nb">set</span><span class="p">,</span> <span class="nb">frozenset</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="n">exclude_pos</span> <span class="o">=</span> <span class="p">{</span><span class="n">pos</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">for</span> <span class="n">pos</span> <span class="ow">in</span> <span class="n">exclude_pos</span><span class="p">}</span>
+            <span class="n">words_</span> <span class="o">=</span> <span class="p">(</span><span class="n">w</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">words_</span> <span class="k">if</span> <span class="n">w</span><span class="o">.</span><span class="n">pos_</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">exclude_pos</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;invalid `exclude_pos` type: &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">exclude_pos</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">min_freq</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">words_</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">words_</span><span class="p">)</span>
+        <span class="n">freqs</span> <span class="o">=</span> <span class="n">itertoolz</span><span class="o">.</span><span class="n">frequencies</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">lower_</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">words_</span><span class="p">)</span>
+        <span class="n">words_</span> <span class="o">=</span> <span class="p">(</span><span class="n">w</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">words_</span>
+                  <span class="k">if</span> <span class="n">freqs</span><span class="p">[</span><span class="n">w</span><span class="o">.</span><span class="n">lower_</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">min_freq</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">words_</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">word</span></div>
+
+
+<div class="viewcode-block" id="ngrams"><a class="viewcode-back" href="../../api_reference.html#textacy.extract.ngrams">[docs]</a><span class="k">def</span> <span class="nf">ngrams</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span>
+           <span class="n">filter_stops</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">filter_punct</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">filter_nums</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+           <span class="n">include_pos</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exclude_pos</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">min_freq</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract an ordered sequence of n-grams (``n`` consecutive words) from a</span>
+<span class="sd">    spacy-parsed doc, optionally filtering n-grams by the types and</span>
+<span class="sd">    parts-of-speech of the constituent words.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        doc (``textacy.Doc``, ``spacy.Doc``, or ``spacy.Span``)</span>
+<span class="sd">        n (int): number of tokens per n-gram; 2 =&gt; bigrams, 3 =&gt; trigrams, etc.</span>
+<span class="sd">        filter_stops (bool): if True, remove ngrams that start or end</span>
+<span class="sd">            with a stop word</span>
+<span class="sd">        filter_punct (bool): if True, remove ngrams that contain</span>
+<span class="sd">            any punctuation-only tokens</span>
+<span class="sd">        filter_nums (bool): if True, remove ngrams that contain</span>
+<span class="sd">            any numbers or number-like tokens (e.g. 10, &#39;ten&#39;)</span>
+<span class="sd">        include_pos (str or Set[str]): remove ngrams if any of their constituent</span>
+<span class="sd">            tokens&#39; part-of-speech tags ARE NOT included in this param</span>
+<span class="sd">        exclude_pos (str or Set[str]): remove ngrams if any of their constituent</span>
+<span class="sd">            tokens&#39; part-of-speech tags ARE included in this param</span>
+<span class="sd">        min_freq (int): remove ngrams that occur in ``doc`` fewer than</span>
+<span class="sd">            ``min_freq`` times</span>
+
+<span class="sd">    Yields:</span>
+<span class="sd">        ``spacy.Span``: the next ngram from ``doc`` passing all specified</span>
+<span class="sd">        filters, in order of appearance in the document</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: if ``n`` &lt; 1</span>
+<span class="sd">        TypeError: if `include_pos` or `exclude_pos` is not a str, a set of str,</span>
+<span class="sd">            or a falsy value</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        Filtering by part-of-speech tag uses the universal POS tag set,</span>
+<span class="sd">        http://universaldependencies.org/u/pos/.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;n must be greater than or equal to 1&#39;</span><span class="p">)</span>
+
+    <span class="n">ngrams_</span> <span class="o">=</span> <span class="p">(</span><span class="n">doc</span><span class="p">[</span><span class="n">i</span><span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">n</span><span class="p">]</span>
+               <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">ngrams_</span> <span class="o">=</span> <span class="p">(</span><span class="n">ngram</span> <span class="k">for</span> <span class="n">ngram</span> <span class="ow">in</span> <span class="n">ngrams_</span>
+               <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">is_space</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">ngram</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">filter_stops</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">ngrams_</span> <span class="o">=</span> <span class="p">(</span><span class="n">ngram</span> <span class="k">for</span> <span class="n">ngram</span> <span class="ow">in</span> <span class="n">ngrams_</span>
+                   <span class="k">if</span> <span class="ow">not</span> <span class="n">ngram</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">is_stop</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">ngram</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">is_stop</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">filter_punct</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">ngrams_</span> <span class="o">=</span> <span class="p">(</span><span class="n">ngram</span> <span class="k">for</span> <span class="n">ngram</span> <span class="ow">in</span> <span class="n">ngrams_</span>
+                   <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">is_punct</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">ngram</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">filter_nums</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">ngrams_</span> <span class="o">=</span> <span class="p">(</span><span class="n">ngram</span> <span class="k">for</span> <span class="n">ngram</span> <span class="ow">in</span> <span class="n">ngrams_</span>
+                   <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">like_num</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">ngram</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">include_pos</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">include_pos</span><span class="p">,</span> <span class="n">compat</span><span class="o">.</span><span class="n">unicode_</span><span class="p">):</span>
+            <span class="n">include_pos</span> <span class="o">=</span> <span class="n">include_pos</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+            <span class="n">ngrams_</span> <span class="o">=</span> <span class="p">(</span><span class="n">ngram</span> <span class="k">for</span> <span class="n">ngram</span> <span class="ow">in</span> <span class="n">ngrams_</span>
+                       <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">pos_</span> <span class="o">==</span> <span class="n">include_pos</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">ngram</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">include_pos</span><span class="p">,</span> <span class="p">(</span><span class="nb">set</span><span class="p">,</span> <span class="nb">frozenset</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="n">include_pos</span> <span class="o">=</span> <span class="p">{</span><span class="n">pos</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">for</span> <span class="n">pos</span> <span class="ow">in</span> <span class="n">include_pos</span><span class="p">}</span>
+            <span class="n">ngrams_</span> <span class="o">=</span> <span class="p">(</span><span class="n">ngram</span> <span class="k">for</span> <span class="n">ngram</span> <span class="ow">in</span> <span class="n">ngrams_</span>
+                       <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">pos_</span> <span class="ow">in</span> <span class="n">include_pos</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">ngram</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;invalid `include_pos` type: &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">include_pos</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">exclude_pos</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exclude_pos</span><span class="p">,</span> <span class="n">compat</span><span class="o">.</span><span class="n">unicode_</span><span class="p">):</span>
+            <span class="n">exclude_pos</span> <span class="o">=</span> <span class="n">exclude_pos</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+            <span class="n">ngrams_</span> <span class="o">=</span> <span class="p">(</span><span class="n">ngram</span> <span class="k">for</span> <span class="n">ngram</span> <span class="ow">in</span> <span class="n">ngrams_</span>
+                       <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">pos_</span> <span class="o">!=</span> <span class="n">exclude_pos</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">ngram</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exclude_pos</span><span class="p">,</span> <span class="p">(</span><span class="nb">set</span><span class="p">,</span> <span class="nb">frozenset</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="n">exclude_pos</span> <span class="o">=</span> <span class="p">{</span><span class="n">pos</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">for</span> <span class="n">pos</span> <span class="ow">in</span> <span class="n">exclude_pos</span><span class="p">}</span>
+            <span class="n">ngrams_</span> <span class="o">=</span> <span class="p">(</span><span class="n">ngram</span> <span class="k">for</span> <span class="n">ngram</span> <span class="ow">in</span> <span class="n">ngrams_</span>
+                       <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">pos_</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">exclude_pos</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">ngram</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;invalid `exclude_pos` type: &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">exclude_pos</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">min_freq</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">ngrams_</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">ngrams_</span><span class="p">)</span>
+        <span class="n">freqs</span> <span class="o">=</span> <span class="n">itertoolz</span><span class="o">.</span><span class="n">frequencies</span><span class="p">(</span><span class="n">ngram</span><span class="o">.</span><span class="n">lower_</span> <span class="k">for</span> <span class="n">ngram</span> <span class="ow">in</span> <span class="n">ngrams_</span><span class="p">)</span>
+        <span class="n">ngrams_</span> <span class="o">=</span> <span class="p">(</span><span class="n">ngram</span> <span class="k">for</span> <span class="n">ngram</span> <span class="ow">in</span> <span class="n">ngrams_</span>
+                   <span class="k">if</span> <span class="n">freqs</span><span class="p">[</span><span class="n">ngram</span><span class="o">.</span><span class="n">lower_</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">min_freq</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">ngram</span> <span class="ow">in</span> <span class="n">ngrams_</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">ngram</span></div>
+
+
+<div class="viewcode-block" id="named_entities"><a class="viewcode-back" href="../../api_reference.html#textacy.extract.named_entities">[docs]</a><span class="k">def</span> <span class="nf">named_entities</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span>
+                   <span class="n">include_types</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exclude_types</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                   <span class="n">drop_determiners</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">min_freq</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract an ordered sequence of named entities (PERSON, ORG, LOC, etc.) from</span>
+<span class="sd">    a spacy-parsed doc, optionally filtering by entity types and frequencies.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        doc (``textacy.Doc`` or ``spacy.Doc``)</span>
+<span class="sd">        include_types (str or Set[str]): remove named entities whose type IS NOT</span>
+<span class="sd">            in this param; if &quot;NUMERIC&quot;, all numeric entity types (&quot;DATE&quot;,</span>
+<span class="sd">            &quot;MONEY&quot;, &quot;ORDINAL&quot;, etc.) are included</span>
+<span class="sd">        exclude_types (str or Set[str]): remove named entities whose type IS</span>
+<span class="sd">            in this param; if &quot;NUMERIC&quot;, all numeric entity types (&quot;DATE&quot;,</span>
+<span class="sd">            &quot;MONEY&quot;, &quot;ORDINAL&quot;, etc.) are excluded</span>
+<span class="sd">        drop_determiners (bool): Remove leading determiners (e.g. &quot;the&quot;)</span>
+<span class="sd">            from named entities (e.g. &quot;the United States&quot; =&gt; &quot;United States&quot;).</span>
+
+<span class="sd">            .. note:: Entities from which a leading determiner has been removed</span>
+<span class="sd">               do *not* keep their entity type annotations. This is irritating</span>
+<span class="sd">               but unavoidable, since the only way to re-annotate them is to</span>
+<span class="sd">               modify ``doc`` directly, and this function is not meant to have</span>
+<span class="sd">               any side-effects. If you&#39;re only using the text of the returned</span>
+<span class="sd">               spans, this is no big deal; if you&#39;re using NE-like attributes</span>
+<span class="sd">               downstream, however, this is something to watch out for.</span>
+
+<span class="sd">        min_freq (int): remove named entities that occur in `doc` fewer</span>
+<span class="sd">            than `min_freq` times</span>
+
+<span class="sd">    Yields:</span>
+<span class="sd">        ``spacy.Span``: the next named entity from ``doc`` passing all specified</span>
+<span class="sd">        filters in order of appearance in the document</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        TypeError: if `include_types` or `exclude_types` is not a str, a set of</span>
+<span class="sd">            str, or a falsy value</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="s1">&#39;spacy_doc&#39;</span><span class="p">):</span>
+        <span class="n">nes</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">spacy_doc</span><span class="o">.</span><span class="n">ents</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">nes</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">ents</span>
+    <span class="k">if</span> <span class="n">include_types</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">include_types</span><span class="p">,</span> <span class="n">compat</span><span class="o">.</span><span class="n">unicode_</span><span class="p">):</span>
+            <span class="n">include_types</span> <span class="o">=</span> <span class="n">include_types</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">include_types</span> <span class="o">==</span> <span class="s1">&#39;NUMERIC&#39;</span><span class="p">:</span>
+                <span class="n">include_types</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">NUMERIC_NE_TYPES</span>  <span class="c1"># we now go to next if block</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">nes</span> <span class="o">=</span> <span class="p">(</span><span class="n">ne</span> <span class="k">for</span> <span class="n">ne</span> <span class="ow">in</span> <span class="n">nes</span> <span class="k">if</span> <span class="n">ne</span><span class="o">.</span><span class="n">label_</span> <span class="o">==</span> <span class="n">include_types</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">include_types</span><span class="p">,</span> <span class="p">(</span><span class="nb">set</span><span class="p">,</span> <span class="nb">frozenset</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="n">include_types</span> <span class="o">=</span> <span class="p">{</span><span class="n">type_</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">for</span> <span class="n">type_</span> <span class="ow">in</span> <span class="n">include_types</span><span class="p">}</span>
+            <span class="n">nes</span> <span class="o">=</span> <span class="p">(</span><span class="n">ne</span> <span class="k">for</span> <span class="n">ne</span> <span class="ow">in</span> <span class="n">nes</span> <span class="k">if</span> <span class="n">ne</span><span class="o">.</span><span class="n">label_</span> <span class="ow">in</span> <span class="n">include_types</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;invalid `include_types` type: &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">include_types</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">exclude_types</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exclude_types</span><span class="p">,</span> <span class="n">compat</span><span class="o">.</span><span class="n">unicode_</span><span class="p">):</span>
+            <span class="n">exclude_types</span> <span class="o">=</span> <span class="n">exclude_types</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">exclude_types</span> <span class="o">==</span> <span class="s1">&#39;NUMERIC&#39;</span><span class="p">:</span>
+                <span class="n">exclude_types</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">NUMERIC_NE_TYPES</span>  <span class="c1"># we now go to next if block</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">nes</span> <span class="o">=</span> <span class="p">(</span><span class="n">ne</span> <span class="k">for</span> <span class="n">ne</span> <span class="ow">in</span> <span class="n">nes</span> <span class="k">if</span> <span class="n">ne</span><span class="o">.</span><span class="n">label_</span> <span class="o">!=</span> <span class="n">exclude_types</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exclude_types</span><span class="p">,</span> <span class="p">(</span><span class="nb">set</span><span class="p">,</span> <span class="nb">frozenset</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="n">exclude_types</span> <span class="o">=</span> <span class="p">{</span><span class="n">type_</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">for</span> <span class="n">type_</span> <span class="ow">in</span> <span class="n">exclude_types</span><span class="p">}</span>
+            <span class="n">nes</span> <span class="o">=</span> <span class="p">(</span><span class="n">ne</span> <span class="k">for</span> <span class="n">ne</span> <span class="ow">in</span> <span class="n">nes</span> <span class="k">if</span> <span class="n">ne</span><span class="o">.</span><span class="n">label_</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">exclude_types</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;invalid `exclude_types` type: &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">exclude_types</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">drop_determiners</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">nes</span> <span class="o">=</span> <span class="p">(</span><span class="n">ne</span> <span class="k">if</span> <span class="n">ne</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">pos</span> <span class="o">!=</span> <span class="n">DET</span> <span class="k">else</span> <span class="n">ne</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="k">for</span> <span class="n">ne</span> <span class="ow">in</span> <span class="n">nes</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">min_freq</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">nes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">nes</span><span class="p">)</span>
+        <span class="n">freqs</span> <span class="o">=</span> <span class="n">itertoolz</span><span class="o">.</span><span class="n">frequencies</span><span class="p">(</span><span class="n">ne</span><span class="o">.</span><span class="n">lower_</span> <span class="k">for</span> <span class="n">ne</span> <span class="ow">in</span> <span class="n">nes</span><span class="p">)</span>
+        <span class="n">nes</span> <span class="o">=</span> <span class="p">(</span><span class="n">ne</span> <span class="k">for</span> <span class="n">ne</span> <span class="ow">in</span> <span class="n">nes</span>
+               <span class="k">if</span> <span class="n">freqs</span><span class="p">[</span><span class="n">ne</span><span class="o">.</span><span class="n">lower_</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">min_freq</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">ne</span> <span class="ow">in</span> <span class="n">nes</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">ne</span></div>
+
+
+<div class="viewcode-block" id="noun_chunks"><a class="viewcode-back" href="../../api_reference.html#textacy.extract.noun_chunks">[docs]</a><span class="k">def</span> <span class="nf">noun_chunks</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">drop_determiners</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">min_freq</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract an ordered sequence of noun chunks from a spacy-parsed doc, optionally</span>
+<span class="sd">    filtering by frequency and dropping leading determiners.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        doc (``textacy.Doc`` or ``spacy.Doc``)</span>
+<span class="sd">        drop_determiners (bool): remove leading determiners (e.g. &quot;the&quot;)</span>
+<span class="sd">            from phrases (e.g. &quot;the quick brown fox&quot; =&gt; &quot;quick brown fox&quot;)</span>
+<span class="sd">        min_freq (int): remove chunks that occur in `doc` fewer than</span>
+<span class="sd">            `min_freq` times</span>
+
+<span class="sd">    Yields:</span>
+<span class="sd">        ``spacy.Span``: the next noun chunk from ``doc`` in order of appearance</span>
+<span class="sd">        in the document</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="s1">&#39;spacy_doc&#39;</span><span class="p">):</span>
+        <span class="n">ncs</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">spacy_doc</span><span class="o">.</span><span class="n">noun_chunks</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ncs</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">noun_chunks</span>
+    <span class="k">if</span> <span class="n">drop_determiners</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">ncs</span> <span class="o">=</span> <span class="p">(</span><span class="n">nc</span> <span class="k">if</span> <span class="n">nc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">pos</span> <span class="o">!=</span> <span class="n">DET</span> <span class="k">else</span> <span class="n">nc</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+               <span class="k">for</span> <span class="n">nc</span> <span class="ow">in</span> <span class="n">ncs</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">min_freq</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">ncs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">ncs</span><span class="p">)</span>
+        <span class="n">freqs</span> <span class="o">=</span> <span class="n">itertoolz</span><span class="o">.</span><span class="n">frequencies</span><span class="p">(</span><span class="n">nc</span><span class="o">.</span><span class="n">lower_</span> <span class="k">for</span> <span class="n">nc</span> <span class="ow">in</span> <span class="n">ncs</span><span class="p">)</span>
+        <span class="n">ncs</span> <span class="o">=</span> <span class="p">(</span><span class="n">nc</span> <span class="k">for</span> <span class="n">nc</span> <span class="ow">in</span> <span class="n">ncs</span>
+               <span class="k">if</span> <span class="n">freqs</span><span class="p">[</span><span class="n">nc</span><span class="o">.</span><span class="n">lower_</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">min_freq</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">nc</span> <span class="ow">in</span> <span class="n">ncs</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">nc</span></div>
+
+
+<div class="viewcode-block" id="pos_regex_matches"><a class="viewcode-back" href="../../api_reference.html#textacy.extract.pos_regex_matches">[docs]</a><span class="k">def</span> <span class="nf">pos_regex_matches</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">pattern</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract sequences of consecutive tokens from a spacy-parsed doc whose</span>
+<span class="sd">    part-of-speech tags match the specified regex pattern.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        doc (``textacy.Doc`` or ``spacy.Doc`` or ``spacy.Span``)</span>
+<span class="sd">        pattern (str): Pattern of consecutive POS tags whose corresponding words</span>
+<span class="sd">            are to be extracted, inspired by the regex patterns used in NLTK&#39;s</span>
+<span class="sd">            `nltk.chunk.regexp`. Tags are uppercase, from the universal tag set;</span>
+<span class="sd">            delimited by &lt; and &gt;, which are basically converted to parentheses</span>
+<span class="sd">            with spaces as needed to correctly extract matching word sequences;</span>
+<span class="sd">            white space in the input doesn&#39;t matter.</span>
+
+<span class="sd">            Examples (see ``constants.POS_REGEX_PATTERNS``):</span>
+
+<span class="sd">            * noun phrase: r&#39;&lt;DET&gt;? (&lt;NOUN&gt;+ &lt;ADP|CONJ&gt;)* &lt;NOUN&gt;+&#39;</span>
+<span class="sd">            * compound nouns: r&#39;&lt;NOUN&gt;+&#39;</span>
+<span class="sd">            * verb phrase: r&#39;&lt;VERB&gt;?&lt;ADV&gt;*&lt;VERB&gt;+&#39;</span>
+<span class="sd">            * prepositional phrase: r&#39;&lt;PREP&gt; &lt;DET&gt;? (&lt;NOUN&gt;+&lt;ADP&gt;)* &lt;NOUN&gt;+&#39;</span>
+
+<span class="sd">    Yields:</span>
+<span class="sd">        ``spacy.Span``: the next span of consecutive tokens from ``doc`` whose</span>
+<span class="sd">        parts-of-speech match ``pattern``, in order of apperance</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># standardize and transform the regular expression pattern...</span>
+    <span class="n">pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\s&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">pattern</span><span class="p">)</span>
+    <span class="n">pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;&lt;([A-Z]+)\|([A-Z]+)&gt;&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;( (\1|\2))&#39;</span><span class="p">,</span> <span class="n">pattern</span><span class="p">)</span>
+    <span class="n">pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;&lt;([A-Z]+)&gt;&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;( \1)&#39;</span><span class="p">,</span> <span class="n">pattern</span><span class="p">)</span>
+
+    <span class="n">tags</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tok</span><span class="o">.</span><span class="n">pos_</span> <span class="k">for</span> <span class="n">tok</span> <span class="ow">in</span> <span class="n">doc</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">tags</span><span class="p">):</span>
+        <span class="k">yield</span> <span class="n">doc</span><span class="p">[</span><span class="n">tags</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">()]</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">):</span><span class="n">tags</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">m</span><span class="o">.</span><span class="n">end</span><span class="p">()]</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)]</span></div>
+
+
+<div class="viewcode-block" id="subject_verb_object_triples"><a class="viewcode-back" href="../../api_reference.html#textacy.extract.subject_verb_object_triples">[docs]</a><span class="k">def</span> <span class="nf">subject_verb_object_triples</span><span class="p">(</span><span class="n">doc</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract an ordered sequence of subject-verb-object (SVO) triples from a</span>
+<span class="sd">    spacy-parsed doc. Note that this only works for SVO languages.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        doc (``textacy.Doc`` or ``spacy.Doc`` or ``spacy.Span``)</span>
+
+<span class="sd">    Yields:</span>
+<span class="sd">        Tuple[``spacy.Span``, ``spacy.Span``, ``spacy.Span``]: The next 3-tuple</span>
+<span class="sd">        of spans from ``doc`` representing a (subject, verb, object) triple,</span>
+<span class="sd">        in order of appearance.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># TODO: What to do about questions, where it may be VSO instead of SVO?</span>
+    <span class="c1"># TODO: What about non-adjacent verb negations?</span>
+    <span class="c1"># TODO: What about object (noun) negations?</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">SpacySpan</span><span class="p">):</span>
+        <span class="n">sents</span> <span class="o">=</span> <span class="p">[</span><span class="n">doc</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># textacy.Doc or spacy.Doc</span>
+        <span class="n">sents</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">sents</span>
+
+    <span class="k">for</span> <span class="n">sent</span> <span class="ow">in</span> <span class="n">sents</span><span class="p">:</span>
+        <span class="n">start_i</span> <span class="o">=</span> <span class="n">sent</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">i</span>
+
+        <span class="n">verbs</span> <span class="o">=</span> <span class="n">spacy_utils</span><span class="o">.</span><span class="n">get_main_verbs_of_sent</span><span class="p">(</span><span class="n">sent</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">verb</span> <span class="ow">in</span> <span class="n">verbs</span><span class="p">:</span>
+            <span class="n">subjs</span> <span class="o">=</span> <span class="n">spacy_utils</span><span class="o">.</span><span class="n">get_subjects_of_verb</span><span class="p">(</span><span class="n">verb</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">subjs</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">objs</span> <span class="o">=</span> <span class="n">spacy_utils</span><span class="o">.</span><span class="n">get_objects_of_verb</span><span class="p">(</span><span class="n">verb</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">objs</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># add adjacent auxiliaries to verbs, for context</span>
+            <span class="c1"># and add compounds to compound nouns</span>
+            <span class="n">verb_span</span> <span class="o">=</span> <span class="n">spacy_utils</span><span class="o">.</span><span class="n">get_span_for_verb_auxiliaries</span><span class="p">(</span><span class="n">verb</span><span class="p">)</span>
+            <span class="n">verb</span> <span class="o">=</span> <span class="n">sent</span><span class="p">[</span><span class="n">verb_span</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">start_i</span><span class="p">:</span> <span class="n">verb_span</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">start_i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">subj</span> <span class="ow">in</span> <span class="n">subjs</span><span class="p">:</span>
+                <span class="n">subj</span> <span class="o">=</span> <span class="n">sent</span><span class="p">[</span><span class="n">spacy_utils</span><span class="o">.</span><span class="n">get_span_for_compound_noun</span><span class="p">(</span><span class="n">subj</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">start_i</span><span class="p">:</span> <span class="n">subj</span><span class="o">.</span><span class="n">i</span> <span class="o">-</span> <span class="n">start_i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objs</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">pos</span> <span class="o">==</span> <span class="n">NOUN</span><span class="p">:</span>
+                        <span class="n">span</span> <span class="o">=</span> <span class="n">spacy_utils</span><span class="o">.</span><span class="n">get_span_for_compound_noun</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="n">obj</span><span class="o">.</span><span class="n">pos</span> <span class="o">==</span> <span class="n">VERB</span><span class="p">:</span>
+                        <span class="n">span</span> <span class="o">=</span> <span class="n">spacy_utils</span><span class="o">.</span><span class="n">get_span_for_verb_auxiliaries</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">span</span> <span class="o">=</span> <span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">i</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">i</span><span class="p">)</span>
+                    <span class="n">obj</span> <span class="o">=</span> <span class="n">sent</span><span class="p">[</span><span class="n">span</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">start_i</span><span class="p">:</span> <span class="n">span</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">start_i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+
+                    <span class="k">yield</span> <span class="p">(</span><span class="n">subj</span><span class="p">,</span> <span class="n">verb</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="acronyms_and_definitions"><a class="viewcode-back" href="../../api_reference.html#textacy.extract.acronyms_and_definitions">[docs]</a><span class="k">def</span> <span class="nf">acronyms_and_definitions</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">known_acro_defs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract a collection of acronyms and their most likely definitions, if available,</span>
+<span class="sd">    from a spacy-parsed doc. If multiple definitions are found for a given acronym,</span>
+<span class="sd">    only the most frequently occurring definition is returned.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        doc (``textacy.Doc`` or ``spacy.Doc`` or ``spacy.Span``)</span>
+<span class="sd">        known_acro_defs (dict): if certain acronym/definition pairs</span>
+<span class="sd">            are known, pass them in as {acronym (str): definition (str)};</span>
+<span class="sd">            algorithm will not attempt to find new definitions</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: unique acronyms (keys) with matched definitions (values)</span>
+
+<span class="sd">    References:</span>
+<span class="sd">        Taghva, Kazem, and Jeff Gilbreth. &quot;Recognizing acronyms and their definitions.&quot;</span>
+<span class="sd">        International Journal on Document Analysis and Recognition 1.4 (1999): 191-198.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># process function arguments</span>
+    <span class="n">acro_defs</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">known_acro_defs</span><span class="p">:</span>
+        <span class="n">known_acronyms</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">acro</span><span class="p">,</span> <span class="n">def_</span> <span class="ow">in</span> <span class="n">known_acro_defs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">acro_defs</span><span class="p">[</span><span class="n">acro</span><span class="p">]</span> <span class="o">=</span> <span class="p">[(</span><span class="n">def_</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)]</span>
+        <span class="n">known_acronyms</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">acro_defs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">SpacySpan</span><span class="p">):</span>
+        <span class="n">sents</span> <span class="o">=</span> <span class="p">[</span><span class="n">doc</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># textacy.Doc or spacy.Doc</span>
+        <span class="n">sents</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">sents</span>
+
+    <span class="c1"># iterate over sentences and their tokens</span>
+    <span class="k">for</span> <span class="n">sent</span> <span class="ow">in</span> <span class="n">sents</span><span class="p">:</span>
+        <span class="n">max_ind</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sent</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">token</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sent</span><span class="p">):</span>
+
+            <span class="n">token_</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">text</span>
+            <span class="k">if</span> <span class="n">token_</span> <span class="ow">in</span> <span class="n">known_acronyms</span> <span class="ow">or</span> <span class="n">text_utils</span><span class="o">.</span><span class="n">is_acronym</span><span class="p">(</span><span class="n">token_</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># define definition search window(s)</span>
+            <span class="n">window_size</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">token_</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">token_</span><span class="p">)</span> <span class="o">+</span> <span class="mi">5</span><span class="p">)</span>
+            <span class="n">windows</span> <span class="o">=</span> <span class="p">[</span><span class="n">sent</span><span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="n">window_size</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span> <span class="n">i</span><span class="p">],</span>
+                       <span class="n">sent</span><span class="p">[</span><span class="nb">min</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">max_ind</span><span class="p">):</span> <span class="nb">min</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="n">window_size</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">max_ind</span><span class="p">)]]</span>
+            <span class="c1"># if candidate inside (X) or -X-, only look in pre-window</span>
+            <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">max_ind</span><span class="p">:</span>
+                <span class="n">adjacent_tokens</span> <span class="o">=</span> <span class="n">sent</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">text</span> <span class="o">+</span> <span class="n">sent</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">text</span>
+                <span class="k">if</span> <span class="n">adjacent_tokens</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;()&#39;</span><span class="p">,</span> <span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="s1">&#39;––&#39;</span><span class="p">}:</span>
+                    <span class="n">windows</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+
+            <span class="c1"># iterate over possible windows</span>
+            <span class="c1"># filtering for valid definition strings</span>
+            <span class="k">for</span> <span class="n">window</span> <span class="ow">in</span> <span class="n">windows</span><span class="p">:</span>
+                <span class="n">window_</span> <span class="o">=</span> <span class="n">window</span><span class="o">.</span><span class="n">text</span>
+                <span class="c1"># window text can&#39;t be all uppercase</span>
+                <span class="k">if</span> <span class="n">window_</span><span class="o">.</span><span class="n">isupper</span><span class="p">():</span>
+                    <span class="k">continue</span>
+                <span class="c1"># window can&#39;t contain separating punctuation</span>
+                <span class="k">if</span> <span class="s1">&#39;!&#39;</span> <span class="ow">in</span> <span class="n">window_</span> <span class="ow">or</span> <span class="s1">&#39;?&#39;</span> <span class="ow">in</span> <span class="n">window_</span> <span class="ow">or</span> <span class="s1">&#39;:&#39;</span> <span class="ow">in</span> <span class="n">window_</span> <span class="ow">or</span> <span class="s1">&#39;;&#39;</span> <span class="ow">in</span> <span class="n">window_</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="c1"># acronym definition can&#39;t contain itself: no ouroboros!</span>
+                <span class="k">if</span> <span class="n">token_</span> <span class="ow">in</span> <span class="n">window_</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="c1"># window must contain at least one character used in acronym</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">char</span> <span class="ow">in</span> <span class="n">window_</span> <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">token_</span><span class="p">):</span>
+                    <span class="k">continue</span>
+                <span class="n">definition</span><span class="p">,</span> <span class="n">confidence</span> <span class="o">=</span> <span class="n">_get_acronym_definition</span><span class="p">(</span>
+                    <span class="n">token_</span><span class="p">,</span> <span class="n">window</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">definition</span><span class="p">:</span>
+                    <span class="n">acro_defs</span><span class="p">[</span><span class="n">token_</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">definition</span><span class="p">,</span> <span class="n">confidence</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">acro_defs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">token_</span><span class="p">):</span>
+                <span class="n">acro_defs</span><span class="p">[</span><span class="n">token_</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">))</span>
+
+    <span class="c1"># vote by confidence score in the case of multiple definitions</span>
+    <span class="k">for</span> <span class="n">acro</span><span class="p">,</span> <span class="n">defs</span> <span class="ow">in</span> <span class="n">acro_defs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">defs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">acro_defs</span><span class="p">[</span><span class="n">acro</span><span class="p">]</span> <span class="o">=</span> <span class="n">defs</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">acro_defs</span><span class="p">[</span><span class="n">acro</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">defs</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">acro_defs</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_get_acronym_definition</span><span class="p">(</span><span class="n">acronym</span><span class="p">,</span> <span class="n">window</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">0.8</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Identify most likely definition for an acronym given a list of tokens.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        acronym (str): acronym for which definition is sought</span>
+<span class="sd">        window (``spacy.Span``): a span of tokens from which definition</span>
+<span class="sd">            extraction will be attempted</span>
+<span class="sd">        threshold (float): minimum &quot;confidence&quot; in definition required</span>
+<span class="sd">            for acceptance; valid values in [0.0, 1.0]; higher value =&gt; stricter threshold</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tuple[str, float]: most likely definition for given acronym (&#39;&#39; if none found),</span>
+<span class="sd">        along with the confidence assigned to it</span>
+
+<span class="sd">    References:</span>
+<span class="sd">        Taghva, Kazem, and Jeff Gilbreth. &quot;Recognizing acronyms and their definitions.&quot;</span>
+<span class="sd">        International Journal on Document Analysis and Recognition 1.4 (1999): 191-198.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">build_lcs_matrix</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">):</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">m</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">Y</span><span class="p">[</span><span class="n">j</span><span class="p">]:</span>
+                    <span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">c</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+                    <span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="k">elif</span> <span class="n">c</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]:</span>
+                    <span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">c</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">c</span><span class="p">,</span> <span class="n">b</span>
+
+    <span class="k">def</span> <span class="nf">parse_lcs_matrix</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">start_i</span><span class="p">,</span> <span class="n">start_j</span><span class="p">,</span> <span class="n">lcs_length</span><span class="p">,</span> <span class="n">stack</span><span class="p">,</span> <span class="n">vectors</span><span class="p">):</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start_i</span><span class="p">,</span> <span class="n">m</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start_j</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">s</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
+                    <span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">lcs_length</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">vec</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">NaN</span><span class="p">]</span> <span class="o">*</span> <span class="n">n</span>
+                        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">stack</span><span class="p">:</span>
+                            <span class="n">vec</span><span class="p">[</span><span class="n">l</span><span class="p">]</span> <span class="o">=</span> <span class="n">k</span>
+                        <span class="n">vectors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vec</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">parse_lcs_matrix</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">lcs_length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">stack</span><span class="p">,</span> <span class="n">vectors</span><span class="p">)</span>
+                    <span class="n">stack</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">return</span> <span class="n">vectors</span>
+
+    <span class="k">def</span> <span class="nf">vector_values</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">types</span><span class="p">):</span>
+        <span class="n">vv</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">first</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="n">v</span><span class="p">)))</span>
+        <span class="n">last</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">v</span><span class="p">)))</span>
+        <span class="n">vv</span><span class="p">[</span><span class="s1">&#39;size&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">last</span> <span class="o">-</span> <span class="n">first</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">vv</span><span class="p">[</span><span class="s1">&#39;distance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">-</span> <span class="n">last</span>
+        <span class="n">vv</span><span class="p">[</span><span class="s1">&#39;stop_count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">vv</span><span class="p">[</span><span class="s1">&#39;misses&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">last</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">v</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">types</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;s&#39;</span><span class="p">:</span>
+                <span class="n">vv</span><span class="p">[</span><span class="s1">&#39;stop_count&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">elif</span> <span class="n">v</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">types</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="s1">&#39;h&#39;</span><span class="p">]:</span>
+                <span class="n">vv</span><span class="p">[</span><span class="s1">&#39;misses&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">vv</span>
+
+    <span class="k">def</span> <span class="nf">compare_vectors</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">types</span><span class="p">):</span>
+        <span class="n">vv_A</span> <span class="o">=</span> <span class="n">vector_values</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">types</span><span class="p">)</span>
+        <span class="n">vv_B</span> <span class="o">=</span> <span class="n">vector_values</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">types</span><span class="p">)</span>
+        <span class="c1"># no one-letter matches, sorryboutit</span>
+        <span class="k">if</span> <span class="n">vv_A</span><span class="p">[</span><span class="s1">&#39;size&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">B</span>
+        <span class="k">elif</span> <span class="n">vv_B</span><span class="p">[</span><span class="s1">&#39;size&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">A</span>
+        <span class="k">if</span> <span class="n">vv_A</span><span class="p">[</span><span class="s1">&#39;misses&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">vv_B</span><span class="p">[</span><span class="s1">&#39;misses&#39;</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="n">B</span>
+        <span class="k">elif</span> <span class="n">vv_A</span><span class="p">[</span><span class="s1">&#39;misses&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">vv_B</span><span class="p">[</span><span class="s1">&#39;misses&#39;</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="n">A</span>
+        <span class="k">if</span> <span class="n">vv_A</span><span class="p">[</span><span class="s1">&#39;stop_count&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">vv_B</span><span class="p">[</span><span class="s1">&#39;stop_count&#39;</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="n">B</span>
+        <span class="k">if</span> <span class="n">vv_A</span><span class="p">[</span><span class="s1">&#39;stop_count&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">vv_B</span><span class="p">[</span><span class="s1">&#39;stop_count&#39;</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="n">A</span>
+        <span class="k">if</span> <span class="n">vv_A</span><span class="p">[</span><span class="s1">&#39;distance&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">vv_B</span><span class="p">[</span><span class="s1">&#39;distance&#39;</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="n">B</span>
+        <span class="k">elif</span> <span class="n">vv_A</span><span class="p">[</span><span class="s1">&#39;distance&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">vv_B</span><span class="p">[</span><span class="s1">&#39;distance&#39;</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="n">A</span>
+        <span class="k">if</span> <span class="n">vv_A</span><span class="p">[</span><span class="s1">&#39;size&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">vv_B</span><span class="p">[</span><span class="s1">&#39;size&#39;</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="n">B</span>
+        <span class="k">elif</span> <span class="n">vv_A</span><span class="p">[</span><span class="s1">&#39;size&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">vv_B</span><span class="p">[</span><span class="s1">&#39;size&#39;</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="n">A</span>
+        <span class="k">return</span> <span class="n">A</span>
+
+    <span class="c1"># get definition window&#39;s leading characters and word types</span>
+    <span class="n">def_leads</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">def_types</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">tok</span> <span class="ow">in</span> <span class="n">window</span><span class="p">:</span>
+        <span class="n">tok_text</span> <span class="o">=</span> <span class="n">tok</span><span class="o">.</span><span class="n">text</span>
+        <span class="k">if</span> <span class="n">tok</span><span class="o">.</span><span class="n">is_stop</span><span class="p">:</span>
+            <span class="n">def_leads</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tok_text</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">def_types</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">text_utils</span><span class="o">.</span><span class="n">is_acronym</span><span class="p">(</span><span class="n">tok_text</span><span class="p">):</span>
+            <span class="n">def_leads</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tok_text</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">def_types</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="s1">&#39;-&#39;</span> <span class="ow">in</span> <span class="n">tok_text</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">tok_text</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">):</span>
+            <span class="n">tok_split</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tok_text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">t</span><span class="p">]</span>
+            <span class="n">def_leads</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">tok_split</span><span class="p">)</span>
+            <span class="n">def_types</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="s1">&#39;H&#39;</span> <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="s1">&#39;h&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tok_split</span><span class="p">)))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">def_leads</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tok_text</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">def_types</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+    <span class="n">def_leads</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">def_leads</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="n">def_types</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">def_types</span><span class="p">)</span>
+
+    <span class="c1"># extract alphanumeric characters from acronym</span>
+    <span class="n">acr_leads</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">acronym</span> <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">isalnum</span><span class="p">())</span>
+    <span class="c1"># handle special cases of &#39;&amp;&#39; and trailing &#39;s&#39;</span>
+    <span class="n">acr_leads</span> <span class="o">=</span> <span class="n">acr_leads</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&amp;&#39;</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">acr_leads</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;s&#39;</span><span class="p">):</span>
+        <span class="c1"># bail out if it&#39;s only a 2-letter acronym to start with, e.g. &#39;Is&#39;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">acr_leads</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">acr_leads</span> <span class="o">=</span> <span class="n">acr_leads</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">acr_leads</span> <span class="o">=</span> <span class="n">acr_leads</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+    <span class="n">c</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">build_lcs_matrix</span><span class="p">(</span><span class="n">acr_leads</span><span class="p">,</span> <span class="n">def_leads</span><span class="p">)</span>
+
+    <span class="c1"># 4.4.1</span>
+    <span class="n">lcs_length</span> <span class="o">=</span> <span class="n">c</span><span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">c</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">confidence</span> <span class="o">=</span> <span class="n">lcs_length</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">acronym</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">confidence</span> <span class="o">&lt;</span> <span class="n">threshold</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">confidence</span><span class="p">)</span>
+
+    <span class="n">vecs</span> <span class="o">=</span> <span class="n">parse_lcs_matrix</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">lcs_length</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[])</span>
+    <span class="c1"># first letter of acronym must be present</span>
+    <span class="n">vecs</span> <span class="o">=</span> <span class="p">[</span><span class="n">vec</span> <span class="k">for</span> <span class="n">vec</span> <span class="ow">in</span> <span class="n">vecs</span> <span class="k">if</span> <span class="mi">0</span> <span class="ow">in</span> <span class="n">vec</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">vecs</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">confidence</span><span class="p">)</span>
+
+    <span class="n">best_vec</span> <span class="o">=</span> <span class="n">vecs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">vec</span> <span class="ow">in</span> <span class="n">vecs</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+        <span class="n">best_vec</span> <span class="o">=</span> <span class="n">compare_vectors</span><span class="p">(</span><span class="n">best_vec</span><span class="p">,</span> <span class="n">vec</span><span class="p">,</span> <span class="n">def_types</span><span class="p">)</span>
+
+    <span class="n">first</span> <span class="o">=</span> <span class="n">best_vec</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="n">best_vec</span><span class="p">)))</span>
+    <span class="n">last</span> <span class="o">=</span> <span class="n">best_vec</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">best_vec</span><span class="p">)))</span>
+
+    <span class="n">definition</span> <span class="o">=</span> <span class="n">window</span><span class="p">[</span><span class="n">first</span><span class="p">:</span> <span class="n">last</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">text</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">definition</span><span class="o">.</span><span class="n">split</span><span class="p">())</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">confidence</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">definition</span><span class="p">,</span> <span class="n">confidence</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="semistructured_statements"><a class="viewcode-back" href="../../api_reference.html#textacy.extract.semistructured_statements">[docs]</a><span class="k">def</span> <span class="nf">semistructured_statements</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">entity</span><span class="p">,</span> <span class="n">cue</span><span class="o">=</span><span class="s1">&#39;be&#39;</span><span class="p">,</span> <span class="n">ignore_entity_case</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                              <span class="n">min_n_words</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_n_words</span><span class="o">=</span><span class="mi">20</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract &quot;semi-structured statements&quot; from a spacy-parsed doc, each as a</span>
+<span class="sd">    (entity, cue, fragment) triple. This is similar to subject-verb-object triples.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        doc (``textacy.Doc`` or ``spacy.Doc``)</span>
+<span class="sd">        entity (str): a noun or noun phrase of some sort (e.g. &quot;President Obama&quot;,</span>
+<span class="sd">            &quot;global warming&quot;, &quot;Python&quot;)</span>
+<span class="sd">        cue (str): verb lemma with which `entity` is associated</span>
+<span class="sd">            (e.g. &quot;talk about&quot;, &quot;have&quot;, &quot;write&quot;)</span>
+<span class="sd">        ignore_entity_case (bool): if True, entity matching is case-independent</span>
+<span class="sd">        min_n_words (int): min number of tokens allowed in a matching fragment</span>
+<span class="sd">        max_n_words (int): max number of tokens allowed in a matching fragment</span>
+
+<span class="sd">    Yields:</span>
+<span class="sd">        (``spacy.Span`` or ``spacy.Token``, ``spacy.Span`` or ``spacy.Token``, ``spacy.Span``):</span>
+<span class="sd">        where each element is a matching (entity, cue, fragment) triple</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        Inspired by N. Diakopoulos, A. Zhang, A. Salway. Visual Analytics of</span>
+<span class="sd">        Media Frames in Online News and Blogs. IEEE InfoVis Workshop on Text</span>
+<span class="sd">        Visualization. October, 2013.</span>
+
+<span class="sd">        Which itself was inspired by by Salway, A.; Kelly, L.; Skadiņa, I.; and</span>
+<span class="sd">        Jones, G. 2010. Portable Extraction of Partially Structured Facts from</span>
+<span class="sd">        the Web. In Proc. ICETAL 2010, LNAI 6233, 345-356. Heidelberg, Springer.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">ignore_entity_case</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">entity_toks</span> <span class="o">=</span> <span class="n">entity</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+        <span class="n">get_tok_text</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">lower_</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">entity_toks</span> <span class="o">=</span> <span class="n">entity</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+        <span class="n">get_tok_text</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">text</span>
+    <span class="n">first_entity_tok</span> <span class="o">=</span> <span class="n">entity_toks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">n_entity_toks</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">entity_toks</span><span class="p">)</span>
+    <span class="n">cue</span> <span class="o">=</span> <span class="n">cue</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="n">cue_toks</span> <span class="o">=</span> <span class="n">cue</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+    <span class="n">n_cue_toks</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cue_toks</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">is_good_last_tok</span><span class="p">(</span><span class="n">tok</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">tok</span><span class="o">.</span><span class="n">is_punct</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">tok</span><span class="o">.</span><span class="n">pos</span> <span class="ow">in</span> <span class="p">{</span><span class="n">CONJ</span><span class="p">,</span> <span class="n">DET</span><span class="p">}:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">for</span> <span class="n">sent</span> <span class="ow">in</span> <span class="n">doc</span><span class="o">.</span><span class="n">sents</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">tok</span> <span class="ow">in</span> <span class="n">sent</span><span class="p">:</span>
+
+            <span class="c1"># filter by entity</span>
+            <span class="k">if</span> <span class="n">get_tok_text</span><span class="p">(</span><span class="n">tok</span><span class="p">)</span> <span class="o">!=</span> <span class="n">first_entity_tok</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">n_entity_toks</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">the_entity</span> <span class="o">=</span> <span class="n">tok</span>
+                <span class="n">the_entity_root</span> <span class="o">=</span> <span class="n">the_entity</span>
+            <span class="k">if</span> <span class="n">tok</span><span class="o">.</span><span class="n">i</span> <span class="o">+</span> <span class="n">n_cue_toks</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">doc</span><span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="k">elif</span> <span class="nb">all</span><span class="p">(</span><span class="n">get_tok_text</span><span class="p">(</span><span class="n">tok</span><span class="o">.</span><span class="n">nbor</span><span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span> <span class="o">==</span> <span class="n">et</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">et</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">entity_toks</span><span class="p">[</span><span class="mi">1</span><span class="p">:])):</span>
+                <span class="n">the_entity</span> <span class="o">=</span> <span class="n">doc</span><span class="p">[</span><span class="n">tok</span><span class="o">.</span><span class="n">i</span><span class="p">:</span> <span class="n">tok</span><span class="o">.</span><span class="n">i</span> <span class="o">+</span> <span class="n">n_entity_toks</span><span class="p">]</span>
+                <span class="n">the_entity_root</span> <span class="o">=</span> <span class="n">the_entity</span><span class="o">.</span><span class="n">root</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># filter by cue</span>
+            <span class="n">terh</span> <span class="o">=</span> <span class="n">the_entity_root</span><span class="o">.</span><span class="n">head</span>
+            <span class="k">if</span> <span class="n">terh</span><span class="o">.</span><span class="n">lemma_</span> <span class="o">!=</span> <span class="n">cue_toks</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">n_cue_toks</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">min_cue_i</span> <span class="o">=</span> <span class="n">terh</span><span class="o">.</span><span class="n">i</span>
+                <span class="n">max_cue_i</span> <span class="o">=</span> <span class="n">terh</span><span class="o">.</span><span class="n">i</span> <span class="o">+</span> <span class="n">n_cue_toks</span>
+                <span class="n">the_cue</span> <span class="o">=</span> <span class="n">terh</span>
+            <span class="k">elif</span> <span class="nb">all</span><span class="p">(</span><span class="n">terh</span><span class="o">.</span><span class="n">nbor</span><span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">lemma_</span> <span class="o">==</span> <span class="n">ct</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ct</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cue_toks</span><span class="p">[</span><span class="mi">1</span><span class="p">:])):</span>
+                <span class="n">min_cue_i</span> <span class="o">=</span> <span class="n">terh</span><span class="o">.</span><span class="n">i</span>
+                <span class="n">max_cue_i</span> <span class="o">=</span> <span class="n">terh</span><span class="o">.</span><span class="n">i</span> <span class="o">+</span> <span class="n">n_cue_toks</span>
+                <span class="n">the_cue</span> <span class="o">=</span> <span class="n">doc</span><span class="p">[</span><span class="n">terh</span><span class="o">.</span><span class="n">i</span><span class="p">:</span> <span class="n">max_cue_i</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">the_entity_root</span> <span class="ow">in</span> <span class="n">the_cue</span><span class="o">.</span><span class="n">rights</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># now add adjacent auxiliary and negating tokens to the cue, for context</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">min_cue_i</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">left</span><span class="o">.</span><span class="n">i</span> <span class="k">for</span> <span class="n">left</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">takewhile</span><span class="p">(</span>
+                    <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">dep_</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;aux&#39;</span><span class="p">,</span> <span class="s1">&#39;neg&#39;</span><span class="p">},</span> <span class="nb">reversed</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">the_cue</span><span class="o">.</span><span class="n">lefts</span><span class="p">))))</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">max_cue_i</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">right</span><span class="o">.</span><span class="n">i</span> <span class="k">for</span> <span class="n">right</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">takewhile</span><span class="p">(</span>
+                    <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">dep_</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;aux&#39;</span><span class="p">,</span> <span class="s1">&#39;neg&#39;</span><span class="p">},</span> <span class="n">the_cue</span><span class="o">.</span><span class="n">rights</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">if</span> <span class="n">max_cue_i</span> <span class="o">-</span> <span class="n">min_cue_i</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">the_cue</span> <span class="o">=</span> <span class="n">doc</span><span class="p">[</span><span class="n">min_cue_i</span><span class="p">:</span> <span class="n">max_cue_i</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">the_cue</span> <span class="o">=</span> <span class="n">doc</span><span class="p">[</span><span class="n">min_cue_i</span><span class="p">]</span>
+
+            <span class="c1"># filter by fragment</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">min_frag_i</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">right</span><span class="o">.</span><span class="n">left_edge</span><span class="o">.</span><span class="n">i</span> <span class="k">for</span> <span class="n">right</span> <span class="ow">in</span> <span class="n">the_cue</span><span class="o">.</span><span class="n">rights</span><span class="p">)</span>
+                <span class="n">max_frag_i</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">right</span><span class="o">.</span><span class="n">right_edge</span><span class="o">.</span><span class="n">i</span> <span class="k">for</span> <span class="n">right</span> <span class="ow">in</span> <span class="n">the_cue</span><span class="o">.</span><span class="n">rights</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">while</span> <span class="n">is_good_last_tok</span><span class="p">(</span><span class="n">doc</span><span class="p">[</span><span class="n">max_frag_i</span><span class="p">])</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+                <span class="n">max_frag_i</span> <span class="o">-=</span> <span class="mi">1</span>
+            <span class="n">n_fragment_toks</span> <span class="o">=</span> <span class="n">max_frag_i</span> <span class="o">-</span> <span class="n">min_frag_i</span>
+            <span class="k">if</span> <span class="n">n_fragment_toks</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">n_fragment_toks</span> <span class="o">&lt;</span> <span class="n">min_n_words</span> <span class="ow">or</span> <span class="n">n_fragment_toks</span> <span class="o">&gt;</span> <span class="n">max_n_words</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="c1"># HACK...</span>
+            <span class="k">if</span> <span class="n">min_frag_i</span> <span class="o">==</span> <span class="n">max_cue_i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">min_frag_i</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">the_fragment</span> <span class="o">=</span> <span class="n">doc</span><span class="p">[</span><span class="n">min_frag_i</span><span class="p">:</span> <span class="n">max_frag_i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+
+            <span class="k">yield</span> <span class="p">(</span><span class="n">the_entity</span><span class="p">,</span> <span class="n">the_cue</span><span class="p">,</span> <span class="n">the_fragment</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="direct_quotations"><a class="viewcode-back" href="../../api_reference.html#textacy.extract.direct_quotations">[docs]</a><span class="k">def</span> <span class="nf">direct_quotations</span><span class="p">(</span><span class="n">doc</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Baseline, not-great attempt at direction quotation extraction (no indirect</span>
+<span class="sd">    or mixed quotations) using rules and patterns. English only.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        doc (``textacy.Doc`` or ``spacy.Doc``)</span>
+
+<span class="sd">    Yields:</span>
+<span class="sd">        (``spacy.Span``, ``spacy.Token``, ``spacy.Span``): next quotation in ``doc``</span>
+<span class="sd">        represented as a (speaker, reporting verb, quotation) 3-tuple</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        Loosely inspired by Krestel, Bergler, Witte. &quot;Minding the Source: Automatic</span>
+<span class="sd">        Tagging of Reported Speech in Newspaper Articles&quot;.</span>
+
+<span class="sd">    TODO: Better approach would use ML, but needs a training dataset.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="s1">&#39;spacy_doc&#39;</span><span class="p">):</span>
+        <span class="n">doc_lang</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">lang</span>
+        <span class="n">doc</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">spacy_doc</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">doc_lang</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">vocab</span><span class="o">.</span><span class="n">lang</span>
+    <span class="k">if</span> <span class="n">doc</span><span class="o">.</span><span class="n">lang</span> <span class="o">!=</span> <span class="s1">&#39;en&#39;</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;sorry, English-language texts only :(&#39;</span><span class="p">)</span>
+    <span class="n">quote_end_punct</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;?&#39;</span><span class="p">,</span> <span class="s1">&#39;!&#39;</span><span class="p">}</span>
+    <span class="n">quote_indexes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">itertoolz</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">(),</span> <span class="n">m</span><span class="o">.</span><span class="n">end</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;(</span><span class="se">\&quot;</span><span class="s2">.*?</span><span class="se">\&quot;</span><span class="s2">)|(&#39;&#39;.*?&#39;&#39;)|(``.*?&#39;&#39;)&quot;</span><span class="p">,</span> <span class="n">doc</span><span class="o">.</span><span class="n">string</span><span class="p">)))</span>
+    <span class="n">quote_positions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">itertoolz</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span>
+        <span class="mi">2</span><span class="p">,</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">tok</span><span class="o">.</span><span class="n">i</span> <span class="k">for</span> <span class="n">tok</span> <span class="ow">in</span> <span class="n">doc</span> <span class="k">if</span> <span class="n">tok</span><span class="o">.</span><span class="n">idx</span> <span class="ow">in</span> <span class="n">quote_indexes</span><span class="p">)))</span>
+    <span class="n">sents</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">doc</span><span class="o">.</span><span class="n">sents</span><span class="p">)</span>
+    <span class="n">sent_positions</span> <span class="o">=</span> <span class="p">[(</span><span class="n">sent</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">sent</span><span class="o">.</span><span class="n">end</span><span class="p">)</span> <span class="k">for</span> <span class="n">sent</span> <span class="ow">in</span> <span class="n">sents</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">q0</span><span class="p">,</span> <span class="n">q1</span> <span class="ow">in</span> <span class="n">quote_positions</span><span class="p">:</span>
+        <span class="n">quote</span> <span class="o">=</span> <span class="n">doc</span><span class="p">[</span><span class="n">q0</span><span class="p">:</span> <span class="n">q1</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="c1"># we&#39;re only looking for direct quotes, not indirect or mixed</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">char</span> <span class="ow">in</span> <span class="n">quote_end_punct</span> <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">quote</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]):</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># get adjacent sentences</span>
+        <span class="n">candidate_sent_indexes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">s0</span><span class="p">,</span> <span class="n">s1</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sent_positions</span><span class="p">):</span>
+
+            <span class="k">if</span> <span class="n">s0</span> <span class="o">&lt;=</span> <span class="n">q1</span> <span class="o">+</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">s1</span> <span class="o">&gt;</span> <span class="n">q1</span><span class="p">:</span>
+                <span class="n">candidate_sent_indexes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">s0</span> <span class="o">&lt;</span> <span class="n">q0</span> <span class="ow">and</span> <span class="n">s1</span> <span class="o">&gt;=</span> <span class="n">q0</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">candidate_sent_indexes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">si</span> <span class="ow">in</span> <span class="n">candidate_sent_indexes</span><span class="p">:</span>
+            <span class="n">sent</span> <span class="o">=</span> <span class="n">sents</span><span class="p">[</span><span class="n">si</span><span class="p">]</span>
+
+            <span class="c1"># get any reporting verbs</span>
+            <span class="n">rvs</span> <span class="o">=</span> <span class="p">[</span><span class="n">tok</span> <span class="k">for</span> <span class="n">tok</span> <span class="ow">in</span> <span class="n">sent</span>
+                   <span class="k">if</span> <span class="n">spacy_utils</span><span class="o">.</span><span class="n">preserve_case</span><span class="p">(</span><span class="n">tok</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span>
+                   <span class="n">tok</span><span class="o">.</span><span class="n">lemma_</span> <span class="ow">in</span> <span class="n">constants</span><span class="o">.</span><span class="n">REPORTING_VERBS</span> <span class="ow">and</span>
+                   <span class="n">tok</span><span class="o">.</span><span class="n">pos_</span> <span class="o">==</span> <span class="s1">&#39;VERB&#39;</span> <span class="ow">and</span>
+                   <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">oq0</span> <span class="o">&lt;=</span> <span class="n">tok</span><span class="o">.</span><span class="n">i</span> <span class="o">&lt;=</span> <span class="n">oq1</span> <span class="k">for</span> <span class="n">oq0</span><span class="p">,</span> <span class="n">oq1</span> <span class="ow">in</span> <span class="n">quote_positions</span><span class="p">)]</span>
+
+            <span class="c1"># get target offset against which to measure distances of NEs</span>
+            <span class="k">if</span> <span class="n">rvs</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rvs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">rv</span> <span class="o">=</span> <span class="n">rvs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">min_rv_dist</span> <span class="o">=</span> <span class="mi">1000</span>
+                    <span class="k">for</span> <span class="n">rv_candidate</span> <span class="ow">in</span> <span class="n">rvs</span><span class="p">:</span>
+                        <span class="n">rv_dist</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">rv_candidate</span><span class="o">.</span><span class="n">i</span> <span class="o">-</span> <span class="n">qp</span><span class="p">)</span> <span class="k">for</span> <span class="n">qp</span> <span class="ow">in</span> <span class="p">(</span><span class="n">q0</span><span class="p">,</span> <span class="n">q1</span><span class="p">))</span>
+                        <span class="k">if</span> <span class="n">rv_dist</span> <span class="o">&lt;</span> <span class="n">min_rv_dist</span><span class="p">:</span>
+                            <span class="n">rv</span> <span class="o">=</span> <span class="n">rv_candidate</span>
+                            <span class="n">min_rv_dist</span> <span class="o">=</span> <span class="n">rv_dist</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># TODO: do we have no other recourse?!</span>
+                <span class="k">continue</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># rv_subj = _find_subjects(rv)[0]</span>
+                <span class="n">rv_subj</span> <span class="o">=</span> <span class="n">spacy_utils</span><span class="o">.</span><span class="n">get_subjects_of_verb</span><span class="p">(</span><span class="n">rv</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                <span class="k">continue</span>
+    <span class="c1">#         if rv_subj.text in {&#39;he&#39;, &#39;she&#39;}:</span>
+    <span class="c1">#             for ne in named_entities(doc, good_ne_types={&#39;PERSON&#39;}):</span>
+    <span class="c1">#                 if ne.start &lt; rv_subj.i:</span>
+    <span class="c1">#                     speaker = ne</span>
+    <span class="c1">#                 else:</span>
+    <span class="c1">#                     break</span>
+    <span class="c1">#         else:</span>
+            <span class="n">span</span> <span class="o">=</span> <span class="n">spacy_utils</span><span class="o">.</span><span class="n">get_span_for_compound_noun</span><span class="p">(</span><span class="n">rv_subj</span><span class="p">)</span>
+            <span class="n">speaker</span> <span class="o">=</span> <span class="n">doc</span><span class="p">[</span><span class="n">span</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="n">span</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+
+            <span class="k">yield</span> <span class="p">(</span><span class="n">speaker</span><span class="p">,</span> <span class="n">rv</span><span class="p">,</span> <span class="n">quote</span><span class="p">)</span>
+            <span class="k">break</span></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016 Chartbeat, Inc..
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.5.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,331 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>textacy.lexicon_methods &mdash; textacy 0.5.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="textacy 0.5.0 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> textacy
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api_reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../license.html">License</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">textacy</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>textacy.lexicon_methods</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for textacy.lexicon_methods</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Collection of lexicon-based methods for characterizing texts by sentiment,</span>
+<span class="sd">emotional valence, etc.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">unicode_literals</span>
+
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">io</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">zipfile</span>
+
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">from</span> <span class="nn">spacy.parts_of_speech</span> <span class="k">import</span> <span class="n">ADJ</span><span class="p">,</span> <span class="n">ADV</span><span class="p">,</span> <span class="n">NOUN</span><span class="p">,</span> <span class="n">VERB</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">cache</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">data_dir</span> <span class="k">as</span> <span class="n">DEFAULT_DATA_DIR</span>
+
+<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="c1"># TODO: Do something smarter for averaging emotional valences?</span>
+
+
+<div class="viewcode-block" id="emotional_valence"><a class="viewcode-back" href="../../api_reference.html#textacy.lexicon_methods.emotional_valence">[docs]</a><span class="k">def</span> <span class="nf">emotional_valence</span><span class="p">(</span><span class="n">words</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">dm_data_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dm_weighting</span><span class="o">=</span><span class="s1">&#39;normfreq&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get average emotional valence over all words for the following emotions --</span>
+<span class="sd">    AFRAID, AMUSED, ANGRY, ANNOYED, DONT_CARE, HAPPY, INSPIRED, SAD -- using</span>
+<span class="sd">    the [DepecheMood]_ dataset.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        words (List[``spacy.Token``]): list of words for which to get</span>
+<span class="sd">            average emotional valence; note that only nouns, adjectives, adverbs,</span>
+<span class="sd">            and verbs will be counted</span>
+<span class="sd">        threshold (float): minimum emotional valence score for which to</span>
+<span class="sd">            count a given word for a given emotion; value must be in [0.0, 1.0)</span>
+<span class="sd">        dm_data_dir (str): full path to directory where DepecheMood data</span>
+<span class="sd">            is saved on disk</span>
+<span class="sd">        dm_weighting ({&#39;freq&#39;, &#39;normfreq&#39;, &#39;tfidf&#39;}): type of word</span>
+<span class="sd">            weighting used in building DepecheMood matrix</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: mapping of emotion (str) to average valence score (float)</span>
+
+<span class="sd">    References:</span>
+<span class="sd">        .. [DepecheMood] Staiano and Guerini. DepecheMood: a Lexicon for Emotion</span>
+<span class="sd">           Analysis from Crowd-Annotated News. 2014.</span>
+<span class="sd">           Data available at https://github.com/marcoguerini/DepecheMood/releases</span>
+
+<span class="sd">    See Also:</span>
+<span class="sd">        :func:`cache.load_depechemood() &lt;textacy.cache.load_depechemood&gt;`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dm</span> <span class="o">=</span> <span class="n">cache</span><span class="o">.</span><span class="n">load_depechemood</span><span class="p">(</span><span class="n">data_dir</span><span class="o">=</span><span class="n">dm_data_dir</span><span class="p">,</span> <span class="n">weighting</span><span class="o">=</span><span class="n">dm_weighting</span><span class="p">)</span>
+    <span class="n">pos_to_letter</span> <span class="o">=</span> <span class="p">{</span><span class="n">NOUN</span><span class="p">:</span> <span class="s1">&#39;n&#39;</span><span class="p">,</span> <span class="n">ADJ</span><span class="p">:</span> <span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="n">ADV</span><span class="p">:</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">VERB</span><span class="p">:</span> <span class="s1">&#39;v&#39;</span><span class="p">}</span>
+    <span class="n">emo_matches</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">emo_scores</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">words</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">word</span><span class="o">.</span><span class="n">pos</span> <span class="ow">in</span> <span class="n">pos_to_letter</span><span class="p">:</span>
+            <span class="n">lemma_pos</span> <span class="o">=</span> <span class="n">word</span><span class="o">.</span><span class="n">lemma_</span> <span class="o">+</span> <span class="s1">&#39;#&#39;</span> <span class="o">+</span> <span class="n">pos_to_letter</span><span class="p">[</span><span class="n">word</span><span class="o">.</span><span class="n">pos</span><span class="p">]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">emo</span><span class="p">,</span> <span class="n">score</span> <span class="ow">in</span> <span class="n">dm</span><span class="p">[</span><span class="n">lemma_pos</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="n">score</span> <span class="o">&gt;</span> <span class="n">threshold</span><span class="p">:</span>
+                        <span class="n">emo_matches</span><span class="p">[</span><span class="n">emo</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="n">emo_scores</span><span class="p">[</span><span class="n">emo</span><span class="p">]</span> <span class="o">+=</span> <span class="n">score</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+    <span class="k">for</span> <span class="n">emo</span> <span class="ow">in</span> <span class="n">emo_scores</span><span class="p">:</span>
+        <span class="n">emo_scores</span><span class="p">[</span><span class="n">emo</span><span class="p">]</span> <span class="o">/=</span> <span class="n">emo_matches</span><span class="p">[</span><span class="n">emo</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">emo_scores</span></div>
+
+
+<div class="viewcode-block" id="download_depechemood"><a class="viewcode-back" href="../../api_reference.html#textacy.lexicon_methods.download_depechemood">[docs]</a><span class="k">def</span> <span class="nf">download_depechemood</span><span class="p">(</span><span class="n">data_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Download the DepecheMood dataset from GitHub, save to disk as .txt files.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data_dir (str): Path to directory on disk where data files are to be saved.</span>
+<span class="sd">        force (bool): If True, download the data, even if it already exists</span>
+<span class="sd">            on disk under ``data_dir``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">data_dir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">data_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">DEFAULT_DATA_DIR</span><span class="p">,</span> <span class="s1">&#39;depechemood&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="s1">&#39;DepecheMood_V1.0&#39;</span><span class="p">))</span> <span class="ow">and</span> <span class="n">force</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+            <span class="s1">&#39;DepecheMood data already exists in </span><span class="si">%s</span><span class="s1">; skipping download...&#39;</span><span class="p">,</span>
+            <span class="n">data_dir</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;https://github.com/marcoguerini/DepecheMood/releases/download/v1.0/DepecheMood_V1.0.zip&#39;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">requests</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">RequestException</span><span class="p">:</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span>
+            <span class="s1">&#39;Unable to download DepecheMood from </span><span class="si">%s</span><span class="s1">; URL status code = </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+            <span class="n">url</span><span class="p">,</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">)</span>
+        <span class="k">raise</span>
+    <span class="k">with</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">))</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">members</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;DepecheMood_V1.0/DepecheMood_freq.txt&#39;</span><span class="p">,</span>
+                   <span class="s1">&#39;DepecheMood_V1.0/DepecheMood_normfreq.txt&#39;</span><span class="p">,</span>
+                   <span class="s1">&#39;DepecheMood_V1.0/DepecheMood_tfidf.txt&#39;</span><span class="p">,</span>
+                   <span class="s1">&#39;DepecheMood_V1.0/README.txt&#39;</span><span class="p">]</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">extractall</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="n">members</span><span class="o">=</span><span class="n">members</span><span class="p">)</span>
+    <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+        <span class="s1">&#39;Downloaded DepecheMood (4MB) from </span><span class="si">%s</span><span class="s1"> and wrote it to </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">url</span><span class="p">,</span> <span class="n">data_dir</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016 Chartbeat, Inc..
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.5.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
