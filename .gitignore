@@ -1,13 +1,16 @@
-# compiled code
-*.py[co]
+# compiled source
+*.c
+*.pyc
+*.so
+__pycache__
 
-# OS X
+# os
 .DS_Store
 
 # distribution / packaging
 build/
 dist/
-*.egg-info/
+*.egg-info
 
 # sphinx documentation
 docs/build/*
