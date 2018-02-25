@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>textacy.doc &mdash; textacy 0.5.0 documentation</title>
+  <title>textacy.doc &mdash; textacy 0.6.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="textacy 0.5.0 documentation" href="../../index.html"/>
+    <link rel="top" title="textacy 0.6.0 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.5
+                0.6
               </div>
             
           
@@ -180,7 +180,7 @@
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">compat</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">constants</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">extract</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">fileio</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">io</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">network</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">spacy_utils</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">text_utils</span>
@@ -270,60 +270,77 @@
 <span class="sd">        spacy_stringstore (``spacy.StringStore``): https://spacy.io/api/stringstore</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">content</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lang</span><span class="o">=</span><span class="n">text_utils</span><span class="o">.</span><span class="n">detect_language</span><span class="p">):</span>
-
-        <span class="c1"># Doc instantiated from text, so must be parsed with a spacy.Language</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">compat</span><span class="o">.</span><span class="n">unicode_</span><span class="p">):</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lang</span><span class="p">,</span> <span class="n">SpacyLang</span><span class="p">):</span>
-                <span class="n">spacy_lang</span> <span class="o">=</span> <span class="n">lang</span>
-                <span class="n">langstr</span> <span class="o">=</span> <span class="n">spacy_lang</span><span class="o">.</span><span class="n">lang</span>
-            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lang</span><span class="p">,</span> <span class="n">compat</span><span class="o">.</span><span class="n">unicode_</span><span class="p">):</span>
-                <span class="n">spacy_lang</span> <span class="o">=</span> <span class="n">cache</span><span class="o">.</span><span class="n">load_spacy</span><span class="p">(</span><span class="n">lang</span><span class="p">)</span>
-                <span class="n">langstr</span> <span class="o">=</span> <span class="n">spacy_lang</span><span class="o">.</span><span class="n">lang</span>
-            <span class="k">elif</span> <span class="n">callable</span><span class="p">(</span><span class="n">lang</span><span class="p">):</span>
-                <span class="n">langstr</span> <span class="o">=</span> <span class="n">lang</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
-                <span class="n">spacy_lang</span> <span class="o">=</span> <span class="n">cache</span><span class="o">.</span><span class="n">load_spacy</span><span class="p">(</span><span class="n">langstr</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                    <span class="s1">&#39;`lang` must be </span><span class="si">{}</span><span class="s1">, not </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                        <span class="p">{</span><span class="n">compat</span><span class="o">.</span><span class="n">unicode_</span><span class="p">,</span> <span class="n">SpacyLang</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">FunctionType</span><span class="p">},</span> <span class="nb">type</span><span class="p">(</span><span class="n">lang</span><span class="p">)))</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">spacy_vocab</span> <span class="o">=</span> <span class="n">spacy_lang</span><span class="o">.</span><span class="n">vocab</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">spacy_stringstore</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_vocab</span><span class="o">.</span><span class="n">strings</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">spacy_doc</span> <span class="o">=</span> <span class="n">spacy_lang</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
-        <span class="c1"># Doc instantiated from an already-parsed spacy.Doc</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_init_from_text</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">metadata</span><span class="p">,</span> <span class="n">lang</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">SpacyDoc</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">spacy_vocab</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">vocab</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">spacy_stringstore</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_vocab</span><span class="o">.</span><span class="n">strings</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">spacy_doc</span> <span class="o">=</span> <span class="n">content</span>
-            <span class="n">langstr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_vocab</span><span class="o">.</span><span class="n">lang</span>
-            <span class="c1"># these checks are probably unnecessary, but in case a user</span>
-            <span class="c1"># has done something strange, we should complain...</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lang</span><span class="p">,</span> <span class="n">SpacyLang</span><span class="p">):</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_vocab</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">lang</span><span class="o">.</span><span class="n">vocab</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                        <span class="s1">&#39;`spacy.Vocab` used to parse `content` must be the same &#39;</span>
-                        <span class="s1">&#39;as the one associated with the `lang` param&#39;</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lang</span><span class="p">,</span> <span class="n">compat</span><span class="o">.</span><span class="n">unicode_</span><span class="p">):</span>
-                <span class="c1"># a `lang` as str could be a specific spacy model name,</span>
-                <span class="c1"># e.g. &quot;en_core_web_sm&quot;, while `langstr` would only be &quot;en&quot;</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">lang</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">langstr</span><span class="p">):</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                        <span class="s1">&#39;lang of spacy model used to parse `content` (</span><span class="si">{}</span><span class="s1">) &#39;</span>
-                        <span class="s1">&#39;must be the same as the `lang` param (</span><span class="si">{}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                            <span class="n">lang</span><span class="p">,</span> <span class="n">langstr</span><span class="p">))</span>
-            <span class="k">elif</span> <span class="n">callable</span><span class="p">(</span><span class="n">lang</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                    <span class="s1">&#39;`lang` must be </span><span class="si">{}</span><span class="s1">, not </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                        <span class="p">{</span><span class="n">compat</span><span class="o">.</span><span class="n">unicode_</span><span class="p">,</span> <span class="n">SpacyLang</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">FunctionType</span><span class="p">},</span> <span class="nb">type</span><span class="p">(</span><span class="n">lang</span><span class="p">)))</span>
-        <span class="c1"># oops, user has made some sort of mistake</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_init_from_spacy_doc</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">metadata</span><span class="p">,</span> <span class="n">lang</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="s1">&#39;`Doc` must be initialized with </span><span class="si">{}</span><span class="s1"> content, not &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                     <span class="p">{</span><span class="n">compat</span><span class="o">.</span><span class="n">unicode_</span><span class="p">,</span> <span class="n">SpacyDoc</span><span class="p">},</span> <span class="nb">type</span><span class="p">(</span><span class="n">content</span><span class="p">)))</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">spacy_doc</span><span class="o">.</span><span class="n">user_data</span><span class="p">[</span><span class="s1">&#39;textacy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;lang&#39;</span><span class="p">:</span> <span class="n">langstr</span><span class="p">}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spacy_doc</span><span class="o">.</span><span class="n">user_data</span><span class="p">[</span><span class="s1">&#39;textacy&#39;</span><span class="p">][</span><span class="s1">&#39;metadata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">metadata</span> <span class="ow">or</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_counted_ngrams</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_counts</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_init_from_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">content</span><span class="p">,</span> <span class="n">metadata</span><span class="p">,</span> <span class="n">lang</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Doc instantiated from text, so must be parsed with a spacy.Language.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lang</span><span class="p">,</span> <span class="n">SpacyLang</span><span class="p">):</span>
+            <span class="n">spacy_lang</span> <span class="o">=</span> <span class="n">lang</span>
+            <span class="n">langstr</span> <span class="o">=</span> <span class="n">spacy_lang</span><span class="o">.</span><span class="n">lang</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lang</span><span class="p">,</span> <span class="n">compat</span><span class="o">.</span><span class="n">unicode_</span><span class="p">):</span>
+            <span class="n">spacy_lang</span> <span class="o">=</span> <span class="n">cache</span><span class="o">.</span><span class="n">load_spacy</span><span class="p">(</span><span class="n">lang</span><span class="p">)</span>
+            <span class="n">langstr</span> <span class="o">=</span> <span class="n">spacy_lang</span><span class="o">.</span><span class="n">lang</span>
+        <span class="k">elif</span> <span class="n">callable</span><span class="p">(</span><span class="n">lang</span><span class="p">):</span>
+            <span class="n">langstr</span> <span class="o">=</span> <span class="n">lang</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+            <span class="n">spacy_lang</span> <span class="o">=</span> <span class="n">cache</span><span class="o">.</span><span class="n">load_spacy</span><span class="p">(</span><span class="n">langstr</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="s1">&#39;`lang` must be </span><span class="si">{}</span><span class="s1">, not </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="p">{</span><span class="n">compat</span><span class="o">.</span><span class="n">unicode_</span><span class="p">,</span> <span class="n">SpacyLang</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">FunctionType</span><span class="p">},</span> <span class="nb">type</span><span class="p">(</span><span class="n">lang</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spacy_vocab</span> <span class="o">=</span> <span class="n">spacy_lang</span><span class="o">.</span><span class="n">vocab</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spacy_stringstore</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_vocab</span><span class="o">.</span><span class="n">strings</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spacy_doc</span> <span class="o">=</span> <span class="n">spacy_lang</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spacy_doc</span><span class="o">.</span><span class="n">user_data</span><span class="p">[</span><span class="s1">&#39;textacy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;lang&#39;</span><span class="p">:</span> <span class="n">langstr</span><span class="p">,</span>
+            <span class="s1">&#39;metadata&#39;</span><span class="p">:</span> <span class="n">metadata</span> <span class="ow">or</span> <span class="p">{},</span>
+            <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">_init_from_spacy_doc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">content</span><span class="p">,</span> <span class="n">metadata</span><span class="p">,</span> <span class="n">lang</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Doc instantiated from an already-parsed spacy.Doc. Ensure agreement</span>
+<span class="sd">        between various spacy objects and inputs, and check for existing metadata</span>
+<span class="sd">        rather than always overwriting it.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spacy_vocab</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">vocab</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spacy_stringstore</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_vocab</span><span class="o">.</span><span class="n">strings</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spacy_doc</span> <span class="o">=</span> <span class="n">content</span>
+        <span class="n">langstr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_vocab</span><span class="o">.</span><span class="n">lang</span>
+        <span class="c1"># these checks are probably unnecessary, but in case a user</span>
+        <span class="c1"># has done something strange, we should complain...</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lang</span><span class="p">,</span> <span class="n">SpacyLang</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_vocab</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">lang</span><span class="o">.</span><span class="n">vocab</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s1">&#39;`spacy.Vocab` used to parse `content` must be the same &#39;</span>
+                    <span class="s1">&#39;as the one associated with the `lang` param&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lang</span><span class="p">,</span> <span class="n">compat</span><span class="o">.</span><span class="n">unicode_</span><span class="p">):</span>
+            <span class="c1"># a `lang` as str could be a specific spacy model name,</span>
+            <span class="c1"># e.g. &quot;en_core_web_sm&quot;, while `langstr` would only be &quot;en&quot;</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">lang</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">langstr</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s1">&#39;lang of spacy model used to parse `content` (</span><span class="si">{}</span><span class="s1">) &#39;</span>
+                    <span class="s1">&#39;must be the same as the `lang` param (</span><span class="si">{}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">lang</span><span class="p">,</span> <span class="n">langstr</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">callable</span><span class="p">(</span><span class="n">lang</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="s1">&#39;`lang` must be </span><span class="si">{}</span><span class="s1">, not </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="p">{</span><span class="n">compat</span><span class="o">.</span><span class="n">unicode_</span><span class="p">,</span> <span class="n">SpacyLang</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">FunctionType</span><span class="p">},</span> <span class="nb">type</span><span class="p">(</span><span class="n">lang</span><span class="p">)))</span>
+        <span class="c1"># textacy metadata could already be assigned to spacy doc; grab it</span>
+        <span class="c1"># if it&#39;s there and user hasn&#39;t supplied *new* metadata to overwrite it</span>
+        <span class="n">metadata</span> <span class="o">=</span> <span class="n">metadata</span> <span class="ow">or</span> <span class="n">content</span><span class="o">.</span><span class="n">user_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;textacy&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;metadata&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spacy_doc</span><span class="o">.</span><span class="n">user_data</span><span class="p">[</span><span class="s1">&#39;textacy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;lang&#39;</span><span class="p">:</span> <span class="n">langstr</span><span class="p">,</span>
+            <span class="s1">&#39;metadata&#39;</span><span class="p">:</span> <span class="n">metadata</span><span class="p">,</span>
+            <span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">snippet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">[:</span><span class="mi">50</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span>
@@ -368,8 +385,8 @@
 
 <span class="sd">        See Also:</span>
 <span class="sd">            :meth:`Doc.load()`</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">fileio</span><span class="o">.</span><span class="n">write_spacy_docs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spacy_doc</span><span class="p">,</span> <span class="n">filepath</span><span class="p">)</span></div>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+        <span class="n">io</span><span class="o">.</span><span class="n">write_spacy_docs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spacy_doc</span><span class="p">,</span> <span class="n">filepath</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Doc.load"><a class="viewcode-back" href="../../api_reference.html#textacy.doc.Doc.load">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filepath</span><span class="p">):</span>
@@ -386,10 +403,10 @@
 <span class="sd">        See Also:</span>
 <span class="sd">            :meth:`Doc.save()`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">spacy_doc</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">fileio</span><span class="o">.</span><span class="n">read_spacy_docs</span><span class="p">(</span><span class="n">filepath</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">spacy_doc</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">read_spacy_docs</span><span class="p">(</span><span class="n">filepath</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">spacy_doc</span><span class="p">,</span>
-                   <span class="n">lang</span><span class="o">=</span><span class="n">spacy_doc</span><span class="o">.</span><span class="n">user_data</span><span class="p">[</span><span class="s1">&#39;textacy&#39;</span><span class="p">][</span><span class="s1">&#39;lang&#39;</span><span class="p">],</span>
-                   <span class="n">metadata</span><span class="o">=</span><span class="n">spacy_doc</span><span class="o">.</span><span class="n">user_data</span><span class="p">[</span><span class="s1">&#39;textacy&#39;</span><span class="p">][</span><span class="s1">&#39;metadata&#39;</span><span class="p">])</span></div>
+                   <span class="n">lang</span><span class="o">=</span><span class="n">spacy_doc</span><span class="o">.</span><span class="n">user_data</span><span class="p">[</span><span class="s1">&#39;textacy&#39;</span><span class="p">][</span><span class="s1">&#39;lang&#39;</span><span class="p">],</span></div>
+                   <span class="n">metadata</span><span class="o">=</span><span class="n">spacy_doc</span><span class="o">.</span><span class="n">user_data</span><span class="p">[</span><span class="s1">&#39;textacy&#39;</span><span class="p">][</span><span class="s1">&#39;metadata&#39;</span><span class="p">])</span>
 
     <span class="c1">####################</span>
     <span class="c1"># BASIC COMPONENTS #</span>
@@ -431,8 +448,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">spacy_utils</span><span class="o">.</span><span class="n">merge_spans</span><span class="p">(</span><span class="n">spans</span><span class="p">)</span>
         <span class="c1"># reset counts, since merging spans invalidates existing counts</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_counts</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_counted_ngrams</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_counts</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_counted_ngrams</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
 
 <div class="viewcode-block" id="Doc.count"><a class="viewcode-back" href="../../api_reference.html#textacy.doc.Doc.count">[docs]</a>    <span class="k">def</span> <span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">term</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -489,8 +506,8 @@
                                                 <span class="n">filter_stops</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                                                 <span class="n">filter_punct</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                                                 <span class="n">filter_nums</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_counted_ngrams</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">term_len</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_counts</span><span class="p">[</span><span class="n">term_id</span><span class="p">]</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_counted_ngrams</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">term_len</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_counts</span><span class="p">[</span><span class="n">term_id</span><span class="p">]</span>
 
     <span class="c1">###############</span>
     <span class="c1"># DOC AS TEXT #</span>
@@ -659,8 +676,8 @@
                 <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">terms</span><span class="p">:</span>
                     <span class="k">yield</span> <span class="n">term</span><span class="o">.</span><span class="n">text</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">terms</span><span class="p">:</span>
-                    <span class="k">yield</span> <span class="n">normalize</span><span class="p">(</span><span class="n">term</span><span class="p">)</span></div>
+                <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">terms</span><span class="p">:</span></div>
+                    <span class="k">yield</span> <span class="n">normalize</span><span class="p">(</span><span class="n">term</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Doc.to_bag_of_words"><a class="viewcode-back" href="../../api_reference.html#textacy.doc.Doc.to_bag_of_words">[docs]</a>    <span class="k">def</span> <span class="nf">to_bag_of_words</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="s1">&#39;lemma&#39;</span><span class="p">,</span> <span class="n">weighting</span><span class="o">=</span><span class="s1">&#39;count&#39;</span><span class="p">,</span> <span class="n">as_strings</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -713,8 +730,8 @@
                 <span class="n">lexeme</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_vocab</span><span class="p">[</span><span class="n">id_</span><span class="p">]</span>
                 <span class="k">if</span> <span class="n">lexeme</span><span class="o">.</span><span class="n">is_stop</span> <span class="ow">or</span> <span class="n">lexeme</span><span class="o">.</span><span class="n">is_punct</span> <span class="ow">or</span> <span class="n">lexeme</span><span class="o">.</span><span class="n">is_space</span><span class="p">:</span>
                     <span class="k">continue</span>
-                <span class="n">bow</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">spacy_stringstore</span><span class="p">[</span><span class="n">id_</span><span class="p">]]</span> <span class="o">=</span> <span class="n">count</span>
-        <span class="k">return</span> <span class="n">bow</span></div>
+                <span class="n">bow</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">spacy_stringstore</span><span class="p">[</span><span class="n">id_</span><span class="p">]]</span> <span class="o">=</span> <span class="n">count</span></div>
+        <span class="k">return</span> <span class="n">bow</span>
 
 <div class="viewcode-block" id="Doc.to_bag_of_terms"><a class="viewcode-back" href="../../api_reference.html#textacy.doc.Doc.to_bag_of_terms">[docs]</a>    <span class="k">def</span> <span class="nf">to_bag_of_terms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ngrams</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">named_entities</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                         <span class="n">normalize</span><span class="o">=</span><span class="s1">&#39;lemma&#39;</span><span class="p">,</span> <span class="n">weighting</span><span class="o">=</span><span class="s1">&#39;count&#39;</span><span class="p">,</span> <span class="n">as_strings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -776,8 +793,8 @@
             <span class="n">n_tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_tokens</span>
             <span class="n">bot</span> <span class="o">=</span> <span class="p">{</span><span class="n">term</span><span class="p">:</span> <span class="n">weight</span> <span class="o">/</span> <span class="n">n_tokens</span> <span class="k">for</span> <span class="n">term</span><span class="p">,</span> <span class="n">weight</span> <span class="ow">in</span> <span class="n">bot</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
         <span class="k">elif</span> <span class="n">weighting</span> <span class="o">==</span> <span class="s1">&#39;binary&#39;</span><span class="p">:</span>
-            <span class="n">bot</span> <span class="o">=</span> <span class="p">{</span><span class="n">term</span><span class="p">:</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">bot</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span>
-        <span class="k">return</span> <span class="n">bot</span></div>
+            <span class="n">bot</span> <span class="o">=</span> <span class="p">{</span><span class="n">term</span><span class="p">:</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">bot</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span></div>
+        <span class="k">return</span> <span class="n">bot</span>
 
 <div class="viewcode-block" id="Doc.to_semantic_network"><a class="viewcode-back" href="../../api_reference.html#textacy.doc.Doc.to_semantic_network">[docs]</a>    <span class="k">def</span> <span class="nf">to_semantic_network</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nodes</span><span class="o">=</span><span class="s1">&#39;words&#39;</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="s1">&#39;lemma&#39;</span><span class="p">,</span>
                             <span class="n">edge_weighting</span><span class="o">=</span><span class="s1">&#39;default&#39;</span><span class="p">,</span> <span class="n">window_width</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
@@ -828,8 +845,8 @@
                 <span class="n">edge_weighting</span><span class="o">=</span><span class="n">edge_weighting</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;nodes &quot;</span><span class="si">{}</span><span class="s1">&quot; not valid; must be in </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                <span class="n">nodes</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;words&#39;</span><span class="p">,</span> <span class="s1">&#39;sents&#39;</span><span class="p">})</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div></div>
+                <span class="n">nodes</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;words&#39;</span><span class="p">,</span> <span class="s1">&#39;sents&#39;</span><span class="p">})</span></div></div>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 </pre></div>
 
            </div>
@@ -866,7 +883,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'0.5.0',
+            VERSION:'0.6.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

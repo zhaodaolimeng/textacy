@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>textacy.extract &mdash; textacy 0.5.0 documentation</title>
+  <title>textacy.extract &mdash; textacy 0.6.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="textacy 0.5.0 documentation" href="../../index.html"/>
+    <link rel="top" title="textacy 0.6.0 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.5
+                0.6
               </div>
             
           
@@ -247,8 +247,8 @@
         <span class="n">words_</span> <span class="o">=</span> <span class="p">(</span><span class="n">w</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">words_</span>
                   <span class="k">if</span> <span class="n">freqs</span><span class="p">[</span><span class="n">w</span><span class="o">.</span><span class="n">lower_</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">min_freq</span><span class="p">)</span>
 
-    <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">words_</span><span class="p">:</span>
-        <span class="k">yield</span> <span class="n">word</span></div>
+    <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">words_</span><span class="p">:</span></div>
+        <span class="k">yield</span> <span class="n">word</span>
 
 
 <div class="viewcode-block" id="ngrams"><a class="viewcode-back" href="../../api_reference.html#textacy.extract.ngrams">[docs]</a><span class="k">def</span> <span class="nf">ngrams</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span>
@@ -292,7 +292,7 @@
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;n must be greater than or equal to 1&#39;</span><span class="p">)</span>
 
     <span class="n">ngrams_</span> <span class="o">=</span> <span class="p">(</span><span class="n">doc</span><span class="p">[</span><span class="n">i</span><span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">n</span><span class="p">]</span>
-               <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+               <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">compat</span><span class="o">.</span><span class="n">range_</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
     <span class="n">ngrams_</span> <span class="o">=</span> <span class="p">(</span><span class="n">ngram</span> <span class="k">for</span> <span class="n">ngram</span> <span class="ow">in</span> <span class="n">ngrams_</span>
                <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">is_space</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">ngram</span><span class="p">))</span>
     <span class="k">if</span> <span class="n">filter_stops</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
@@ -334,8 +334,8 @@
         <span class="n">ngrams_</span> <span class="o">=</span> <span class="p">(</span><span class="n">ngram</span> <span class="k">for</span> <span class="n">ngram</span> <span class="ow">in</span> <span class="n">ngrams_</span>
                    <span class="k">if</span> <span class="n">freqs</span><span class="p">[</span><span class="n">ngram</span><span class="o">.</span><span class="n">lower_</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">min_freq</span><span class="p">)</span>
 
-    <span class="k">for</span> <span class="n">ngram</span> <span class="ow">in</span> <span class="n">ngrams_</span><span class="p">:</span>
-        <span class="k">yield</span> <span class="n">ngram</span></div>
+    <span class="k">for</span> <span class="n">ngram</span> <span class="ow">in</span> <span class="n">ngrams_</span><span class="p">:</span></div>
+        <span class="k">yield</span> <span class="n">ngram</span>
 
 
 <div class="viewcode-block" id="named_entities"><a class="viewcode-back" href="../../api_reference.html#textacy.extract.named_entities">[docs]</a><span class="k">def</span> <span class="nf">named_entities</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span>
@@ -357,12 +357,12 @@
 <span class="sd">            from named entities (e.g. &quot;the United States&quot; =&gt; &quot;United States&quot;).</span>
 
 <span class="sd">            .. note:: Entities from which a leading determiner has been removed</span>
-<span class="sd">               do *not* keep their entity type annotations. This is irritating</span>
-<span class="sd">               but unavoidable, since the only way to re-annotate them is to</span>
-<span class="sd">               modify ``doc`` directly, and this function is not meant to have</span>
-<span class="sd">               any side-effects. If you&#39;re only using the text of the returned</span>
-<span class="sd">               spans, this is no big deal; if you&#39;re using NE-like attributes</span>
-<span class="sd">               downstream, however, this is something to watch out for.</span>
+<span class="sd">               are, effectively, *new* entities, and not saved to the ``SpacyDoc``</span>
+<span class="sd">               from which they came. This is irritating but unavoidable, since</span>
+<span class="sd">               this function is not meant to have side-effects on document state.</span>
+<span class="sd">               If you&#39;re only using the text of the returned spans, this is no</span>
+<span class="sd">               big deal, but watch out if you&#39;re counting on determiner-less</span>
+<span class="sd">               entities associated with the doc downstream.</span>
 
 <span class="sd">        min_freq (int): remove named entities that occur in `doc` fewer</span>
 <span class="sd">            than `min_freq` times</span>
@@ -406,15 +406,17 @@
             <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;invalid `exclude_types` type: &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">exclude_types</span><span class="p">))</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">drop_determiners</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="n">nes</span> <span class="o">=</span> <span class="p">(</span><span class="n">ne</span> <span class="k">if</span> <span class="n">ne</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">pos</span> <span class="o">!=</span> <span class="n">DET</span> <span class="k">else</span> <span class="n">ne</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="k">for</span> <span class="n">ne</span> <span class="ow">in</span> <span class="n">nes</span><span class="p">)</span>
+        <span class="n">nes</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">ne</span> <span class="k">if</span> <span class="n">ne</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">pos</span> <span class="o">!=</span> <span class="n">DET</span> <span class="k">else</span> <span class="n">SpacySpan</span><span class="p">(</span><span class="n">ne</span><span class="o">.</span><span class="n">doc</span><span class="p">,</span> <span class="n">ne</span><span class="o">.</span><span class="n">start</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">ne</span><span class="o">.</span><span class="n">end</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">ne</span><span class="o">.</span><span class="n">label</span><span class="p">,</span> <span class="n">vector</span><span class="o">=</span><span class="n">ne</span><span class="o">.</span><span class="n">vector</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">ne</span> <span class="ow">in</span> <span class="n">nes</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">min_freq</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">nes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">nes</span><span class="p">)</span>
         <span class="n">freqs</span> <span class="o">=</span> <span class="n">itertoolz</span><span class="o">.</span><span class="n">frequencies</span><span class="p">(</span><span class="n">ne</span><span class="o">.</span><span class="n">lower_</span> <span class="k">for</span> <span class="n">ne</span> <span class="ow">in</span> <span class="n">nes</span><span class="p">)</span>
         <span class="n">nes</span> <span class="o">=</span> <span class="p">(</span><span class="n">ne</span> <span class="k">for</span> <span class="n">ne</span> <span class="ow">in</span> <span class="n">nes</span>
                <span class="k">if</span> <span class="n">freqs</span><span class="p">[</span><span class="n">ne</span><span class="o">.</span><span class="n">lower_</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">min_freq</span><span class="p">)</span>
 
-    <span class="k">for</span> <span class="n">ne</span> <span class="ow">in</span> <span class="n">nes</span><span class="p">:</span>
-        <span class="k">yield</span> <span class="n">ne</span></div>
+    <span class="k">for</span> <span class="n">ne</span> <span class="ow">in</span> <span class="n">nes</span><span class="p">:</span></div>
+        <span class="k">yield</span> <span class="n">ne</span>
 
 
 <div class="viewcode-block" id="noun_chunks"><a class="viewcode-back" href="../../api_reference.html#textacy.extract.noun_chunks">[docs]</a><span class="k">def</span> <span class="nf">noun_chunks</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">drop_determiners</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">min_freq</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
@@ -446,8 +448,8 @@
         <span class="n">ncs</span> <span class="o">=</span> <span class="p">(</span><span class="n">nc</span> <span class="k">for</span> <span class="n">nc</span> <span class="ow">in</span> <span class="n">ncs</span>
                <span class="k">if</span> <span class="n">freqs</span><span class="p">[</span><span class="n">nc</span><span class="o">.</span><span class="n">lower_</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">min_freq</span><span class="p">)</span>
 
-    <span class="k">for</span> <span class="n">nc</span> <span class="ow">in</span> <span class="n">ncs</span><span class="p">:</span>
-        <span class="k">yield</span> <span class="n">nc</span></div>
+    <span class="k">for</span> <span class="n">nc</span> <span class="ow">in</span> <span class="n">ncs</span><span class="p">:</span></div>
+        <span class="k">yield</span> <span class="n">nc</span>
 
 
 <div class="viewcode-block" id="pos_regex_matches"><a class="viewcode-back" href="../../api_reference.html#textacy.extract.pos_regex_matches">[docs]</a><span class="k">def</span> <span class="nf">pos_regex_matches</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">pattern</span><span class="p">):</span>
@@ -482,8 +484,8 @@
 
     <span class="n">tags</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tok</span><span class="o">.</span><span class="n">pos_</span> <span class="k">for</span> <span class="n">tok</span> <span class="ow">in</span> <span class="n">doc</span><span class="p">)</span>
 
-    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">tags</span><span class="p">):</span>
-        <span class="k">yield</span> <span class="n">doc</span><span class="p">[</span><span class="n">tags</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">()]</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">):</span><span class="n">tags</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">m</span><span class="o">.</span><span class="n">end</span><span class="p">()]</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)]</span></div>
+    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">tags</span><span class="p">):</span></div>
+        <span class="k">yield</span> <span class="n">doc</span><span class="p">[</span><span class="n">tags</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">()]</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">):</span><span class="n">tags</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">m</span><span class="o">.</span><span class="n">end</span><span class="p">()]</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)]</span>
 
 
 <div class="viewcode-block" id="subject_verb_object_triples"><a class="viewcode-back" href="../../api_reference.html#textacy.extract.subject_verb_object_triples">[docs]</a><span class="k">def</span> <span class="nf">subject_verb_object_triples</span><span class="p">(</span><span class="n">doc</span><span class="p">):</span>
@@ -533,8 +535,8 @@
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">span</span> <span class="o">=</span> <span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">i</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">i</span><span class="p">)</span>
                     <span class="n">obj</span> <span class="o">=</span> <span class="n">sent</span><span class="p">[</span><span class="n">span</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">start_i</span><span class="p">:</span> <span class="n">span</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">start_i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
-
-                    <span class="k">yield</span> <span class="p">(</span><span class="n">subj</span><span class="p">,</span> <span class="n">verb</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span></div>
+</div>
+                    <span class="k">yield</span> <span class="p">(</span><span class="n">subj</span><span class="p">,</span> <span class="n">verb</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="acronyms_and_definitions"><a class="viewcode-back" href="../../api_reference.html#textacy.extract.acronyms_and_definitions">[docs]</a><span class="k">def</span> <span class="nf">acronyms_and_definitions</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">known_acro_defs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -620,8 +622,8 @@
             <span class="n">acro_defs</span><span class="p">[</span><span class="n">acro</span><span class="p">]</span> <span class="o">=</span> <span class="n">defs</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">acro_defs</span><span class="p">[</span><span class="n">acro</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">defs</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-
-    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">acro_defs</span><span class="p">)</span></div>
+</div>
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">acro_defs</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">_get_acronym_definition</span><span class="p">(</span><span class="n">acronym</span><span class="p">,</span> <span class="n">window</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">0.8</span><span class="p">):</span>
@@ -648,8 +650,8 @@
         <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span>
         <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
         <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">m</span><span class="p">):</span>
-            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">compat</span><span class="o">.</span><span class="n">range_</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">m</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">compat</span><span class="o">.</span><span class="n">range_</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">Y</span><span class="p">[</span><span class="n">j</span><span class="p">]:</span>
                     <span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">c</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
                     <span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
@@ -662,8 +664,8 @@
     <span class="k">def</span> <span class="nf">parse_lcs_matrix</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">start_i</span><span class="p">,</span> <span class="n">start_j</span><span class="p">,</span> <span class="n">lcs_length</span><span class="p">,</span> <span class="n">stack</span><span class="p">,</span> <span class="n">vectors</span><span class="p">):</span>
         <span class="n">m</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">n</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start_i</span><span class="p">,</span> <span class="n">m</span><span class="p">):</span>
-            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start_j</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">compat</span><span class="o">.</span><span class="n">range_</span><span class="p">(</span><span class="n">start_i</span><span class="p">,</span> <span class="n">m</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">compat</span><span class="o">.</span><span class="n">range_</span><span class="p">(</span><span class="n">start_j</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                     <span class="n">s</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
                     <span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
@@ -685,7 +687,7 @@
         <span class="n">vv</span><span class="p">[</span><span class="s1">&#39;distance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">-</span> <span class="n">last</span>
         <span class="n">vv</span><span class="p">[</span><span class="s1">&#39;stop_count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">vv</span><span class="p">[</span><span class="s1">&#39;misses&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">last</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">compat</span><span class="o">.</span><span class="n">range_</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">last</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">v</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">types</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;s&#39;</span><span class="p">:</span>
                 <span class="n">vv</span><span class="p">[</span><span class="s1">&#39;stop_count&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="k">elif</span> <span class="n">v</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">types</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="s1">&#39;h&#39;</span><span class="p">]:</span>
@@ -732,7 +734,7 @@
         <span class="k">elif</span> <span class="s1">&#39;-&#39;</span> <span class="ow">in</span> <span class="n">tok_text</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">tok_text</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">):</span>
             <span class="n">tok_split</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tok_text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">t</span><span class="p">]</span>
             <span class="n">def_leads</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">tok_split</span><span class="p">)</span>
-            <span class="n">def_types</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="s1">&#39;H&#39;</span> <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="s1">&#39;h&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tok_split</span><span class="p">)))</span>
+            <span class="n">def_types</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="s1">&#39;H&#39;</span> <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="s1">&#39;h&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">compat</span><span class="o">.</span><span class="n">range_</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tok_split</span><span class="p">)))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">def_leads</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tok_text</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
             <span class="n">def_types</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
@@ -891,8 +893,8 @@
             <span class="k">if</span> <span class="n">min_frag_i</span> <span class="o">==</span> <span class="n">max_cue_i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">min_frag_i</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="n">the_fragment</span> <span class="o">=</span> <span class="n">doc</span><span class="p">[</span><span class="n">min_frag_i</span><span class="p">:</span> <span class="n">max_frag_i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
-
-            <span class="k">yield</span> <span class="p">(</span><span class="n">the_entity</span><span class="p">,</span> <span class="n">the_cue</span><span class="p">,</span> <span class="n">the_fragment</span><span class="p">)</span></div>
+</div>
+            <span class="k">yield</span> <span class="p">(</span><span class="n">the_entity</span><span class="p">,</span> <span class="n">the_cue</span><span class="p">,</span> <span class="n">the_fragment</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="direct_quotations"><a class="viewcode-back" href="../../api_reference.html#textacy.extract.direct_quotations">[docs]</a><span class="k">def</span> <span class="nf">direct_quotations</span><span class="p">(</span><span class="n">doc</span><span class="p">):</span>
@@ -986,8 +988,8 @@
             <span class="n">span</span> <span class="o">=</span> <span class="n">spacy_utils</span><span class="o">.</span><span class="n">get_span_for_compound_noun</span><span class="p">(</span><span class="n">rv_subj</span><span class="p">)</span>
             <span class="n">speaker</span> <span class="o">=</span> <span class="n">doc</span><span class="p">[</span><span class="n">span</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="n">span</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
 
-            <span class="k">yield</span> <span class="p">(</span><span class="n">speaker</span><span class="p">,</span> <span class="n">rv</span><span class="p">,</span> <span class="n">quote</span><span class="p">)</span>
-            <span class="k">break</span></div>
+            <span class="k">yield</span> <span class="p">(</span><span class="n">speaker</span><span class="p">,</span> <span class="n">rv</span><span class="p">,</span> <span class="n">quote</span><span class="p">)</span></div>
+            <span class="k">break</span>
 </pre></div>
 
            </div>
@@ -1024,7 +1026,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'0.5.0',
+            VERSION:'0.6.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

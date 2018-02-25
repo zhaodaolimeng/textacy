@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>textacy.datasets.oxford_text_archive &mdash; textacy 0.5.0 documentation</title>
+  <title>textacy.datasets.oxford_text_archive &mdash; textacy 0.6.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../../genindex.html"/>
         <link rel="search" title="Search" href="../../../search.html"/>
-    <link rel="top" title="textacy 0.5.0 documentation" href="../../../index.html"/>
+    <link rel="top" title="textacy 0.6.0 documentation" href="../../../index.html"/>
         <link rel="up" title="Module code" href="../../index.html"/> 
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.5
+                0.6
               </div>
             
           
@@ -181,17 +181,17 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">unicode_literals</span>
 
-<span class="kn">import</span> <span class="nn">io</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">zipfile</span>
+<span class="kn">from</span> <span class="nn">io</span> <span class="k">import</span> <span class="n">StringIO</span>
 
 <span class="kn">import</span> <span class="nn">requests</span>
 
 <span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">compat</span>
 <span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">data_dir</span>
-<span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">fileio</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">io</span>
 <span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">preprocess</span>
 <span class="kn">from</span> <span class="nn">.base</span> <span class="k">import</span> <span class="n">Dataset</span>
 
@@ -241,7 +241,7 @@
 
 <span class="sd">    Stream literary works into a :class:`textacy.Corpus`::</span>
 
-<span class="sd">        &gt;&gt;&gt; text_stream, metadata_stream = textacy.fileio.split_record_fields(</span>
+<span class="sd">        &gt;&gt;&gt; text_stream, metadata_stream = textacy.io.split_records(</span>
 <span class="sd">        ...     ota.records(limit=10), &#39;text&#39;)</span>
 <span class="sd">        &gt;&gt;&gt; c = textacy.Corpus(&#39;en&#39;, texts=text_stream, metadatas=metadata_stream)</span>
 <span class="sd">        &gt;&gt;&gt; c</span>
@@ -300,10 +300,10 @@
             <span class="k">return</span>
         <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
             <span class="s1">&#39;Downloading data from </span><span class="si">%s</span><span class="s1"> and writing it to </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
-        <span class="n">fileio</span><span class="o">.</span><span class="n">write_streaming_download_file</span><span class="p">(</span>
+        <span class="n">io</span><span class="o">.</span><span class="n">write_http_stream</span><span class="p">(</span>
             <span class="n">url</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;wb&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">auto_make_dirs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">chunk_size</span><span class="o">=</span><span class="mi">1024</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_and_parse_metadata</span><span class="p">()</span></div>
+            <span class="n">make_dirs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">chunk_size</span><span class="o">=</span><span class="mi">1024</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_and_parse_metadata</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_load_and_parse_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -325,7 +325,7 @@
 
         <span class="n">metadata</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">with</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_filename</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-            <span class="n">subf</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;ota-master/metadata.tsv&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span>
+            <span class="n">subf</span> <span class="o">=</span> <span class="n">StringIO</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;ota-master/metadata.tsv&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span>
             <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">compat</span><span class="o">.</span><span class="n">csv</span><span class="o">.</span><span class="n">DictReader</span><span class="p">(</span><span class="n">subf</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">):</span>
                 <span class="c1"># only include English-language works (99.9% of all works)</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;Language&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;English&#39;</span><span class="p">):</span>
@@ -376,8 +376,8 @@
 <span class="sd">            ValueError: If any filtering options are invalid.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">texts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_iterate</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">author</span><span class="p">,</span> <span class="n">date_range</span><span class="p">,</span> <span class="n">min_len</span><span class="p">,</span> <span class="n">limit</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">texts</span><span class="p">:</span>
-            <span class="k">yield</span> <span class="n">text</span></div>
+        <span class="k">for</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">texts</span><span class="p">:</span></div>
+            <span class="k">yield</span> <span class="n">text</span>
 
 <div class="viewcode-block" id="OxfordTextArchive.records"><a class="viewcode-back" href="../../../api_reference.html#textacy.datasets.oxford_text_archive.OxfordTextArchive.records">[docs]</a>    <span class="k">def</span> <span class="nf">records</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">author</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">date_range</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">min_len</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">limit</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -403,8 +403,8 @@
 <span class="sd">            ValueError: If any filtering options are invalid.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">records</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_iterate</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">author</span><span class="p">,</span> <span class="n">date_range</span><span class="p">,</span> <span class="n">min_len</span><span class="p">,</span> <span class="n">limit</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span><span class="p">:</span>
-            <span class="k">yield</span> <span class="n">record</span></div>
+        <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span><span class="p">:</span></div>
+            <span class="k">yield</span> <span class="n">record</span>
 
     <span class="k">def</span> <span class="nf">_iterate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text_only</span><span class="p">,</span> <span class="n">author</span><span class="p">,</span> <span class="n">date_range</span><span class="p">,</span> <span class="n">min_len</span><span class="p">,</span> <span class="n">limit</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -454,8 +454,8 @@
                     <span class="k">yield</span> <span class="n">meta</span>
 
                 <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
-                <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="n">limit</span><span class="p">:</span>
-                    <span class="k">break</span></div>
+                <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="n">limit</span><span class="p">:</span></div>
+                    <span class="k">break</span>
 </pre></div>
 
            </div>
@@ -492,7 +492,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../../',
-            VERSION:'0.5.0',
+            VERSION:'0.6.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

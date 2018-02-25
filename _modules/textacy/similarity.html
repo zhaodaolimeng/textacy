@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>textacy.similarity &mdash; textacy 0.5.0 documentation</title>
+  <title>textacy.similarity &mdash; textacy 0.6.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="textacy 0.5.0 documentation" href="../../index.html"/>
+    <link rel="top" title="textacy 0.6.0 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.5
+                0.6
               </div>
             
           
@@ -159,7 +159,11 @@
             
   <h1>Source code for textacy.similarity</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Collection of semantic similarity metrics.</span>
+<span class="sd">Similarity</span>
+<span class="sd">----------</span>
+
+<span class="sd">Collection of various semantic similarity metrics between docs, sequences of tokens,</span>
+<span class="sd">and individual tokens, where tokens may either be spaCy objects or strings.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span>
 
@@ -222,17 +226,17 @@
         <span class="n">word_idxs</span><span class="p">[</span><span class="n">word</span><span class="o">.</span><span class="n">orth</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">extract</span><span class="o">.</span><span class="n">words</span><span class="p">(</span><span class="n">doc1</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">word</span><span class="o">.</span><span class="n">has_vector</span><span class="p">)</span>
-    <span class="n">vec1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">vec1</span><span class="p">[</span><span class="n">word_idx</span><span class="p">]</span> <span class="k">for</span> <span class="n">word_idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">word_idxs</span><span class="p">))])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">double</span><span class="p">)</span>
+    <span class="n">vec1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">vec1</span><span class="p">[</span><span class="n">word_idx</span><span class="p">]</span> <span class="k">for</span> <span class="n">word_idx</span> <span class="ow">in</span> <span class="n">compat</span><span class="o">.</span><span class="n">range_</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">word_idxs</span><span class="p">))])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">double</span><span class="p">)</span>
     <span class="n">vec1</span> <span class="o">/=</span> <span class="n">vec1</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>  <span class="c1"># normalize word counts</span>
 
     <span class="n">vec2</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">(</span>
         <span class="n">word_idxs</span><span class="p">[</span><span class="n">word</span><span class="o">.</span><span class="n">orth</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">extract</span><span class="o">.</span><span class="n">words</span><span class="p">(</span><span class="n">doc2</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">word</span><span class="o">.</span><span class="n">has_vector</span><span class="p">)</span>
-    <span class="n">vec2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">vec2</span><span class="p">[</span><span class="n">word_idx</span><span class="p">]</span> <span class="k">for</span> <span class="n">word_idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">word_idxs</span><span class="p">))])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">double</span><span class="p">)</span>
+    <span class="n">vec2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">vec2</span><span class="p">[</span><span class="n">word_idx</span><span class="p">]</span> <span class="k">for</span> <span class="n">word_idx</span> <span class="ow">in</span> <span class="n">compat</span><span class="o">.</span><span class="n">range_</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">word_idxs</span><span class="p">))])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">double</span><span class="p">)</span>
     <span class="n">vec2</span> <span class="o">/=</span> <span class="n">vec2</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>  <span class="c1"># normalize word counts</span>
-
-    <span class="k">return</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">emd</span><span class="p">(</span><span class="n">vec1</span><span class="p">,</span> <span class="n">vec2</span><span class="p">,</span> <span class="n">distance_mat</span><span class="p">)</span></div>
+</div>
+    <span class="k">return</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">emd</span><span class="p">(</span><span class="n">vec1</span><span class="p">,</span> <span class="n">vec2</span><span class="p">,</span> <span class="n">distance_mat</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="word2vec"><a class="viewcode-back" href="../../api_reference.html#textacy.similarity.word2vec">[docs]</a><span class="k">def</span> <span class="nf">word2vec</span><span class="p">(</span><span class="n">obj1</span><span class="p">,</span> <span class="n">obj2</span><span class="p">):</span>
@@ -251,8 +255,8 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj1</span><span class="p">,</span> <span class="n">Doc</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj2</span><span class="p">,</span> <span class="n">Doc</span><span class="p">):</span>
         <span class="n">obj1</span> <span class="o">=</span> <span class="n">obj1</span><span class="o">.</span><span class="n">spacy_doc</span>
-        <span class="n">obj2</span> <span class="o">=</span> <span class="n">obj2</span><span class="o">.</span><span class="n">spacy_doc</span>
-    <span class="k">return</span> <span class="n">obj1</span><span class="o">.</span><span class="n">similarity</span><span class="p">(</span><span class="n">obj2</span><span class="p">)</span></div>
+        <span class="n">obj2</span> <span class="o">=</span> <span class="n">obj2</span><span class="o">.</span><span class="n">spacy_doc</span></div>
+    <span class="k">return</span> <span class="n">obj1</span><span class="o">.</span><span class="n">similarity</span><span class="p">(</span><span class="n">obj2</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="jaccard"><a class="viewcode-back" href="../../api_reference.html#textacy.similarity.jaccard">[docs]</a><span class="k">def</span> <span class="nf">jaccard</span><span class="p">(</span><span class="n">obj1</span><span class="p">,</span> <span class="n">obj2</span><span class="p">,</span> <span class="n">fuzzy_match</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">match_threshold</span><span class="o">=</span><span class="mf">0.8</span><span class="p">):</span>
@@ -298,8 +302,8 @@
                 <span class="n">intersection</span> <span class="o">+=</span> <span class="mi">1</span>
     <span class="k">elif</span> <span class="n">fuzzy_match</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;fuzzy matching not possible with str inputs&#39;</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">intersection</span> <span class="o">/</span> <span class="n">union</span></div>
+</div>
+    <span class="k">return</span> <span class="n">intersection</span> <span class="o">/</span> <span class="n">union</span>
 
 
 <div class="viewcode-block" id="hamming"><a class="viewcode-back" href="../../api_reference.html#textacy.similarity.hamming">[docs]</a><span class="k">def</span> <span class="nf">hamming</span><span class="p">(</span><span class="n">str1</span><span class="p">,</span> <span class="n">str2</span><span class="p">):</span>
@@ -332,8 +336,8 @@
         <span class="c1"># distance is # of different chars + difference in str lengths</span>
         <span class="n">distance</span> <span class="o">=</span> <span class="n">len_str1</span> <span class="o">-</span> <span class="n">len_str2</span>
         <span class="n">distance</span> <span class="o">+=</span> <span class="n">_hamming</span><span class="p">(</span><span class="n">str1</span><span class="p">[:</span><span class="n">len_str2</span><span class="p">],</span> <span class="n">str2</span><span class="p">)</span>
-    <span class="n">distance</span> <span class="o">/=</span> <span class="n">len_str1</span>
-    <span class="k">return</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">distance</span></div>
+    <span class="n">distance</span> <span class="o">/=</span> <span class="n">len_str1</span></div>
+    <span class="k">return</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">distance</span>
 
 
 <div class="viewcode-block" id="levenshtein"><a class="viewcode-back" href="../../api_reference.html#textacy.similarity.levenshtein">[docs]</a><span class="k">def</span> <span class="nf">levenshtein</span><span class="p">(</span><span class="n">str1</span><span class="p">,</span> <span class="n">str2</span><span class="p">):</span>
@@ -353,8 +357,8 @@
 <span class="sd">        where larger values correspond to more similar strings</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">distance</span> <span class="o">=</span> <span class="n">_levenshtein</span><span class="p">(</span><span class="n">str1</span><span class="p">,</span> <span class="n">str2</span><span class="p">)</span>
-    <span class="n">distance</span> <span class="o">/=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">str1</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">str2</span><span class="p">))</span>
-    <span class="k">return</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">distance</span></div>
+    <span class="n">distance</span> <span class="o">/=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">str1</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">str2</span><span class="p">))</span></div>
+    <span class="k">return</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">distance</span>
 
 
 <div class="viewcode-block" id="jaro_winkler"><a class="viewcode-back" href="../../api_reference.html#textacy.similarity.jaro_winkler">[docs]</a><span class="k">def</span> <span class="nf">jaro_winkler</span><span class="p">(</span><span class="n">str1</span><span class="p">,</span> <span class="n">str2</span><span class="p">,</span> <span class="n">prefix_weight</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
@@ -371,8 +375,8 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        float: similarity between `str1` and `str2` in the interval [0.0, 1.0],</span>
 <span class="sd">        where larger values correspond to more similar strings</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">_jaro_winkler</span><span class="p">(</span><span class="n">str1</span><span class="p">,</span> <span class="n">str2</span><span class="p">,</span> <span class="n">prefix_weight</span><span class="p">)</span></div>
+<span class="sd">    &quot;&quot;&quot;</span></div>
+    <span class="k">return</span> <span class="n">_jaro_winkler</span><span class="p">(</span><span class="n">str1</span><span class="p">,</span> <span class="n">str2</span><span class="p">,</span> <span class="n">prefix_weight</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="token_sort_ratio"><a class="viewcode-back" href="../../api_reference.html#textacy.similarity.token_sort_ratio">[docs]</a><span class="k">def</span> <span class="nf">token_sort_ratio</span><span class="p">(</span><span class="n">str1</span><span class="p">,</span> <span class="n">str2</span><span class="p">):</span>
@@ -393,8 +397,8 @@
     <span class="n">str1</span> <span class="o">=</span> <span class="n">_force_unicode</span><span class="p">(</span><span class="n">str1</span><span class="p">)</span>
     <span class="n">str2</span> <span class="o">=</span> <span class="n">_force_unicode</span><span class="p">(</span><span class="n">str2</span><span class="p">)</span>
     <span class="n">str1_proc</span> <span class="o">=</span> <span class="n">_process_and_sort</span><span class="p">(</span><span class="n">str1</span><span class="p">)</span>
-    <span class="n">str2_proc</span> <span class="o">=</span> <span class="n">_process_and_sort</span><span class="p">(</span><span class="n">str2</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">_ratio</span><span class="p">(</span><span class="n">str1_proc</span><span class="p">,</span> <span class="n">str2_proc</span><span class="p">)</span></div>
+    <span class="n">str2_proc</span> <span class="o">=</span> <span class="n">_process_and_sort</span><span class="p">(</span><span class="n">str2</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">_ratio</span><span class="p">(</span><span class="n">str1_proc</span><span class="p">,</span> <span class="n">str2_proc</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">_force_unicode</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
@@ -456,7 +460,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'0.5.0',
+            VERSION:'0.6.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

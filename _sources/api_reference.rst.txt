@@ -46,31 +46,40 @@ Information Extraction
 .. automodule:: textacy.keyterms
     :members:
 
-Topic Modeling
---------------
+Vectorization & Topic Modeling
+------------------------------
+
+.. automodule:: textacy.vsm.vectorizers
+    :members:
+
+.. automodule:: textacy.vsm.matrix_utils
+    :members:
 
 .. automodule:: textacy.tm.topic_model
     :members:
 
-Representations
----------------
+IO
+--
 
-.. automodule:: textacy.network
+.. automodule:: textacy.io.utils
     :members:
 
-.. automodule:: textacy.vsm
+.. automodule:: textacy.io.text
     :members:
 
-File IO
--------
-
-.. automodule:: textacy.fileio.read
+.. automodule:: textacy.io.json
     :members:
 
-.. automodule:: textacy.fileio.write
+.. automodule:: textacy.io.csv
     :members:
 
-.. automodule:: textacy.fileio.utils
+.. automodule:: textacy.io.matrix
+    :members:
+
+.. automodule:: textacy.io.spacy
+    :members:
+
+.. automodule:: textacy.io.http
     :members:
 
 Visualization
@@ -96,6 +105,9 @@ Utilities
 
 Other Stuff!
 ------------
+
+.. automodule:: textacy.network
+    :members:
 
 .. automodule:: textacy.similarity
     :members:

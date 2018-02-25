@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>textacy.tm.topic_model &mdash; textacy 0.5.0 documentation</title>
+  <title>textacy.tm.topic_model &mdash; textacy 0.6.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../../genindex.html"/>
         <link rel="search" title="Search" href="../../../search.html"/>
-    <link rel="top" title="textacy 0.5.0 documentation" href="../../../index.html"/>
+    <link rel="top" title="textacy 0.6.0 documentation" href="../../../index.html"/>
         <link rel="up" title="Module code" href="../../index.html"/> 
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.5
+                0.6
               </div>
             
           
@@ -158,7 +158,12 @@
            <div itemprop="articleBody">
             
   <h1>Source code for textacy.tm.topic_model</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Convenient and consolidated topic-modeling, built on ``scikit-learn``.&quot;&quot;&quot;</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Topic Models</span>
+<span class="sd">------------</span>
+
+<span class="sd">Convenient and consolidated topic-modeling, built on ``scikit-learn``.</span>
+<span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span>
 
 <span class="kn">import</span> <span class="nn">logging</span>
@@ -167,6 +172,7 @@
 <span class="kn">from</span> <span class="nn">sklearn.decomposition</span> <span class="k">import</span> <span class="n">NMF</span><span class="p">,</span> <span class="n">LatentDirichletAllocation</span><span class="p">,</span> <span class="n">TruncatedSVD</span>
 <span class="kn">from</span> <span class="nn">sklearn.externals</span> <span class="k">import</span> <span class="n">joblib</span>
 
+<span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">compat</span>
 <span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">viz</span>
 
 <span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
@@ -183,7 +189,7 @@
 <span class="sd">    See :class:`textacy.vsm.Vectorizer` for details. In short::</span>
 
 <span class="sd">        &gt;&gt;&gt; vectorizer = Vectorizer(</span>
-<span class="sd">        ...     weighting=&#39;tfidf&#39;, normalize=True, smooth_idf=True,</span>
+<span class="sd">        ...     tf_type=&#39;linear&#39;, apply_idf=True, idf_type=&#39;smooth&#39;, norm=&#39;l2&#39;,</span>
 <span class="sd">        ...     min_df=3, max_df=0.95, max_n_terms=100000)</span>
 <span class="sd">        &gt;&gt;&gt; doc_term_matrix = vectorizer.fit_transform(terms_list)</span>
 
@@ -337,13 +343,13 @@
 <span class="sd">                i.e. topic weights on each document sum to 1</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            ``numpy.ndarray``: Document-topic matrix with shape (n_docs, n_topics).</span>
+<span class="sd">            :class:`numpy.ndarray`: Document-topic matrix with shape (n_docs, n_topics).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">doc_topic_matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">doc_term_matrix</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">normalize</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">doc_topic_matrix</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">doc_topic_matrix</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">doc_topic_matrix</span></div>
+        <span class="k">else</span><span class="p">:</span></div>
+            <span class="k">return</span> <span class="n">doc_topic_matrix</span>
 
 <div class="viewcode-block" id="TopicModel.top_topic_terms"><a class="viewcode-back" href="../../../api_reference.html#textacy.tm.topic_model.TopicModel.top_topic_terms">[docs]</a>    <span class="k">def</span> <span class="nf">top_topic_terms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">id2term</span><span class="p">,</span> <span class="n">topics</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">top_n</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -375,7 +381,7 @@
 <span class="sd">                    [(0, ((&#39;foo&#39;, 0.1415), (&#39;bar&#39;, 0.0986)))]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">topics</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-            <span class="n">topics</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_topics</span><span class="p">)</span>
+            <span class="n">topics</span> <span class="o">=</span> <span class="n">compat</span><span class="o">.</span><span class="n">range_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_topics</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">topics</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
             <span class="n">topics</span> <span class="o">=</span> <span class="p">(</span><span class="n">topics</span><span class="p">,)</span>
 
@@ -385,8 +391,8 @@
                 <span class="k">yield</span> <span class="p">(</span><span class="n">topic_idx</span><span class="p">,</span>
                        <span class="nb">tuple</span><span class="p">(</span><span class="n">id2term</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">topic</span><span class="p">)[:</span><span class="o">-</span><span class="n">top_n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">yield</span> <span class="p">(</span><span class="n">topic_idx</span><span class="p">,</span>
-                       <span class="nb">tuple</span><span class="p">((</span><span class="n">id2term</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">topic</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">topic</span><span class="p">)[:</span><span class="o">-</span><span class="n">top_n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span></div>
+                <span class="k">yield</span> <span class="p">(</span><span class="n">topic_idx</span><span class="p">,</span></div>
+                       <span class="nb">tuple</span><span class="p">((</span><span class="n">id2term</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">topic</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">topic</span><span class="p">)[:</span><span class="o">-</span><span class="n">top_n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
 
 <div class="viewcode-block" id="TopicModel.top_topic_docs"><a class="viewcode-back" href="../../../api_reference.html#textacy.tm.topic_model.TopicModel.top_topic_docs">[docs]</a>    <span class="k">def</span> <span class="nf">top_topic_docs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">doc_topic_matrix</span><span class="p">,</span>
                        <span class="n">topics</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">top_n</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -394,9 +400,8 @@
 <span class="sd">        Get the top ``top_n`` docs by weight per topic in ``doc_topic_matrix``.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            doc_topic_matrix (``numpy.ndarray``): document-topic matrix with shape</span>
-<span class="sd">                (n_docs, n_topics), the result of calling</span>
-<span class="sd">                :func:`get_doc_topic_matrix() &lt;textacy.topic_modeling.get_doc_topic_matrix&gt;`</span>
+<span class="sd">            doc_topic_matrix (:class:`numpy.ndarray`): document-topic matrix with shape</span>
+<span class="sd">                (n_docs, n_topics), the result of calling :meth:`TopicModel.get_doc_topic_matrix()`</span>
 <span class="sd">            topics (int or Sequence[int]): topic(s) for which to return top docs;</span>
 <span class="sd">                if -1, all topics&#39; docs are returned</span>
 <span class="sd">            top_n (int): number of top docs to return per topic</span>
@@ -417,7 +422,7 @@
 <span class="sd">                    [(0, ((4, 0.3217), (2, 0.2154)))]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">topics</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-            <span class="n">topics</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_topics</span><span class="p">)</span>
+            <span class="n">topics</span> <span class="o">=</span> <span class="n">compat</span><span class="o">.</span><span class="n">range_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_topics</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">topics</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
             <span class="n">topics</span> <span class="o">=</span> <span class="p">(</span><span class="n">topics</span><span class="p">,)</span>
 
@@ -427,17 +432,16 @@
                 <span class="k">yield</span> <span class="p">(</span><span class="n">topic_idx</span><span class="p">,</span>
                        <span class="nb">tuple</span><span class="p">(</span><span class="n">doc_idx</span> <span class="k">for</span> <span class="n">doc_idx</span> <span class="ow">in</span> <span class="n">top_doc_idxs</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">yield</span> <span class="p">(</span><span class="n">topic_idx</span><span class="p">,</span>
-                       <span class="nb">tuple</span><span class="p">((</span><span class="n">doc_idx</span><span class="p">,</span> <span class="n">doc_topic_matrix</span><span class="p">[</span><span class="n">doc_idx</span><span class="p">,</span> <span class="n">topic_idx</span><span class="p">])</span> <span class="k">for</span> <span class="n">doc_idx</span> <span class="ow">in</span> <span class="n">top_doc_idxs</span><span class="p">))</span></div>
+                <span class="k">yield</span> <span class="p">(</span><span class="n">topic_idx</span><span class="p">,</span></div>
+                       <span class="nb">tuple</span><span class="p">((</span><span class="n">doc_idx</span><span class="p">,</span> <span class="n">doc_topic_matrix</span><span class="p">[</span><span class="n">doc_idx</span><span class="p">,</span> <span class="n">topic_idx</span><span class="p">])</span> <span class="k">for</span> <span class="n">doc_idx</span> <span class="ow">in</span> <span class="n">top_doc_idxs</span><span class="p">))</span>
 
 <div class="viewcode-block" id="TopicModel.top_doc_topics"><a class="viewcode-back" href="../../../api_reference.html#textacy.tm.topic_model.TopicModel.top_doc_topics">[docs]</a>    <span class="k">def</span> <span class="nf">top_doc_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">doc_topic_matrix</span><span class="p">,</span> <span class="n">docs</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">top_n</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the top ``top_n`` topics by weight per doc for ``docs`` in ``doc_topic_matrix``.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            doc_topic_matrix (``numpy.ndarray``): document-topic matrix with shape</span>
-<span class="sd">                (n_docs, n_topics), the result of calling</span>
-<span class="sd">                :func:`get_doc_topic_matrix() &lt;textacy.topic_modeling.get_doc_topic_matrix&gt;`</span>
+<span class="sd">            doc_topic_matrix (:class:`numpy.ndarray`): document-topic matrix with shape</span>
+<span class="sd">                (n_docs, n_topics), the result of calling :meth:`TopicModel.get_doc_topic_matrix()`</span>
 <span class="sd">            docs (int or Sequence[int]): docs for which to return top topics;</span>
 <span class="sd">                if -1, all docs&#39; top topics are returned</span>
 <span class="sd">            top_n (int): number of top topics to return per doc</span>
@@ -458,7 +462,7 @@
 <span class="sd">                    [(0, ((1, 0.2855), (4, 0.2412)))]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">docs</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-            <span class="n">docs</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">doc_topic_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">docs</span> <span class="o">=</span> <span class="n">compat</span><span class="o">.</span><span class="n">range_</span><span class="p">(</span><span class="n">doc_topic_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
             <span class="n">docs</span> <span class="o">=</span> <span class="p">(</span><span class="n">docs</span><span class="p">,)</span>
 
@@ -468,8 +472,8 @@
                 <span class="k">yield</span> <span class="p">(</span><span class="n">doc_idx</span><span class="p">,</span>
                        <span class="nb">tuple</span><span class="p">(</span><span class="n">topic_idx</span> <span class="k">for</span> <span class="n">topic_idx</span> <span class="ow">in</span> <span class="n">top_topic_idxs</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">yield</span> <span class="p">(</span><span class="n">doc_idx</span><span class="p">,</span>
-                       <span class="nb">tuple</span><span class="p">((</span><span class="n">topic_idx</span><span class="p">,</span> <span class="n">doc_topic_matrix</span><span class="p">[</span><span class="n">doc_idx</span><span class="p">,</span> <span class="n">topic_idx</span><span class="p">])</span> <span class="k">for</span> <span class="n">topic_idx</span> <span class="ow">in</span> <span class="n">top_topic_idxs</span><span class="p">))</span></div>
+                <span class="k">yield</span> <span class="p">(</span><span class="n">doc_idx</span><span class="p">,</span></div>
+                       <span class="nb">tuple</span><span class="p">((</span><span class="n">topic_idx</span><span class="p">,</span> <span class="n">doc_topic_matrix</span><span class="p">[</span><span class="n">doc_idx</span><span class="p">,</span> <span class="n">topic_idx</span><span class="p">])</span> <span class="k">for</span> <span class="n">topic_idx</span> <span class="ow">in</span> <span class="n">top_topic_idxs</span><span class="p">))</span>
 
 <div class="viewcode-block" id="TopicModel.topic_weights"><a class="viewcode-back" href="../../../api_reference.html#textacy.tm.topic_model.TopicModel.topic_weights">[docs]</a>    <span class="k">def</span> <span class="nf">topic_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">doc_topic_matrix</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -478,14 +482,13 @@
 <span class="sd">        or not. I suppose either way makes sense... o_O</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            doc_topic_matrix (``numpy.ndarray``): document-topic matrix with shape</span>
-<span class="sd">                (n_docs, n_topics), the result of calling</span>
-<span class="sd">                :func:`get_doc_topic_matrix() &lt;textacy.topic_modeling.get_doc_topic_matrix&gt;`</span>
+<span class="sd">            doc_topic_matrix (:class:`numpy.ndarray`): document-topic matrix with shape</span>
+<span class="sd">                (n_docs, n_topics), the result of calling :meth:`TopicModel.get_doc_topic_matrix()`</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            ``numpy.ndarray``: the ith element is the ith topic&#39;s overall weight</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">doc_topic_matrix</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="n">doc_topic_matrix</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span></div>
+<span class="sd">            :class:`numpy.ndarray`: the ith element is the ith topic&#39;s overall weight</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+        <span class="k">return</span> <span class="n">doc_topic_matrix</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="n">doc_topic_matrix</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
 
     <span class="c1"># def get_topic_coherence(self, topic_idx):</span>
     <span class="c1">#     raise NotImplementedError()</span>
@@ -502,7 +505,7 @@
 <span class="sd">        to promote comparison of terms both within and across topics.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            doc_term_matrix (``np.ndarray``-like or sparse matrix): corpus</span>
+<span class="sd">            doc_term_matrix (:class:`numpy.ndarray` or sparse matrix): corpus</span>
 <span class="sd">                represented as a document-term matrix with shape (n_docs, n_terms);</span>
 <span class="sd">                may have tf- or tfidf-weighting</span>
 <span class="sd">            id2term (List[str] or dict): object that returns the term string corresponding</span>
@@ -552,7 +555,7 @@
 
         <span class="c1"># get topics indices</span>
         <span class="k">if</span> <span class="n">topics</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-            <span class="n">topic_inds</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_topics</span><span class="p">))</span>
+            <span class="n">topic_inds</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">compat</span><span class="o">.</span><span class="n">range_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_topics</span><span class="p">))</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">topics</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
             <span class="n">topic_inds</span> <span class="o">=</span> <span class="p">(</span><span class="n">topics</span><span class="p">,)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -572,7 +575,7 @@
 
         <span class="c1"># get column index of any topics to highlight in termite plot</span>
         <span class="k">if</span> <span class="n">highlight_topics</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">highlight_cols</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">topic_inds</span><span class="p">))</span>
+            <span class="n">highlight_cols</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">compat</span><span class="o">.</span><span class="n">range_</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">topic_inds</span><span class="p">))</span>
                                    <span class="k">if</span> <span class="n">topic_inds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">in</span> <span class="n">highlight_topics</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">highlight_cols</span> <span class="o">=</span> <span class="kc">None</span>
@@ -624,8 +627,8 @@
                                       <span class="k">for</span> <span class="n">topic_ind</span> <span class="ow">in</span> <span class="n">topic_inds</span><span class="p">])</span><span class="o">.</span><span class="n">T</span>
 
         <span class="k">return</span> <span class="n">viz</span><span class="o">.</span><span class="n">draw_termite_plot</span><span class="p">(</span>
-            <span class="n">term_topic_weights</span><span class="p">,</span> <span class="n">topic_labels</span><span class="p">,</span> <span class="n">term_labels</span><span class="p">,</span>
-            <span class="n">highlight_cols</span><span class="o">=</span><span class="n">highlight_cols</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="n">save</span><span class="p">)</span></div></div>
+            <span class="n">term_topic_weights</span><span class="p">,</span> <span class="n">topic_labels</span><span class="p">,</span> <span class="n">term_labels</span><span class="p">,</span></div></div>
+            <span class="n">highlight_cols</span><span class="o">=</span><span class="n">highlight_cols</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="n">save</span><span class="p">)</span>
 </pre></div>
 
            </div>
@@ -662,7 +665,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../../',
-            VERSION:'0.5.0',
+            VERSION:'0.6.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

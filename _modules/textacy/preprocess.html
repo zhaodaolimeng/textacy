@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>textacy.preprocess &mdash; textacy 0.5.0 documentation</title>
+  <title>textacy.preprocess &mdash; textacy 0.6.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="textacy 0.5.0 documentation" href="../../index.html"/>
+    <link rel="top" title="textacy 0.6.0 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.5
+                0.6
               </div>
             
           
@@ -195,8 +195,8 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">        str</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">fix_text</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">normalization</span><span class="o">=</span><span class="n">normalization</span><span class="p">)</span></div>
+<span class="sd">    &quot;&quot;&quot;</span></div>
+    <span class="k">return</span> <span class="n">fix_text</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">normalization</span><span class="o">=</span><span class="n">normalization</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="transliterate_unicode"><a class="viewcode-back" href="../../api_reference.html#textacy.preprocess.transliterate_unicode">[docs]</a><span class="k">def</span> <span class="nf">transliterate_unicode</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
@@ -207,16 +207,16 @@
 <span class="sd">    Works great for languages of Western origin, worse the farther the language</span>
 <span class="sd">    gets from Latin-based alphabets. It&#39;s based on hand-tuned character mappings</span>
 <span class="sd">    that also contain ascii approximations for symbols and non-Latin alphabets.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">unidecode</span><span class="p">(</span><span class="n">text</span><span class="p">)</span></div>
+<span class="sd">    &quot;&quot;&quot;</span></div>
+    <span class="k">return</span> <span class="n">unidecode</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="normalize_whitespace"><a class="viewcode-back" href="../../api_reference.html#textacy.preprocess.normalize_whitespace">[docs]</a><span class="k">def</span> <span class="nf">normalize_whitespace</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Given ``text`` str, replace one or more spacings with a single space, and one</span>
 <span class="sd">    or more linebreaks with a single newline. Also strip leading/trailing whitespace.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">NONBREAKING_SPACE_REGEX</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="n">constants</span><span class="o">.</span><span class="n">LINEBREAK_REGEX</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\n&#39;</span><span class="p">,</span> <span class="n">text</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span></div>
+<span class="sd">    &quot;&quot;&quot;</span></div>
+    <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">NONBREAKING_SPACE_REGEX</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="n">constants</span><span class="o">.</span><span class="n">LINEBREAK_REGEX</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\n&#39;</span><span class="p">,</span> <span class="n">text</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
 
 <div class="viewcode-block" id="unpack_contractions"><a class="viewcode-back" href="../../api_reference.html#textacy.preprocess.unpack_contractions">[docs]</a><span class="k">def</span> <span class="nf">unpack_contractions</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
@@ -236,28 +236,28 @@
     <span class="n">text</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;(\b)([Ll]et)&#39;s&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;\1\2 us&quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
     <span class="n">text</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;(\b)([Ww])on&#39;t&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;\1\2ill not&quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
     <span class="n">text</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;(\b)([Ss])han&#39;t&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;\1\2hall not&quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
-    <span class="n">text</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;(\b)([Yy])(?:&#39;all|a&#39;ll)&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;\1\2ou all&quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">text</span></div>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;(\b)([Yy])(?:&#39;all|a&#39;ll)&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;\1\2ou all&quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">text</span>
 
 
 <div class="viewcode-block" id="replace_urls"><a class="viewcode-back" href="../../api_reference.html#textacy.preprocess.replace_urls">[docs]</a><span class="k">def</span> <span class="nf">replace_urls</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">replace_with</span><span class="o">=</span><span class="s1">&#39;*URL*&#39;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Replace all URLs in ``text`` str with ``replace_with`` str.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">URL_REGEX</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">replace_with</span><span class="p">,</span> <span class="n">constants</span><span class="o">.</span><span class="n">SHORT_URL_REGEX</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">replace_with</span><span class="p">,</span> <span class="n">text</span><span class="p">))</span></div>
+    <span class="sd">&quot;&quot;&quot;Replace all URLs in ``text`` str with ``replace_with`` str.&quot;&quot;&quot;</span></div>
+    <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">URL_REGEX</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">replace_with</span><span class="p">,</span> <span class="n">constants</span><span class="o">.</span><span class="n">SHORT_URL_REGEX</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">replace_with</span><span class="p">,</span> <span class="n">text</span><span class="p">))</span>
 
 
 <div class="viewcode-block" id="replace_emails"><a class="viewcode-back" href="../../api_reference.html#textacy.preprocess.replace_emails">[docs]</a><span class="k">def</span> <span class="nf">replace_emails</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">replace_with</span><span class="o">=</span><span class="s1">&#39;*EMAIL*&#39;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Replace all emails in ``text`` str with ``replace_with`` str.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">EMAIL_REGEX</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">replace_with</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span></div>
+    <span class="sd">&quot;&quot;&quot;Replace all emails in ``text`` str with ``replace_with`` str.&quot;&quot;&quot;</span></div>
+    <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">EMAIL_REGEX</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">replace_with</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="replace_phone_numbers"><a class="viewcode-back" href="../../api_reference.html#textacy.preprocess.replace_phone_numbers">[docs]</a><span class="k">def</span> <span class="nf">replace_phone_numbers</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">replace_with</span><span class="o">=</span><span class="s1">&#39;*PHONE*&#39;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Replace all phone numbers in ``text`` str with ``replace_with`` str.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">PHONE_REGEX</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">replace_with</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span></div>
+    <span class="sd">&quot;&quot;&quot;Replace all phone numbers in ``text`` str with ``replace_with`` str.&quot;&quot;&quot;</span></div>
+    <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">PHONE_REGEX</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">replace_with</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="replace_numbers"><a class="viewcode-back" href="../../api_reference.html#textacy.preprocess.replace_numbers">[docs]</a><span class="k">def</span> <span class="nf">replace_numbers</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">replace_with</span><span class="o">=</span><span class="s1">&#39;*NUMBER*&#39;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Replace all numbers in ``text`` str with ``replace_with`` str.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">NUMBERS_REGEX</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">replace_with</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span></div>
+    <span class="sd">&quot;&quot;&quot;Replace all numbers in ``text`` str with ``replace_with`` str.&quot;&quot;&quot;</span></div>
+    <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">NUMBERS_REGEX</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">replace_with</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="replace_currency_symbols"><a class="viewcode-back" href="../../api_reference.html#textacy.preprocess.replace_currency_symbols">[docs]</a><span class="k">def</span> <span class="nf">replace_currency_symbols</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">replace_with</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -278,8 +278,8 @@
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">constants</span><span class="o">.</span><span class="n">CURRENCIES</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">text</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">CURRENCY_REGEX</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">replace_with</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span></div>
+    <span class="k">else</span><span class="p">:</span></div>
+        <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">CURRENCY_REGEX</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">replace_with</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="remove_punct"><a class="viewcode-back" href="../../api_reference.html#textacy.preprocess.remove_punct">[docs]</a><span class="k">def</span> <span class="nf">remove_punct</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">marks</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -306,8 +306,8 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">compat</span><span class="o">.</span><span class="n">unicode_</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">text</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">constants</span><span class="o">.</span><span class="n">PUNCT_TRANSLATE_UNICODE</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">text</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">constants</span><span class="o">.</span><span class="n">PUNCT_TRANSLATE_BYTES</span><span class="p">)</span></div>
+        <span class="k">else</span><span class="p">:</span></div>
+            <span class="k">return</span> <span class="n">text</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">constants</span><span class="o">.</span><span class="n">PUNCT_TRANSLATE_BYTES</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="remove_accents"><a class="viewcode-back" href="../../api_reference.html#textacy.preprocess.remove_accents">[docs]</a><span class="k">def</span> <span class="nf">remove_accents</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;unicode&#39;</span><span class="p">):</span>
@@ -335,8 +335,8 @@
     <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;ascii&#39;</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">unicodedata</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="s1">&#39;NFKD&#39;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;`method` must be either &quot;unicode&quot; and &quot;ascii&quot;, not </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">method</span><span class="p">)</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;`method` must be either &quot;unicode&quot; and &quot;ascii&quot;, not </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">method</span><span class="p">)</span></div>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="preprocess_text"><a class="viewcode-back" href="../../api_reference.html#textacy.preprocess.preprocess_text">[docs]</a><span class="k">def</span> <span class="nf">preprocess_text</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">fix_unicode</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">lowercase</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">transliterate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -401,8 +401,8 @@
         <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
     <span class="c1"># always normalize whitespace; treat linebreaks separately from spacing</span>
     <span class="n">text</span> <span class="o">=</span> <span class="n">normalize_whitespace</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">text</span></div>
+</div>
+    <span class="k">return</span> <span class="n">text</span>
 </pre></div>
 
            </div>
@@ -439,7 +439,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'0.5.0',
+            VERSION:'0.6.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

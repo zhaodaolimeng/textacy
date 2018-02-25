@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>textacy.cache &mdash; textacy 0.5.0 documentation</title>
+  <title>textacy.cache &mdash; textacy 0.6.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="textacy 0.5.0 documentation" href="../../index.html"/>
+    <link rel="top" title="textacy 0.6.0 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.5
+                0.6
               </div>
             
           
@@ -159,7 +159,11 @@
             
   <h1>Source code for textacy.cache</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Functions to load and cache language data and other NLP resources.</span>
+<span class="sd">Cache</span>
+<span class="sd">-----</span>
+
+<span class="sd">Functions to load and cache language data and other NLP resources. Loading data</span>
+<span class="sd">from disk can be slow; let&#39;s just do it once and forget about it. :)</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span>
 
@@ -211,14 +215,20 @@
     <span class="k">return</span> <span class="n">size</span>
 
 
-<span class="n">LRU_CACHE</span> <span class="o">=</span> <span class="n">LRUCache</span><span class="p">(</span><span class="mi">2147483648</span><span class="p">,</span> <span class="n">getsizeof</span><span class="o">=</span><span class="n">_get_size</span><span class="p">)</span>
-<span class="sd">&quot;&quot;&quot;:class:`cachetools.LRUCache`: Least Recently Used (LRU) cache, with 2GB max size.&quot;&quot;&quot;</span>
+<span class="n">LRU_CACHE</span> <span class="o">=</span> <span class="n">LRUCache</span><span class="p">(</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;TEXTACY_MAX_CACHE_SIZE&#39;</span><span class="p">,</span> <span class="mi">2147483648</span><span class="p">),</span>
+    <span class="n">getsizeof</span><span class="o">=</span><span class="n">_get_size</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;:class:`cachetools.LRUCache`: Least Recently Used (LRU) cache for loaded data.</span>
+
+<span class="sd">The max cache size may be set by the `TEXTACY_MAX_CACHE_SIZE` environment variable,</span>
+<span class="sd">where the value must be an integer (in bytes). Otherwise, the max size is 2GB.</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
 
 <div class="viewcode-block" id="clear"><a class="viewcode-back" href="../../api_reference.html#textacy.cache.clear">[docs]</a><span class="k">def</span> <span class="nf">clear</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;Clear textacy&#39;s cache of loaded data.&quot;&quot;&quot;</span>
-    <span class="k">global</span> <span class="n">LRU_CACHE</span>
-    <span class="n">LRU_CACHE</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
+    <span class="k">global</span> <span class="n">LRU_CACHE</span></div>
+    <span class="n">LRU_CACHE</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
 
 
 <div class="viewcode-block" id="load_spacy"><a class="viewcode-back" href="../../api_reference.html#textacy.cache.load_spacy">[docs]</a><span class="nd">@cached</span><span class="p">(</span><span class="n">LRU_CACHE</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">hashkey</span><span class="p">,</span> <span class="s1">&#39;spacy&#39;</span><span class="p">))</span>
@@ -245,8 +255,8 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">disable</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">disable</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Loading &quot;</span><span class="si">%s</span><span class="s1">&quot; spaCy pipeline&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">spacy</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="n">disable</span><span class="p">)</span></div>
+    <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Loading &quot;</span><span class="si">%s</span><span class="s1">&quot; spaCy pipeline&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">spacy</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="n">disable</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="load_hyphenator"><a class="viewcode-back" href="../../api_reference.html#textacy.cache.load_hyphenator">[docs]</a><span class="nd">@cached</span><span class="p">(</span><span class="n">LRU_CACHE</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">hashkey</span><span class="p">,</span> <span class="s1">&#39;hyphenator&#39;</span><span class="p">))</span>
@@ -268,8 +278,8 @@
 <span class="sd">        not all syllable divisions are valid hyphenation points. But it&#39;s decent.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">import</span> <span class="nn">pyphen</span>
-    <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Loading &quot;</span><span class="si">%s</span><span class="s1">&quot; language hyphenator&#39;</span><span class="p">,</span> <span class="n">lang</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">pyphen</span><span class="o">.</span><span class="n">Pyphen</span><span class="p">(</span><span class="n">lang</span><span class="o">=</span><span class="n">lang</span><span class="p">)</span></div>
+    <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Loading &quot;</span><span class="si">%s</span><span class="s1">&quot; language hyphenator&#39;</span><span class="p">,</span> <span class="n">lang</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">pyphen</span><span class="o">.</span><span class="n">Pyphen</span><span class="p">(</span><span class="n">lang</span><span class="o">=</span><span class="n">lang</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="load_depechemood"><a class="viewcode-back" href="../../api_reference.html#textacy.cache.load_depechemood">[docs]</a><span class="nd">@cached</span><span class="p">(</span><span class="n">LRU_CACHE</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">hashkey</span><span class="p">,</span> <span class="s1">&#39;depechemood&#39;</span><span class="p">))</span>
@@ -324,8 +334,8 @@
         <span class="k">raise</span>
     <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Loading DepecheMood lexicon from </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
     <span class="n">cols</span> <span class="o">=</span> <span class="n">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="k">return</span> <span class="p">{</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="p">{</span><span class="n">cols</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span> <span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">9</span><span class="p">)}</span>
-            <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">[</span><span class="mi">1</span><span class="p">:]}</span></div>
+    <span class="k">return</span> <span class="p">{</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="p">{</span><span class="n">cols</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span> <span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">compat</span><span class="o">.</span><span class="n">range_</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">9</span><span class="p">)}</span></div>
+            <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">[</span><span class="mi">1</span><span class="p">:]}</span>
 </pre></div>
 
            </div>
@@ -362,7 +372,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'0.5.0',
+            VERSION:'0.6.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

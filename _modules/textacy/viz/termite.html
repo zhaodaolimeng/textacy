@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>textacy.viz.termite &mdash; textacy 0.5.0 documentation</title>
+  <title>textacy.viz.termite &mdash; textacy 0.6.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../../genindex.html"/>
         <link rel="search" title="Search" href="../../../search.html"/>
-    <link rel="top" title="textacy 0.5.0 documentation" href="../../../index.html"/>
+    <link rel="top" title="textacy 0.6.0 documentation" href="../../../index.html"/>
         <link rel="up" title="Module code" href="../../index.html"/> 
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.5
+                0.6
               </div>
             
           
@@ -209,7 +209,7 @@
 <span class="sd">    layout that promotes comparison of terms both within and across topics.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        values_mat (``np.ndarray`` or matrix): matrix of values with shape</span>
+<span class="sd">        values_mat (:class:`np.ndarray` or matrix): matrix of values with shape</span>
 <span class="sd">            (# row labels, # col labels) used to size the dots on the grid</span>
 <span class="sd">        col_labels (seq[str]): labels used to identify x-axis ticks on the grid</span>
 <span class="sd">        row_labels(seq[str]): labels used to identify y-axis ticks on the grid</span>
@@ -221,7 +221,7 @@
 <span class="sd">        save (str, optional): give the full /path/to/fname on disk to save figure</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        ``matplotlib.axes.Axes.axis``: Axis on which termite plot is plotted.</span>
+<span class="sd">        :obj:`matplotlib.axes.Axes.axis`: Axis on which termite plot is plotted.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        ValueError: if more columns are selected for highlighting than colors</span>
@@ -234,7 +234,7 @@
 <span class="sd">        Visual Interfaces. ACM, 2012.</span>
 
 <span class="sd">    See Also:</span>
-<span class="sd">        :func:`TopicModel.termite_plot &lt;textacy.tm.TopicModel.termite_plot&gt;`</span>
+<span class="sd">        :meth:`TopicModel.termite_plot() &lt;textacy.tm.topic_model.TopicModel.termite_plot&gt;`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">plt</span>
@@ -315,8 +315,8 @@
 
     <span class="k">if</span> <span class="n">save</span><span class="p">:</span>
         <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">save</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">ax</span></div>
+</div>
+    <span class="k">return</span> <span class="n">ax</span>
 </pre></div>
 
            </div>
@@ -353,7 +353,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../../',
-            VERSION:'0.5.0',
+            VERSION:'0.6.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

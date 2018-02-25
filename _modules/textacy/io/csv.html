@@ -1,0 +1,361 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>textacy.io.csv &mdash; textacy 0.6.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../search.html"/>
+    <link rel="top" title="textacy 0.6.0 documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> textacy
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.6
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">textacy</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>textacy.io.csv</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for textacy.io.csv</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">CSV</span>
+<span class="sd">---</span>
+
+<span class="sd">Functions for reading from and writing to disk records in CSV format, where</span>
+<span class="sd">CSVs may be delimited not only by commas (the default) but tabs, pipes, and</span>
+<span class="sd">other valid one-char delimiters.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span>
+
+<span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">compat</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="k">import</span> <span class="n">open_sesame</span>
+
+
+<div class="viewcode-block" id="read_csv"><a class="viewcode-back" href="../../../api_reference.html#textacy.io.csv.read_csv">[docs]</a><span class="k">def</span> <span class="nf">read_csv</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+             <span class="n">fieldnames</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dialect</span><span class="o">=</span><span class="s1">&#39;excel&#39;</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Read the contents of a CSV file at ``fname``, streaming line-by-line,</span>
+<span class="sd">    where each line is a list of strings and/or floats whose values</span>
+<span class="sd">    are separated by ``delimiter``.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        fname (str): Path to file on disk from which data will be read.</span>
+<span class="sd">        encoding (str): Name of the encoding used to decode or encode the data</span>
+<span class="sd">            in ``fname``.</span>
+<span class="sd">        fieldnames (List[str] or &#39;infer&#39;): If specified, gives names for columns</span>
+<span class="sd">            of values, which are used as keys in an ordered dictionary representation</span>
+<span class="sd">            of each line&#39;s data. If &#39;infer&#39;, the first kB of data is analyzed</span>
+<span class="sd">            to make a guess about whether the first row is a header of column</span>
+<span class="sd">            names, and if so, those names are used as keys. If None, no column</span>
+<span class="sd">            names are used, and each line is returned as a list of strings/floats.</span>
+<span class="sd">        dialect (str): Grouping of formatting parameters that determine how</span>
+<span class="sd">            the data is parsed when reading/writing. If &#39;infer&#39;, the first kB</span>
+<span class="sd">            of data is analyzed to get a best guess for the correct dialect.</span>
+<span class="sd">        delimiter (str): 1-character string used to separate fields in a row.</span>
+
+<span class="sd">    Yields:</span>
+<span class="sd">        List[obj]: Next row, whose elements are strings and/or floats.</span>
+<span class="sd">        If ``fieldnames`` is None or &#39;infer&#39; doesn&#39;t detect a header row.</span>
+
+<span class="sd">        *or*</span>
+
+<span class="sd">        Dict[str, obj]: Next row, as an ordered dictionary of (key, value) pairs,</span>
+<span class="sd">        where keys are column names and values are the corresponding strings</span>
+<span class="sd">        and/or floats. If ``fieldnames`` is a list of column names or &#39;infer&#39;</span>
+<span class="sd">        detects a header row.</span>
+
+<span class="sd">    See Also:</span>
+<span class="sd">        https://docs.python.org/3/library/csv.html#csv.reader</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">has_header</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">with</span> <span class="n">open_sesame</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;rt&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">dialect</span> <span class="o">==</span> <span class="s1">&#39;infer&#39;</span> <span class="ow">or</span> <span class="n">fieldnames</span> <span class="o">==</span> <span class="s1">&#39;infer&#39;</span><span class="p">:</span>
+            <span class="n">sniffer</span> <span class="o">=</span> <span class="n">compat</span><span class="o">.</span><span class="n">csv</span><span class="o">.</span><span class="n">Sniffer</span><span class="p">()</span>
+            <span class="c1"># add pipes to the list of preferred delimiters, and put spaces last</span>
+            <span class="n">sniffer</span><span class="o">.</span><span class="n">preferred</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;|&#39;</span><span class="p">,</span> <span class="s1">&#39;;&#39;</span><span class="p">,</span> <span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">]</span>
+            <span class="n">sample</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>  <span class="c1"># f.read(1024)</span>
+            <span class="k">if</span> <span class="n">dialect</span> <span class="o">==</span> <span class="s1">&#39;infer&#39;</span><span class="p">:</span>
+                <span class="n">dialect</span> <span class="o">=</span> <span class="n">sniffer</span><span class="o">.</span><span class="n">sniff</span><span class="p">(</span><span class="n">sample</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">fieldnames</span> <span class="o">==</span> <span class="s1">&#39;infer&#39;</span><span class="p">:</span>
+                <span class="n">has_header</span> <span class="o">=</span> <span class="n">sniffer</span><span class="o">.</span><span class="n">has_header</span><span class="p">(</span><span class="n">sample</span><span class="p">)</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">has_header</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">csv_reader</span> <span class="o">=</span> <span class="n">compat</span><span class="o">.</span><span class="n">csv</span><span class="o">.</span><span class="n">DictReader</span><span class="p">(</span>
+                <span class="n">f</span><span class="p">,</span> <span class="n">fieldnames</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dialect</span><span class="o">=</span><span class="n">dialect</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="n">delimiter</span><span class="p">,</span>
+                <span class="n">quoting</span><span class="o">=</span><span class="n">compat</span><span class="o">.</span><span class="n">csv</span><span class="o">.</span><span class="n">QUOTE_NONNUMERIC</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">fieldnames</span><span class="p">:</span>
+            <span class="n">csv_reader</span> <span class="o">=</span> <span class="n">compat</span><span class="o">.</span><span class="n">csv</span><span class="o">.</span><span class="n">DictReader</span><span class="p">(</span>
+                <span class="n">f</span><span class="p">,</span> <span class="n">fieldnames</span><span class="o">=</span><span class="n">fieldnames</span><span class="p">,</span> <span class="n">dialect</span><span class="o">=</span><span class="n">dialect</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="n">delimiter</span><span class="p">,</span>
+                <span class="n">quoting</span><span class="o">=</span><span class="n">compat</span><span class="o">.</span><span class="n">csv</span><span class="o">.</span><span class="n">QUOTE_NONNUMERIC</span><span class="p">)</span>
+            <span class="n">first_row</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">csv_reader</span><span class="p">)</span>
+            <span class="c1"># is the first row a header with same values as fieldnames?</span>
+            <span class="c1"># if not, we should yield the row as usual</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">key</span> <span class="o">==</span> <span class="n">value</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">first_row</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+                <span class="k">yield</span> <span class="n">first_row</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">csv_reader</span> <span class="o">=</span> <span class="n">compat</span><span class="o">.</span><span class="n">csv</span><span class="o">.</span><span class="n">reader</span><span class="p">(</span>
+                <span class="n">f</span><span class="p">,</span> <span class="n">dialect</span><span class="o">=</span><span class="n">dialect</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="n">delimiter</span><span class="p">,</span>
+                <span class="n">quoting</span><span class="o">=</span><span class="n">compat</span><span class="o">.</span><span class="n">csv</span><span class="o">.</span><span class="n">QUOTE_NONNUMERIC</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">csv_reader</span><span class="p">:</span></div>
+            <span class="k">yield</span> <span class="n">row</span>
+
+
+<div class="viewcode-block" id="write_csv"><a class="viewcode-back" href="../../../api_reference.html#textacy.io.csv.write_csv">[docs]</a><span class="k">def</span> <span class="nf">write_csv</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">make_dirs</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+              <span class="n">fieldnames</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dialect</span><span class="o">=</span><span class="s1">&#39;excel&#39;</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Write rows of ``data`` to disk at ``fname``, where each row is an iterable</span>
+<span class="sd">    or a dictionary of strings and/or numbers, written to one line with values</span>
+<span class="sd">    separated by ``delimiter``.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data (Iterable[Iterable] or Iterable[dict]): If ``fieldnames`` is None,</span>
+<span class="sd">            an iterable of iterables of strings and/or numbers to write to disk;</span>
+<span class="sd">            for example::</span>
+
+<span class="sd">                [[&#39;That was a great movie!&#39;, 0.9],</span>
+<span class="sd">                 [&#39;The movie was okay, I guess.&#39;, 0.2],</span>
+<span class="sd">                 [&#39;Worst. Movie. Ever.&#39;, -1.0]]</span>
+
+<span class="sd">            If ``fieldnames`` is specified, an iterable of dictionaries with</span>
+<span class="sd">            string and/or number values to write to disk; for example::</span>
+
+<span class="sd">                [{&#39;text&#39;: &#39;That was a great movie!&#39;, &#39;score&#39;: 0.9},</span>
+<span class="sd">                 {&#39;text&#39;: &#39;The movie was okay, I guess.&#39;, &#39;score&#39;: 0.2},</span>
+<span class="sd">                 {&#39;text&#39;: &#39;Worst. Movie. Ever.&#39;, &#39;score&#39;: -1.0}]</span>
+
+<span class="sd">        fname (str): Path to file on disk to which data will be written.</span>
+<span class="sd">        encoding (str): Name of the encoding used to decode or encode the data</span>
+<span class="sd">            in ``fname``.</span>
+<span class="sd">        make_dirs (bool): If True, automatically create (sub)directories if</span>
+<span class="sd">            not already present in order to write ``fname``.</span>
+<span class="sd">        fieldnames (List[str]): Sequence of keys that identify the order in which</span>
+<span class="sd">            values in each rows&#39; dictionary is written to ``fname``. These are</span>
+<span class="sd">            included in ``fname`` as a header row of column names.</span>
+
+<span class="sd">            .. note:: Only specify this if ``data`` is an iterable of dictionaries.</span>
+
+<span class="sd">        dialect (str): Grouping of formatting parameters that determine how</span>
+<span class="sd">            the data is parsed when reading/writing.</span>
+<span class="sd">        delimiter (str): 1-character string used to separate fields in a row.</span>
+
+<span class="sd">    See Also:</span>
+<span class="sd">        https://docs.python.org/3/library/csv.html#csv.writer</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="n">open_sesame</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;wt&#39;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">,</span> <span class="n">make_dirs</span><span class="o">=</span><span class="n">make_dirs</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">fieldnames</span><span class="p">:</span>
+            <span class="n">csv_writer</span> <span class="o">=</span> <span class="n">compat</span><span class="o">.</span><span class="n">csv</span><span class="o">.</span><span class="n">DictWriter</span><span class="p">(</span>
+                <span class="n">f</span><span class="p">,</span> <span class="n">fieldnames</span><span class="p">,</span> <span class="n">dialect</span><span class="o">=</span><span class="n">dialect</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="n">delimiter</span><span class="p">,</span>
+                <span class="n">quoting</span><span class="o">=</span><span class="n">compat</span><span class="o">.</span><span class="n">csv</span><span class="o">.</span><span class="n">QUOTE_NONNUMERIC</span><span class="p">)</span>
+            <span class="n">csv_writer</span><span class="o">.</span><span class="n">writeheader</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">csv_writer</span> <span class="o">=</span> <span class="n">compat</span><span class="o">.</span><span class="n">csv</span><span class="o">.</span><span class="n">writer</span><span class="p">(</span>
+                <span class="n">f</span><span class="p">,</span> <span class="n">dialect</span><span class="o">=</span><span class="n">dialect</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="n">delimiter</span><span class="p">,</span>
+                <span class="n">quoting</span><span class="o">=</span><span class="n">compat</span><span class="o">.</span><span class="n">csv</span><span class="o">.</span><span class="n">QUOTE_NONNUMERIC</span><span class="p">)</span></div>
+        <span class="n">csv_writer</span><span class="o">.</span><span class="n">writerows</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016 Chartbeat, Inc..
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'0.6.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

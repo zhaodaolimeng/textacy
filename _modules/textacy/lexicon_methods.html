@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>textacy.lexicon_methods &mdash; textacy 0.5.0 documentation</title>
+  <title>textacy.lexicon_methods &mdash; textacy 0.6.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="textacy 0.5.0 documentation" href="../../index.html"/>
+    <link rel="top" title="textacy 0.6.0 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.5
+                0.6
               </div>
             
           
@@ -159,8 +159,13 @@
             
   <h1>Source code for textacy.lexicon_methods</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Lexicon Methods</span>
+<span class="sd">---------------</span>
+
 <span class="sd">Collection of lexicon-based methods for characterizing texts by sentiment,</span>
 <span class="sd">emotional valence, etc.</span>
+
+<span class="sd">This module is a bit of an orphan right now...</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">unicode_literals</span>
 
@@ -226,8 +231,8 @@
 
     <span class="k">for</span> <span class="n">emo</span> <span class="ow">in</span> <span class="n">emo_scores</span><span class="p">:</span>
         <span class="n">emo_scores</span><span class="p">[</span><span class="n">emo</span><span class="p">]</span> <span class="o">/=</span> <span class="n">emo_matches</span><span class="p">[</span><span class="n">emo</span><span class="p">]</span>
-
-    <span class="k">return</span> <span class="n">emo_scores</span></div>
+</div>
+    <span class="k">return</span> <span class="n">emo_scores</span>
 
 
 <div class="viewcode-block" id="download_depechemood"><a class="viewcode-back" href="../../api_reference.html#textacy.lexicon_methods.download_depechemood">[docs]</a><span class="k">def</span> <span class="nf">download_depechemood</span><span class="p">(</span><span class="n">data_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -261,8 +266,8 @@
                    <span class="s1">&#39;DepecheMood_V1.0/README.txt&#39;</span><span class="p">]</span>
         <span class="n">f</span><span class="o">.</span><span class="n">extractall</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="n">members</span><span class="o">=</span><span class="n">members</span><span class="p">)</span>
     <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-        <span class="s1">&#39;Downloaded DepecheMood (4MB) from </span><span class="si">%s</span><span class="s1"> and wrote it to </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
-        <span class="n">url</span><span class="p">,</span> <span class="n">data_dir</span><span class="p">)</span></div>
+        <span class="s1">&#39;Downloaded DepecheMood (4MB) from </span><span class="si">%s</span><span class="s1"> and wrote it to </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span></div>
+        <span class="n">url</span><span class="p">,</span> <span class="n">data_dir</span><span class="p">)</span>
 </pre></div>
 
            </div>
@@ -299,7 +304,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'0.5.0',
+            VERSION:'0.6.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
