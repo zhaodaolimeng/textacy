@@ -91,6 +91,8 @@
             
               <p class="caption"><span class="caption-text">Contents</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started/quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api_reference.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../license.html">License</a></li>
@@ -329,8 +331,8 @@
     <span class="n">graph</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">()</span>
     <span class="n">graph</span><span class="o">.</span><span class="n">add_edges_from</span><span class="p">(</span><span class="n">norm_edge_weights</span><span class="p">)</span>
     <span class="n">term_ranks</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">pagerank_scipy</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
-</div>
-    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">term_ranks</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)[:</span><span class="n">n_keyterms</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">term_ranks</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)[:</span><span class="n">n_keyterms</span><span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="textrank"><a class="viewcode-back" href="../../api_reference.html#textacy.keyterms.textrank">[docs]</a><span class="k">def</span> <span class="nf">textrank</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="s1">&#39;lemma&#39;</span><span class="p">,</span> <span class="n">n_keyterms</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
@@ -356,8 +358,8 @@
 <span class="sd">           order into texts. Association for Computational Linguistics.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">key_terms_from_semantic_network</span><span class="p">(</span>
-        <span class="n">doc</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="n">normalize</span><span class="p">,</span> <span class="n">window_width</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">edge_weighting</span><span class="o">=</span><span class="s1">&#39;binary&#39;</span><span class="p">,</span></div>
-        <span class="n">ranking_algo</span><span class="o">=</span><span class="s1">&#39;pagerank&#39;</span><span class="p">,</span> <span class="n">join_key_words</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">n_keyterms</span><span class="o">=</span><span class="n">n_keyterms</span><span class="p">)</span>
+        <span class="n">doc</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="n">normalize</span><span class="p">,</span> <span class="n">window_width</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">edge_weighting</span><span class="o">=</span><span class="s1">&#39;binary&#39;</span><span class="p">,</span>
+        <span class="n">ranking_algo</span><span class="o">=</span><span class="s1">&#39;pagerank&#39;</span><span class="p">,</span> <span class="n">join_key_words</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">n_keyterms</span><span class="o">=</span><span class="n">n_keyterms</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="singlerank"><a class="viewcode-back" href="../../api_reference.html#textacy.keyterms.singlerank">[docs]</a><span class="k">def</span> <span class="nf">singlerank</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="s1">&#39;lemma&#39;</span><span class="p">,</span> <span class="n">n_keyterms</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
@@ -385,8 +387,8 @@
 <span class="sd">           Posters (pp. 365-373). Association for Computational Linguistics.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">key_terms_from_semantic_network</span><span class="p">(</span>
-        <span class="n">doc</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="n">normalize</span><span class="p">,</span> <span class="n">window_width</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">edge_weighting</span><span class="o">=</span><span class="s1">&#39;cooc_freq&#39;</span><span class="p">,</span></div>
-        <span class="n">ranking_algo</span><span class="o">=</span><span class="s1">&#39;pagerank&#39;</span><span class="p">,</span> <span class="n">join_key_words</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_keyterms</span><span class="o">=</span><span class="n">n_keyterms</span><span class="p">)</span>
+        <span class="n">doc</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="n">normalize</span><span class="p">,</span> <span class="n">window_width</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">edge_weighting</span><span class="o">=</span><span class="s1">&#39;cooc_freq&#39;</span><span class="p">,</span>
+        <span class="n">ranking_algo</span><span class="o">=</span><span class="s1">&#39;pagerank&#39;</span><span class="p">,</span> <span class="n">join_key_words</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_keyterms</span><span class="o">=</span><span class="n">n_keyterms</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="key_terms_from_semantic_network"><a class="viewcode-back" href="../../api_reference.html#textacy.keyterms.key_terms_from_semantic_network">[docs]</a><span class="k">def</span> <span class="nf">key_terms_from_semantic_network</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="s1">&#39;lemma&#39;</span><span class="p">,</span>
@@ -489,8 +491,8 @@
                 <span class="k">continue</span>
             <span class="n">seen_joined_key_terms</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">term</span><span class="p">)</span>
             <span class="n">joined_key_terms</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">term</span><span class="p">,</span> <span class="nb">sum</span><span class="p">(</span><span class="n">word_ranks</span><span class="p">[</span><span class="n">word</span><span class="p">]</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">words</span><span class="p">)))</span>
-</div>
-    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">joined_key_terms</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)[:</span><span class="n">n_keyterms</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">joined_key_terms</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)[:</span><span class="n">n_keyterms</span><span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="most_discriminating_terms"><a class="viewcode-back" href="../../api_reference.html#textacy.keyterms.most_discriminating_terms">[docs]</a><span class="k">def</span> <span class="nf">most_discriminating_terms</span><span class="p">(</span><span class="n">terms_lists</span><span class="p">,</span> <span class="n">bool_array_grp1</span><span class="p">,</span>
@@ -587,8 +589,8 @@
     <span class="n">top_grp2_terms</span> <span class="o">=</span> <span class="p">[</span><span class="n">term</span> <span class="k">for</span> <span class="n">term</span><span class="p">,</span> <span class="n">likelihood</span>
                       <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">grp2_terms_likelihoods</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span>
                                 <span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)[:</span><span class="n">top_n_terms</span><span class="p">]]</span>
-</div>
-    <span class="k">return</span> <span class="p">(</span><span class="n">top_grp1_terms</span><span class="p">,</span> <span class="n">top_grp2_terms</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">top_grp1_terms</span><span class="p">,</span> <span class="n">top_grp2_terms</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="aggregate_term_variants"><a class="viewcode-back" href="../../api_reference.html#textacy.keyterms.aggregate_term_variants">[docs]</a><span class="k">def</span> <span class="nf">aggregate_term_variants</span><span class="p">(</span><span class="n">terms</span><span class="p">,</span>
@@ -697,8 +699,8 @@
                     <span class="k">break</span>
 
         <span class="n">agg_terms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">variants</span><span class="p">)</span>
-</div>
-    <span class="k">return</span> <span class="n">agg_terms</span>
+
+    <span class="k">return</span> <span class="n">agg_terms</span></div>
 
 
 <div class="viewcode-block" id="rank_nodes_by_bestcoverage"><a class="viewcode-back" href="../../api_reference.html#textacy.keyterms.rank_nodes_by_bestcoverage">[docs]</a><span class="k">def</span> <span class="nf">rank_nodes_by_bestcoverage</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
@@ -802,8 +804,8 @@
                         <span class="s1">&#39;Word </span><span class="si">%s</span><span class="s1"> not in contrib dict! We</span><span class="se">\&#39;</span><span class="s1">re approximating...&#39;</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
             <span class="n">taken</span><span class="p">[</span><span class="n">vertex</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">contrib</span><span class="p">[</span><span class="n">max_word_score</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">0</span>
-</div>
-    <span class="k">return</span> <span class="n">results</span>
+
+    <span class="k">return</span> <span class="n">results</span></div>
 
 
 <div class="viewcode-block" id="rank_nodes_by_divrank"><a class="viewcode-back" href="../../api_reference.html#textacy.keyterms.rank_nodes_by_divrank">[docs]</a><span class="k">def</span> <span class="nf">rank_nodes_by_divrank</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lambda_</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
@@ -877,8 +879,8 @@
     <span class="c1"># replace node number by node value</span>
     <span class="n">nodes_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">()))</span>
     <span class="n">divranks</span> <span class="o">=</span> <span class="p">{</span><span class="n">nodes_list</span><span class="p">[</span><span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]]:</span> <span class="n">result</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">}</span>
-</div>
-    <span class="k">return</span> <span class="n">divranks</span>
+
+    <span class="k">return</span> <span class="n">divranks</span></div>
 </pre></div>
 
            </div>

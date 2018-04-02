@@ -91,6 +91,8 @@
             
               <p class="caption"><span class="caption-text">Contents</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started/quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api_reference.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../license.html">License</a></li>
@@ -339,8 +341,8 @@
                 <span class="s1">&#39;coleman_liau_index&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">coleman_liau_index</span><span class="p">,</span>
                 <span class="s1">&#39;automated_readability_index&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">automated_readability_index</span><span class="p">,</span>
                 <span class="s1">&#39;lix&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">lix</span><span class="p">,</span>
-                <span class="s1">&#39;gulpease_index&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">gulpease_index</span><span class="p">,</span></div>
-                <span class="s1">&#39;wiener_sachtextformel&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">wiener_sachtextformel</span><span class="p">}</span>
+                <span class="s1">&#39;gulpease_index&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">gulpease_index</span><span class="p">,</span>
+                <span class="s1">&#39;wiener_sachtextformel&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">wiener_sachtextformel</span><span class="p">}</span></div>
 
 
 <div class="viewcode-block" id="flesch_kincaid_grade_level"><a class="viewcode-back" href="../../api_reference.html#textacy.text_stats.flesch_kincaid_grade_level">[docs]</a><span class="k">def</span> <span class="nf">flesch_kincaid_grade_level</span><span class="p">(</span><span class="n">n_syllables</span><span class="p">,</span> <span class="n">n_words</span><span class="p">,</span> <span class="n">n_sents</span><span class="p">):</span>
@@ -351,8 +353,8 @@
 
 <span class="sd">    References:</span>
 <span class="sd">        https://en.wikipedia.org/wiki/Flesch%E2%80%93Kincaid_readability_tests#Flesch.E2.80.93Kincaid_grade_level</span>
-<span class="sd">    &quot;&quot;&quot;</span></div>
-    <span class="k">return</span> <span class="p">(</span><span class="mf">11.8</span> <span class="o">*</span> <span class="n">n_syllables</span> <span class="o">/</span> <span class="n">n_words</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mf">0.39</span> <span class="o">*</span> <span class="n">n_words</span> <span class="o">/</span> <span class="n">n_sents</span><span class="p">)</span> <span class="o">-</span> <span class="mf">15.59</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="mf">11.8</span> <span class="o">*</span> <span class="n">n_syllables</span> <span class="o">/</span> <span class="n">n_words</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mf">0.39</span> <span class="o">*</span> <span class="n">n_words</span> <span class="o">/</span> <span class="n">n_sents</span><span class="p">)</span> <span class="o">-</span> <span class="mf">15.59</span></div>
 
 
 <div class="viewcode-block" id="flesch_reading_ease"><a class="viewcode-back" href="../../api_reference.html#textacy.text_stats.flesch_reading_ease">[docs]</a><span class="k">def</span> <span class="nf">flesch_reading_ease</span><span class="p">(</span><span class="n">n_syllables</span><span class="p">,</span> <span class="n">n_words</span><span class="p">,</span> <span class="n">n_sents</span><span class="p">,</span> <span class="n">lang</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -390,8 +392,8 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">langs</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;en&#39;</span><span class="p">,</span> <span class="s1">&#39;de&#39;</span><span class="p">,</span> <span class="s1">&#39;es&#39;</span><span class="p">,</span> <span class="s1">&#39;fr&#39;</span><span class="p">,</span> <span class="s1">&#39;it&#39;</span><span class="p">,</span> <span class="s1">&#39;nl&#39;</span><span class="p">,</span> <span class="s1">&#39;ru&#39;</span><span class="p">]</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="s1">&#39;Flesch Reading Ease is only implemented for these languages: </span><span class="si">{}</span><span class="s1">. &#39;</span></div>
-            <span class="s1">&#39;Passing `lang=None` falls back to &quot;en&quot; (English)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">langs</span><span class="p">))</span>
+            <span class="s1">&#39;Flesch Reading Ease is only implemented for these languages: </span><span class="si">{}</span><span class="s1">. &#39;</span>
+            <span class="s1">&#39;Passing `lang=None` falls back to &quot;en&quot; (English)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">langs</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="flesch_readability_ease"><a class="viewcode-back" href="../../api_reference.html#textacy.text_stats.flesch_readability_ease">[docs]</a><span class="k">def</span> <span class="nf">flesch_readability_ease</span><span class="p">(</span><span class="n">n_syllables</span><span class="p">,</span> <span class="n">n_words</span><span class="p">,</span> <span class="n">n_sents</span><span class="p">,</span> <span class="n">lang</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -403,8 +405,8 @@
     <span class="n">utils</span><span class="o">.</span><span class="n">deprecated</span><span class="p">(</span>
         <span class="s1">&#39;`flesch_readability_ease()` is an alias for `flesch_reading_ease()` &#39;</span>
         <span class="s1">&#39;for backwards compatibility; it will be removed in a future version.&#39;</span><span class="p">,</span>
-        <span class="n">action</span><span class="o">=</span><span class="s1">&#39;once&#39;</span><span class="p">)</span></div>
-    <span class="n">flesch_reading_ease</span><span class="p">(</span><span class="n">n_syllables</span><span class="p">,</span> <span class="n">n_words</span><span class="p">,</span> <span class="n">n_sents</span><span class="p">,</span> <span class="n">lang</span><span class="o">=</span><span class="n">lang</span><span class="p">)</span>
+        <span class="n">action</span><span class="o">=</span><span class="s1">&#39;once&#39;</span><span class="p">)</span>
+    <span class="n">flesch_reading_ease</span><span class="p">(</span><span class="n">n_syllables</span><span class="p">,</span> <span class="n">n_words</span><span class="p">,</span> <span class="n">n_sents</span><span class="p">,</span> <span class="n">lang</span><span class="o">=</span><span class="n">lang</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="smog_index"><a class="viewcode-back" href="../../api_reference.html#textacy.text_stats.smog_index">[docs]</a><span class="k">def</span> <span class="nf">smog_index</span><span class="p">(</span><span class="n">n_polysyllable_words</span><span class="p">,</span> <span class="n">n_sents</span><span class="p">):</span>
@@ -418,8 +420,8 @@
 <span class="sd">        https://en.wikipedia.org/wiki/SMOG</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">n_sents</span> <span class="o">&lt;</span> <span class="mi">30</span><span class="p">:</span>
-        <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;SMOG score may be unreliable for n_sents &lt; 30&#39;</span><span class="p">)</span></div>
-    <span class="k">return</span> <span class="p">(</span><span class="mf">1.0430</span> <span class="o">*</span> <span class="n">sqrt</span><span class="p">(</span><span class="mi">30</span> <span class="o">*</span> <span class="n">n_polysyllable_words</span> <span class="o">/</span> <span class="n">n_sents</span><span class="p">))</span> <span class="o">+</span> <span class="mf">3.1291</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;SMOG score may be unreliable for n_sents &lt; 30&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="mf">1.0430</span> <span class="o">*</span> <span class="n">sqrt</span><span class="p">(</span><span class="mi">30</span> <span class="o">*</span> <span class="n">n_polysyllable_words</span> <span class="o">/</span> <span class="n">n_sents</span><span class="p">))</span> <span class="o">+</span> <span class="mf">3.1291</span></div>
 
 
 <div class="viewcode-block" id="gunning_fog_index"><a class="viewcode-back" href="../../api_reference.html#textacy.text_stats.gunning_fog_index">[docs]</a><span class="k">def</span> <span class="nf">gunning_fog_index</span><span class="p">(</span><span class="n">n_words</span><span class="p">,</span> <span class="n">n_polysyllable_words</span><span class="p">,</span> <span class="n">n_sents</span><span class="p">):</span>
@@ -430,8 +432,8 @@
 
 <span class="sd">    References:</span>
 <span class="sd">        https://en.wikipedia.org/wiki/Gunning_fog_index</span>
-<span class="sd">    &quot;&quot;&quot;</span></div>
-    <span class="k">return</span> <span class="mf">0.4</span> <span class="o">*</span> <span class="p">((</span><span class="n">n_words</span> <span class="o">/</span> <span class="n">n_sents</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="n">n_polysyllable_words</span> <span class="o">/</span> <span class="n">n_words</span><span class="p">))</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="mf">0.4</span> <span class="o">*</span> <span class="p">((</span><span class="n">n_words</span> <span class="o">/</span> <span class="n">n_sents</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="n">n_polysyllable_words</span> <span class="o">/</span> <span class="n">n_words</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="coleman_liau_index"><a class="viewcode-back" href="../../api_reference.html#textacy.text_stats.coleman_liau_index">[docs]</a><span class="k">def</span> <span class="nf">coleman_liau_index</span><span class="p">(</span><span class="n">n_chars</span><span class="p">,</span> <span class="n">n_words</span><span class="p">,</span> <span class="n">n_sents</span><span class="p">):</span>
@@ -442,8 +444,8 @@
 <span class="sd">    Higher value =&gt; more difficult text.</span>
 
 <span class="sd">    References:</span>
-<span class="sd">        https://en.wikipedia.org/wiki/Coleman%E2%80%93Liau_index&quot;&quot;&quot;</span></div>
-    <span class="k">return</span> <span class="p">(</span><span class="mf">5.879851</span> <span class="o">*</span> <span class="n">n_chars</span> <span class="o">/</span> <span class="n">n_words</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="mf">29.587280</span> <span class="o">*</span> <span class="n">n_sents</span> <span class="o">/</span> <span class="n">n_words</span><span class="p">)</span> <span class="o">-</span> <span class="mf">15.800804</span>
+<span class="sd">        https://en.wikipedia.org/wiki/Coleman%E2%80%93Liau_index&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="mf">5.879851</span> <span class="o">*</span> <span class="n">n_chars</span> <span class="o">/</span> <span class="n">n_words</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="mf">29.587280</span> <span class="o">*</span> <span class="n">n_sents</span> <span class="o">/</span> <span class="n">n_words</span><span class="p">)</span> <span class="o">-</span> <span class="mf">15.800804</span></div>
 
 
 <div class="viewcode-block" id="automated_readability_index"><a class="viewcode-back" href="../../api_reference.html#textacy.text_stats.automated_readability_index">[docs]</a><span class="k">def</span> <span class="nf">automated_readability_index</span><span class="p">(</span><span class="n">n_chars</span><span class="p">,</span> <span class="n">n_words</span><span class="p">,</span> <span class="n">n_sents</span><span class="p">):</span>
@@ -455,8 +457,8 @@
 
 <span class="sd">    References:</span>
 <span class="sd">        https://en.wikipedia.org/wiki/Automated_readability_index</span>
-<span class="sd">    &quot;&quot;&quot;</span></div>
-    <span class="k">return</span> <span class="p">(</span><span class="mf">4.71</span> <span class="o">*</span> <span class="n">n_chars</span> <span class="o">/</span> <span class="n">n_words</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">n_words</span> <span class="o">/</span> <span class="n">n_sents</span><span class="p">)</span> <span class="o">-</span> <span class="mf">21.43</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="mf">4.71</span> <span class="o">*</span> <span class="n">n_chars</span> <span class="o">/</span> <span class="n">n_words</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">n_words</span> <span class="o">/</span> <span class="n">n_sents</span><span class="p">)</span> <span class="o">-</span> <span class="mf">21.43</span></div>
 
 
 <div class="viewcode-block" id="lix"><a class="viewcode-back" href="../../api_reference.html#textacy.text_stats.lix">[docs]</a><span class="k">def</span> <span class="nf">lix</span><span class="p">(</span><span class="n">n_words</span><span class="p">,</span> <span class="n">n_long_words</span><span class="p">,</span> <span class="n">n_sents</span><span class="p">):</span>
@@ -466,8 +468,8 @@
 
 <span class="sd">    References:</span>
 <span class="sd">        https://en.wikipedia.org/wiki/LIX</span>
-<span class="sd">    &quot;&quot;&quot;</span></div>
-    <span class="k">return</span> <span class="p">(</span><span class="n">n_words</span> <span class="o">/</span> <span class="n">n_sents</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="n">n_long_words</span> <span class="o">/</span> <span class="n">n_words</span><span class="p">)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">n_words</span> <span class="o">/</span> <span class="n">n_sents</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="n">n_long_words</span> <span class="o">/</span> <span class="n">n_words</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="wiener_sachtextformel"><a class="viewcode-back" href="../../api_reference.html#textacy.text_stats.wiener_sachtextformel">[docs]</a><span class="k">def</span> <span class="nf">wiener_sachtextformel</span><span class="p">(</span><span class="n">n_words</span><span class="p">,</span> <span class="n">n_polysyllable_words</span><span class="p">,</span> <span class="n">n_monosyllable_words</span><span class="p">,</span>
@@ -492,8 +494,8 @@
         <span class="k">return</span> <span class="p">(</span><span class="mf">0.2963</span> <span class="o">*</span> <span class="n">ms</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mf">0.1905</span> <span class="o">*</span> <span class="n">sl</span><span class="p">)</span> <span class="o">-</span> <span class="mf">1.1144</span>
     <span class="k">elif</span> <span class="n">variant</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">(</span><span class="mf">0.2744</span> <span class="o">*</span> <span class="n">ms</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mf">0.2656</span> <span class="o">*</span> <span class="n">sl</span><span class="p">)</span> <span class="o">-</span> <span class="mf">1.693</span>
-    <span class="k">else</span><span class="p">:</span></div>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;``variant`` value invalid; must be 1, 2, 3, or 4&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;``variant`` value invalid; must be 1, 2, 3, or 4&#39;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="gulpease_index"><a class="viewcode-back" href="../../api_reference.html#textacy.text_stats.gulpease_index">[docs]</a><span class="k">def</span> <span class="nf">gulpease_index</span><span class="p">(</span><span class="n">n_chars</span><span class="p">,</span> <span class="n">n_words</span><span class="p">,</span> <span class="n">n_sents</span><span class="p">):</span>
@@ -504,8 +506,8 @@
 
 <span class="sd">    References:</span>
 <span class="sd">        https://it.wikipedia.org/wiki/Indice_Gulpease</span>
-<span class="sd">    &quot;&quot;&quot;</span></div>
-    <span class="k">return</span> <span class="p">(</span><span class="mi">300</span> <span class="o">*</span> <span class="n">n_sents</span> <span class="o">/</span> <span class="n">n_words</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="mi">10</span> <span class="o">*</span> <span class="n">n_chars</span> <span class="o">/</span> <span class="n">n_words</span><span class="p">)</span> <span class="o">+</span> <span class="mi">89</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="mi">300</span> <span class="o">*</span> <span class="n">n_sents</span> <span class="o">/</span> <span class="n">n_words</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="mi">10</span> <span class="o">*</span> <span class="n">n_chars</span> <span class="o">/</span> <span class="n">n_words</span><span class="p">)</span> <span class="o">+</span> <span class="mi">89</span></div>
 </pre></div>
 
            </div>

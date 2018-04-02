@@ -37,7 +37,7 @@
         <link rel="search" title="Search" href="search.html"/>
     <link rel="top" title="textacy 0.6.0 documentation" href="index.html"/>
         <link rel="next" title="Changelog" href="changelog.html"/>
-        <link rel="prev" title="textacy: higher-level NLP built on spaCy" href="index.html"/> 
+        <link rel="prev" title="Quickstart" href="getting_started/quickstart.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -92,6 +92,8 @@
             
               <p class="caption"><span class="caption-text">Contents</span></p>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started/quickstart.html">Quickstart</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#module-textacy.doc">Doc</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-textacy.corpus">Corpus</a></li>
@@ -199,7 +201,7 @@
            <div itemprop="articleBody">
             
   <div class="section" id="api-reference">
-<h1>API Reference<a class="headerlink" href="#api-reference" title="Permalink to this headline">¶</a></h1>
+<span id="ref-api-reference"></span><h1>API Reference<a class="headerlink" href="#api-reference" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="module-textacy.doc">
 <span id="doc"></span><h2>Doc<a class="headerlink" href="#module-textacy.doc" title="Permalink to this headline">¶</a></h2>
 <p>Load, process, iterate, transform, and save text content paired with metadata
@@ -1135,7 +1137,7 @@ of occurrence (depending on the value of <code class="docutils literal notransla
 
 </div>
 <div class="section" id="module-textacy.datasets.capitol_words">
-<span id="datasets"></span><h2>Datasets<a class="headerlink" href="#module-textacy.datasets.capitol_words" title="Permalink to this headline">¶</a></h2>
+<span id="datasets"></span><span id="ref-api-datasets"></span><h2>Datasets<a class="headerlink" href="#module-textacy.datasets.capitol_words" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="capitol-words">
 <h3>Capitol Words<a class="headerlink" href="#capitol-words" title="Permalink to this headline">¶</a></h3>
 <p>A collection of ~11k (almost all) speeches given by the main protagonists of the
@@ -2304,7 +2306,7 @@ remove accented char for any unicode symbol</p>
 <dt id="textacy.preprocess.remove_punct">
 <code class="descclassname">textacy.preprocess.</code><code class="descname">remove_punct</code><span class="sig-paren">(</span><em>text</em>, <em>marks=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/textacy/preprocess.html#remove_punct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.preprocess.remove_punct" title="Permalink to this definition">¶</a></dt>
 <dd><p>Remove punctuation from <code class="docutils literal notranslate"><span class="pre">text</span></code> by replacing all instances of <code class="docutils literal notranslate"><span class="pre">marks</span></code>
-with an empty string.</p>
+with whitespace.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -2325,7 +2327,7 @@ Otherwise, all punctuation marks are removed.</li>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">When <code class="docutils literal notranslate"><span class="pre">marks=None</span></code>, Python’s built-in <a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str.translate" title="(in Python v3.6)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">str.translate()</span></code></a> is
-used to remove punctuation; otherwise,, a regular expression is used
+used to remove punctuation; otherwise, a regular expression is used
 instead. The former’s performance is about 5-10x faster.</p>
 </div>
 </dd></dl>
@@ -5072,7 +5074,7 @@ column; if not specified (default), a good set of 6 pairs are used</li>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Axis on which termite plot is plotted.</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><a class="reference external" href="https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.axis.html#matplotlib.axes.Axes.axis" title="(in Matplotlib v2.1.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.axes.Axes.axis</span></code></a></p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><a class="reference external" href="https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.axis.html#matplotlib.axes.Axes.axis" title="(in Matplotlib v2.2.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.axes.Axes.axis</span></code></a></p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3.6/library/exceptions.html#ValueError" title="(in Python v3.6)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> – if more columns are selected for highlighting than colors
@@ -5127,7 +5129,7 @@ this value based on the corresponding node weights compared to the max</li>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Axis on which network plot is drawn.</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.axis.html#matplotlib.axes.Axes.axis" title="(in Matplotlib v2.1.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.axes.Axes.axis</span></code></a></p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.axis.html#matplotlib.axes.Axes.axis" title="(in Matplotlib v2.2.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.axes.Axes.axis</span></code></a></p>
 </td>
 </tr>
 </tbody>
@@ -6219,7 +6221,7 @@ Data available at <a class="reference external" href="https://github.com/marcogu
         <a href="changelog.html" class="btn btn-neutral float-right" title="Changelog" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="index.html" class="btn btn-neutral" title="textacy: higher-level NLP built on spaCy" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="getting_started/quickstart.html" class="btn btn-neutral" title="Quickstart" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

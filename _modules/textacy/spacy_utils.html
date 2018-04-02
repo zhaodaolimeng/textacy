@@ -91,6 +91,8 @@
             
               <p class="caption"><span class="caption-text">Contents</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started/quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api_reference.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../license.html">License</a></li>
@@ -190,8 +192,8 @@
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;token is not POS-tagged&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">token</span><span class="o">.</span><span class="n">pos</span> <span class="o">==</span> <span class="n">NOUN</span> <span class="ow">and</span> <span class="n">token</span><span class="o">.</span><span class="n">lemma</span> <span class="o">!=</span> <span class="n">token</span><span class="o">.</span><span class="n">lower</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">True</span>
-    <span class="k">else</span><span class="p">:</span></div>
-        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
 
 
 <div class="viewcode-block" id="is_negated_verb"><a class="viewcode-back" href="../../api_reference.html#textacy.spacy_utils.is_negated_verb">[docs]</a><span class="k">def</span> <span class="nf">is_negated_verb</span><span class="p">(</span><span class="n">token</span><span class="p">):</span>
@@ -212,8 +214,8 @@
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;token is not parsed&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">token</span><span class="o">.</span><span class="n">pos</span> <span class="o">==</span> <span class="n">VERB</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">dep_</span> <span class="o">==</span> <span class="s1">&#39;neg&#39;</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">token</span><span class="o">.</span><span class="n">children</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">True</span>
-    <span class="k">else</span><span class="p">:</span></div>
-        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
 
 
 <div class="viewcode-block" id="preserve_case"><a class="viewcode-back" href="../../api_reference.html#textacy.spacy_utils.preserve_case">[docs]</a><span class="k">def</span> <span class="nf">preserve_case</span><span class="p">(</span><span class="n">token</span><span class="p">):</span>
@@ -230,8 +232,8 @@
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;token is not POS-tagged&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">token</span><span class="o">.</span><span class="n">pos</span> <span class="o">==</span> <span class="n">PROPN</span> <span class="ow">or</span> <span class="n">text_utils</span><span class="o">.</span><span class="n">is_acronym</span><span class="p">(</span><span class="n">token</span><span class="o">.</span><span class="n">text</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">True</span>
-    <span class="k">else</span><span class="p">:</span></div>
-        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
 
 
 <div class="viewcode-block" id="normalized_str"><a class="viewcode-back" href="../../api_reference.html#textacy.spacy_utils.normalized_str">[docs]</a><span class="k">def</span> <span class="nf">normalized_str</span><span class="p">(</span><span class="n">token</span><span class="p">):</span>
@@ -252,8 +254,8 @@
                         <span class="k">for</span> <span class="n">subtok</span> <span class="ow">in</span> <span class="n">token</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-            <span class="s1">&#39;Input must be a spacy Token or Span, not </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">token</span><span class="p">))</span></div>
-            <span class="p">)</span>
+            <span class="s1">&#39;Input must be a spacy Token or Span, not </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
+            <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="merge_spans"><a class="viewcode-back" href="../../api_reference.html#textacy.spacy_utils.merge_spans">[docs]</a><span class="k">def</span> <span class="nf">merge_spans</span><span class="p">(</span><span class="n">spans</span><span class="p">):</span>
@@ -266,14 +268,14 @@
     <span class="k">for</span> <span class="n">span</span> <span class="ow">in</span> <span class="n">spans</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">span</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">span</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">tag_</span><span class="p">,</span> <span class="n">span</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="n">span</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">ent_type_</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">IndexError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span></div>
-            <span class="n">LOGGER</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s1">&#39;Unable to merge span &quot;</span><span class="si">%s</span><span class="s1">&quot;; skipping...&#39;</span><span class="p">,</span> <span class="n">span</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">IndexError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s1">&#39;Unable to merge span &quot;</span><span class="si">%s</span><span class="s1">&quot;; skipping...&#39;</span><span class="p">,</span> <span class="n">span</span><span class="o">.</span><span class="n">text</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="get_main_verbs_of_sent"><a class="viewcode-back" href="../../api_reference.html#textacy.spacy_utils.get_main_verbs_of_sent">[docs]</a><span class="k">def</span> <span class="nf">get_main_verbs_of_sent</span><span class="p">(</span><span class="n">sent</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Return the main (non-auxiliary) verbs in a sentence.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">tok</span> <span class="k">for</span> <span class="n">tok</span> <span class="ow">in</span> <span class="n">sent</span></div>
-            <span class="k">if</span> <span class="n">tok</span><span class="o">.</span><span class="n">pos</span> <span class="o">==</span> <span class="n">VERB</span> <span class="ow">and</span> <span class="n">tok</span><span class="o">.</span><span class="n">dep_</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;aux&#39;</span><span class="p">,</span> <span class="s1">&#39;auxpass&#39;</span><span class="p">}]</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">tok</span> <span class="k">for</span> <span class="n">tok</span> <span class="ow">in</span> <span class="n">sent</span>
+            <span class="k">if</span> <span class="n">tok</span><span class="o">.</span><span class="n">pos</span> <span class="o">==</span> <span class="n">VERB</span> <span class="ow">and</span> <span class="n">tok</span><span class="o">.</span><span class="n">dep_</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;aux&#39;</span><span class="p">,</span> <span class="s1">&#39;auxpass&#39;</span><span class="p">}]</span></div>
 
 
 <div class="viewcode-block" id="get_subjects_of_verb"><a class="viewcode-back" href="../../api_reference.html#textacy.spacy_utils.get_subjects_of_verb">[docs]</a><span class="k">def</span> <span class="nf">get_subjects_of_verb</span><span class="p">(</span><span class="n">verb</span><span class="p">):</span>
@@ -281,8 +283,8 @@
     <span class="n">subjs</span> <span class="o">=</span> <span class="p">[</span><span class="n">tok</span> <span class="k">for</span> <span class="n">tok</span> <span class="ow">in</span> <span class="n">verb</span><span class="o">.</span><span class="n">lefts</span>
              <span class="k">if</span> <span class="n">tok</span><span class="o">.</span><span class="n">dep_</span> <span class="ow">in</span> <span class="n">constants</span><span class="o">.</span><span class="n">SUBJ_DEPS</span><span class="p">]</span>
     <span class="c1"># get additional conjunct subjects</span>
-    <span class="n">subjs</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">tok</span> <span class="k">for</span> <span class="n">subj</span> <span class="ow">in</span> <span class="n">subjs</span> <span class="k">for</span> <span class="n">tok</span> <span class="ow">in</span> <span class="n">_get_conjuncts</span><span class="p">(</span><span class="n">subj</span><span class="p">))</span></div>
-    <span class="k">return</span> <span class="n">subjs</span>
+    <span class="n">subjs</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">tok</span> <span class="k">for</span> <span class="n">subj</span> <span class="ow">in</span> <span class="n">subjs</span> <span class="k">for</span> <span class="n">tok</span> <span class="ow">in</span> <span class="n">_get_conjuncts</span><span class="p">(</span><span class="n">subj</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">subjs</span></div>
 
 
 <div class="viewcode-block" id="get_objects_of_verb"><a class="viewcode-back" href="../../api_reference.html#textacy.spacy_utils.get_objects_of_verb">[docs]</a><span class="k">def</span> <span class="nf">get_objects_of_verb</span><span class="p">(</span><span class="n">verb</span><span class="p">):</span>
@@ -296,8 +298,8 @@
     <span class="n">objs</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">tok</span> <span class="k">for</span> <span class="n">tok</span> <span class="ow">in</span> <span class="n">verb</span><span class="o">.</span><span class="n">rights</span>
                 <span class="k">if</span> <span class="n">tok</span><span class="o">.</span><span class="n">dep_</span> <span class="o">==</span> <span class="s1">&#39;xcomp&#39;</span><span class="p">)</span>
     <span class="c1"># get additional conjunct objects</span>
-    <span class="n">objs</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">tok</span> <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objs</span> <span class="k">for</span> <span class="n">tok</span> <span class="ow">in</span> <span class="n">_get_conjuncts</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span></div>
-    <span class="k">return</span> <span class="n">objs</span>
+    <span class="n">objs</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">tok</span> <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objs</span> <span class="k">for</span> <span class="n">tok</span> <span class="ow">in</span> <span class="n">_get_conjuncts</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">objs</span></div>
 
 
 <span class="k">def</span> <span class="nf">_get_conjuncts</span><span class="p">(</span><span class="n">tok</span><span class="p">):</span>
@@ -315,8 +317,8 @@
 <span class="sd">    in a compound noun.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">min_i</span> <span class="o">=</span> <span class="n">noun</span><span class="o">.</span><span class="n">i</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">takewhile</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">dep_</span> <span class="o">==</span> <span class="s1">&#39;compound&#39;</span><span class="p">,</span>
-                                                        <span class="nb">reversed</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">noun</span><span class="o">.</span><span class="n">lefts</span><span class="p">))))</span></div>
-    <span class="k">return</span> <span class="p">(</span><span class="n">min_i</span><span class="p">,</span> <span class="n">noun</span><span class="o">.</span><span class="n">i</span><span class="p">)</span>
+                                                        <span class="nb">reversed</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">noun</span><span class="o">.</span><span class="n">lefts</span><span class="p">))))</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">min_i</span><span class="p">,</span> <span class="n">noun</span><span class="o">.</span><span class="n">i</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="get_span_for_verb_auxiliaries"><a class="viewcode-back" href="../../api_reference.html#textacy.spacy_utils.get_span_for_verb_auxiliaries">[docs]</a><span class="k">def</span> <span class="nf">get_span_for_verb_auxiliaries</span><span class="p">(</span><span class="n">verb</span><span class="p">):</span>
@@ -327,8 +329,8 @@
     <span class="n">min_i</span> <span class="o">=</span> <span class="n">verb</span><span class="o">.</span><span class="n">i</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">takewhile</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">dep_</span> <span class="ow">in</span> <span class="n">constants</span><span class="o">.</span><span class="n">AUX_DEPS</span><span class="p">,</span>
                                                         <span class="nb">reversed</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">verb</span><span class="o">.</span><span class="n">lefts</span><span class="p">))))</span>
     <span class="n">max_i</span> <span class="o">=</span> <span class="n">verb</span><span class="o">.</span><span class="n">i</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">takewhile</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">dep_</span> <span class="ow">in</span> <span class="n">constants</span><span class="o">.</span><span class="n">AUX_DEPS</span><span class="p">,</span>
-                                                        <span class="n">verb</span><span class="o">.</span><span class="n">rights</span><span class="p">))</span></div>
-    <span class="k">return</span> <span class="p">(</span><span class="n">min_i</span><span class="p">,</span> <span class="n">max_i</span><span class="p">)</span>
+                                                        <span class="n">verb</span><span class="o">.</span><span class="n">rights</span><span class="p">))</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">min_i</span><span class="p">,</span> <span class="n">max_i</span><span class="p">)</span></div>
 </pre></div>
 
            </div>

@@ -91,6 +91,8 @@
             
               <p class="caption"><span class="caption-text">Contents</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../api_reference.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
@@ -244,8 +246,8 @@
     <span class="n">f</span> <span class="o">=</span> <span class="n">_get_file_handle</span><span class="p">(</span>
         <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="n">compression</span><span class="p">,</span>
         <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="n">errors</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="n">newline</span><span class="p">)</span>
-</div>
-    <span class="k">return</span> <span class="n">f</span>
+
+    <span class="k">return</span> <span class="n">f</span></div>
 
 
 <span class="k">def</span> <span class="nf">_get_compression</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">compression</span><span class="p">):</span>
@@ -360,8 +362,8 @@
     <span class="k">if</span> <span class="s1">&#39;t&#39;</span> <span class="ow">in</span> <span class="n">file_mode</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">compat</span><span class="o">.</span><span class="n">bytes_</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">compat</span><span class="o">.</span><span class="n">bytes_to_unicode</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
     <span class="k">elif</span> <span class="s1">&#39;b&#39;</span> <span class="ow">in</span> <span class="n">file_mode</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">compat</span><span class="o">.</span><span class="n">unicode_</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">compat</span><span class="o">.</span><span class="n">unicode_to_bytes</span><span class="p">(</span><span class="n">content</span><span class="p">)</span></div>
-    <span class="k">return</span> <span class="n">content</span>
+        <span class="k">return</span> <span class="n">compat</span><span class="o">.</span><span class="n">unicode_to_bytes</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">content</span></div>
 
 
 <div class="viewcode-block" id="split_records"><a class="viewcode-back" href="../../../api_reference.html#textacy.io.utils.split_records">[docs]</a><span class="k">def</span> <span class="nf">split_records</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">content_field</span><span class="p">,</span> <span class="n">itemwise</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -405,8 +407,8 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">itemwise</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">((</span><span class="n">item</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">content_field</span><span class="p">),</span> <span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span></div>
-        <span class="k">return</span> <span class="n">unzip</span><span class="p">(((</span><span class="n">item</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">content_field</span><span class="p">),</span> <span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">unzip</span><span class="p">(((</span><span class="n">item</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">content_field</span><span class="p">),</span> <span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="split_record_fields"><a class="viewcode-back" href="../../../api_reference.html#textacy.io.utils.split_record_fields">[docs]</a><span class="k">def</span> <span class="nf">split_record_fields</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">content_field</span><span class="p">,</span> <span class="n">itemwise</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -417,8 +419,8 @@
     <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
         <span class="s1">&#39;`split_record_fields()` has been renamed `split_records()`, &#39;</span>
         <span class="s1">&#39;and this function is just a temporary alias for it.&#39;</span><span class="p">,</span>
-        <span class="ne">DeprecationWarning</span><span class="p">)</span></div>
-    <span class="k">return</span> <span class="n">split_records</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">content_field</span><span class="p">,</span> <span class="n">itemwise</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="ne">DeprecationWarning</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">split_records</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">content_field</span><span class="p">,</span> <span class="n">itemwise</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="unzip"><a class="viewcode-back" href="../../../api_reference.html#textacy.io.utils.unzip">[docs]</a><span class="k">def</span> <span class="nf">unzip</span><span class="p">(</span><span class="n">seq</span><span class="p">):</span>
@@ -434,8 +436,8 @@
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">()</span>
     <span class="c1"># and create them</span>
     <span class="n">niters</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">first</span><span class="p">)</span>
-    <span class="n">seqs</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">tee</span><span class="p">(</span><span class="n">itertoolz</span><span class="o">.</span><span class="n">cons</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">seq</span><span class="p">),</span> <span class="n">niters</span><span class="p">)</span></div>
-    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">starmap</span><span class="p">(</span><span class="n">itertoolz</span><span class="o">.</span><span class="n">pluck</span><span class="p">,</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">seqs</span><span class="p">)))</span>
+    <span class="n">seqs</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">tee</span><span class="p">(</span><span class="n">itertoolz</span><span class="o">.</span><span class="n">cons</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">seq</span><span class="p">),</span> <span class="n">niters</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">starmap</span><span class="p">(</span><span class="n">itertoolz</span><span class="o">.</span><span class="n">pluck</span><span class="p">,</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">seqs</span><span class="p">)))</span></div>
 
 
 <div class="viewcode-block" id="get_filenames"><a class="viewcode-back" href="../../../api_reference.html#textacy.io.utils.get_filenames">[docs]</a><span class="k">def</span> <span class="nf">get_filenames</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="n">match_regex</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ignore_regex</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -494,8 +496,8 @@
                     <span class="k">yield</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirpath</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">dirname</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">is_good_file</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">dirname</span><span class="p">):</span></div>
-                <span class="k">yield</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">is_good_file</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">dirname</span><span class="p">):</span>
+                <span class="k">yield</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span></div>
 </pre></div>
 
            </div>

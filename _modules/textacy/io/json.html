@@ -91,6 +91,8 @@
             
               <p class="caption"><span class="caption-text">Contents</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../api_reference.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
@@ -212,8 +214,8 @@
             <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
                 <span class="k">yield</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">compat</span><span class="o">.</span><span class="n">string_types</span><span class="p">):</span>
-            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">ijson</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">lines</span><span class="p">):</span></div>
-                <span class="k">yield</span> <span class="n">item</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">ijson</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">lines</span><span class="p">):</span>
+                <span class="k">yield</span> <span class="n">item</span></div>
 
 
 <div class="viewcode-block" id="read_json_mash"><a class="viewcode-back" href="../../../api_reference.html#textacy.io.json.read_json_mash">[docs]</a><span class="k">def</span> <span class="nf">read_json_mash</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;rt&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">buffer_size</span><span class="o">=</span><span class="mi">2048</span><span class="p">):</span>
@@ -248,8 +250,8 @@
                     <span class="k">yield</span> <span class="n">result</span>
                     <span class="n">buffer_</span> <span class="o">=</span> <span class="n">buffer_</span><span class="p">[</span><span class="n">index</span><span class="p">:]</span>
                 <span class="c1"># not enough data to decode =&gt; read another chunk</span>
-                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span></div>
-                    <span class="k">break</span>
+                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                    <span class="k">break</span></div>
 
 
 <div class="viewcode-block" id="write_json"><a class="viewcode-back" href="../../../api_reference.html#textacy.io.json.write_json">[docs]</a><span class="k">def</span> <span class="nf">write_json</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;wt&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -306,8 +308,8 @@
             <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
                 <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="n">indent</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="n">ensure_ascii</span><span class="p">,</span>
                                    <span class="n">separators</span><span class="o">=</span><span class="n">separators</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="n">sort_keys</span><span class="p">,</span>
-                                   <span class="bp">cls</span><span class="o">=</span><span class="n">ExtendedJSONEncoder</span><span class="p">)</span> <span class="o">+</span></div>
-                        <span class="n">newline</span><span class="p">)</span>
+                                   <span class="bp">cls</span><span class="o">=</span><span class="n">ExtendedJSONEncoder</span><span class="p">)</span> <span class="o">+</span>
+                        <span class="n">newline</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="ExtendedJSONEncoder"><a class="viewcode-back" href="../../../api_reference.html#textacy.io.json.ExtendedJSONEncoder">[docs]</a><span class="k">class</span> <span class="nc">ExtendedJSONEncoder</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">JSONEncoder</span><span class="p">):</span>
@@ -322,8 +324,8 @@
 <div class="viewcode-block" id="ExtendedJSONEncoder.default"><a class="viewcode-back" href="../../../api_reference.html#textacy.io.json.ExtendedJSONEncoder.default">[docs]</a>    <span class="k">def</span> <span class="nf">default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">)):</span>
             <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span></div></div>
-            <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">ExtendedJSONEncoder</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">default</span><span class="p">(</span><span class="n">ob</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">ExtendedJSONEncoder</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">default</span><span class="p">(</span><span class="n">ob</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>

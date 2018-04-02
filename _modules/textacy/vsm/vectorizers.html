@@ -91,6 +91,8 @@
             
               <p class="caption"><span class="caption-text">Contents</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../api_reference.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
@@ -532,8 +534,8 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            :class:`Vectorizer`: The instance that has just been fit.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fit</span><span class="p">(</span><span class="n">tokenized_docs</span><span class="p">)</span></div>
-        <span class="k">return</span> <span class="bp">self</span>
+        <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fit</span><span class="p">(</span><span class="n">tokenized_docs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
 
 <div class="viewcode-block" id="Vectorizer.fit_transform"><a class="viewcode-back" href="../../../api_reference.html#textacy.vsm.vectorizers.Vectorizer.fit_transform">[docs]</a>    <span class="k">def</span> <span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tokenized_docs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -561,8 +563,8 @@
         <span class="c1"># count terms and fit global weights</span>
         <span class="n">doc_term_matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fit</span><span class="p">(</span><span class="n">tokenized_docs</span><span class="p">)</span>
         <span class="c1"># re-weight values in doc-term matrix, as specified in init</span>
-        <span class="n">doc_term_matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reweight_values</span><span class="p">(</span><span class="n">doc_term_matrix</span><span class="p">)</span></div>
-        <span class="k">return</span> <span class="n">doc_term_matrix</span>
+        <span class="n">doc_term_matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reweight_values</span><span class="p">(</span><span class="n">doc_term_matrix</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">doc_term_matrix</span></div>
 
 <div class="viewcode-block" id="Vectorizer.transform"><a class="viewcode-back" href="../../../api_reference.html#textacy.vsm.vectorizers.Vectorizer.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tokenized_docs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -595,8 +597,8 @@
 <span class="sd">            all uppercased: The output doc-term-matrix will be empty.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_vocabulary</span><span class="p">()</span>
-        <span class="n">doc_term_matrix</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_count_terms</span><span class="p">(</span><span class="n">tokenized_docs</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span></div>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reweight_values</span><span class="p">(</span><span class="n">doc_term_matrix</span><span class="p">)</span>
+        <span class="n">doc_term_matrix</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_count_terms</span><span class="p">(</span><span class="n">tokenized_docs</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reweight_values</span><span class="p">(</span><span class="n">doc_term_matrix</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tokenized_docs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -827,8 +829,8 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_idf</span><span class="p">:</span>
             <span class="n">w</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idf_types</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">idf_type</span><span class="p">])</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_dl</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">tf_type</span> <span class="o">!=</span> <span class="s1">&#39;bm25&#39;</span><span class="p">:</span>
-            <span class="n">w</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dl_types</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">dl_type</span><span class="p">])</span></div>
-        <span class="k">return</span> <span class="s1">&#39; * &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+            <span class="n">w</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dl_types</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">dl_type</span><span class="p">])</span>
+        <span class="k">return</span> <span class="s1">&#39; * &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">w</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="GroupVectorizer"><a class="viewcode-back" href="../../../api_reference.html#textacy.vsm.vectorizers.GroupVectorizer">[docs]</a><span class="k">class</span> <span class="nc">GroupVectorizer</span><span class="p">(</span><span class="n">Vectorizer</span><span class="p">):</span>
@@ -1056,8 +1058,8 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            :class:`GroupVectorizer`: The instance that has just been fit.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fit</span><span class="p">(</span><span class="n">tokenized_docs</span><span class="p">,</span> <span class="n">grps</span><span class="p">)</span></div>
-        <span class="k">return</span> <span class="bp">self</span>
+        <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fit</span><span class="p">(</span><span class="n">tokenized_docs</span><span class="p">,</span> <span class="n">grps</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
 
 <div class="viewcode-block" id="GroupVectorizer.fit_transform"><a class="viewcode-back" href="../../../api_reference.html#textacy.vsm.vectorizers.GroupVectorizer.fit_transform">[docs]</a>    <span class="k">def</span> <span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tokenized_docs</span><span class="p">,</span> <span class="n">grps</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1090,8 +1092,8 @@
         <span class="c1"># count terms and fit global weights</span>
         <span class="n">grp_term_matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fit</span><span class="p">(</span><span class="n">tokenized_docs</span><span class="p">,</span> <span class="n">grps</span><span class="p">)</span>
         <span class="c1"># re-weight values in group-term matrix, as specified in init</span>
-        <span class="n">grp_term_matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reweight_values</span><span class="p">(</span><span class="n">grp_term_matrix</span><span class="p">)</span></div>
-        <span class="k">return</span> <span class="n">grp_term_matrix</span>
+        <span class="n">grp_term_matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reweight_values</span><span class="p">(</span><span class="n">grp_term_matrix</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">grp_term_matrix</span></div>
 
 <div class="viewcode-block" id="GroupVectorizer.transform"><a class="viewcode-back" href="../../../api_reference.html#textacy.vsm.vectorizers.GroupVectorizer.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tokenized_docs</span><span class="p">,</span> <span class="n">grps</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1130,8 +1132,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_vocabulary</span><span class="p">()</span>
         <span class="n">grp_term_matrix</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_count_terms</span><span class="p">(</span>
-            <span class="n">tokenized_docs</span><span class="p">,</span> <span class="n">grps</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span></div>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reweight_values</span><span class="p">(</span><span class="n">grp_term_matrix</span><span class="p">)</span>
+            <span class="n">tokenized_docs</span><span class="p">,</span> <span class="n">grps</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reweight_values</span><span class="p">(</span><span class="n">grp_term_matrix</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tokenized_docs</span><span class="p">,</span> <span class="n">grps</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1256,8 +1258,8 @@
             <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">vocabulary_grps</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">vocabulary_terms</span><span class="p">)),</span>
             <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
         <span class="n">grp_term_matrix</span><span class="o">.</span><span class="n">sort_indices</span><span class="p">()</span>
-</div>
-        <span class="k">return</span> <span class="n">grp_term_matrix</span><span class="p">,</span> <span class="n">vocabulary_terms</span><span class="p">,</span> <span class="n">vocabulary_grps</span>
+
+        <span class="k">return</span> <span class="n">grp_term_matrix</span><span class="p">,</span> <span class="n">vocabulary_terms</span><span class="p">,</span> <span class="n">vocabulary_grps</span></div>
 </pre></div>
 
            </div>

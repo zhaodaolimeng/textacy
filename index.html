@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>textacy: higher-level NLP built on spaCy &mdash; textacy 0.6.0 documentation</title>
+  <title>textacy: NLP, before and after spaCy &mdash; textacy 0.6.0 documentation</title>
   
 
   
@@ -36,7 +36,7 @@
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
     <link rel="top" title="textacy 0.6.0 documentation" href="#"/>
-        <link rel="next" title="API Reference" href="api_reference.html"/> 
+        <link rel="next" title="Installation" href="getting_started/installation.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -91,6 +91,8 @@
             
               <p class="caption"><span class="caption-text">Contents</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="getting_started/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started/quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api_reference.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
 <li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
@@ -138,7 +140,7 @@
     
       <li><a href="#">Docs</a> &raquo;</li>
         
-      <li>textacy: higher-level NLP built on spaCy</li>
+      <li>textacy: NLP, before and after spaCy</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -157,13 +159,13 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="textacy-higher-level-nlp-built-on-spacy">
-<h1>textacy: higher-level NLP built on spaCy<a class="headerlink" href="#textacy-higher-level-nlp-built-on-spacy" title="Permalink to this headline">¶</a></h1>
-<p><code class="docutils literal notranslate"><span class="pre">textacy</span></code> is a Python library for performing higher-level natural language
-processing (NLP) tasks, built on the high-performance <a class="reference external" href="https://spacy.io/">spaCy</a> library. With the
+  <div class="section" id="textacy-nlp-before-and-after-spacy">
+<h1>textacy: NLP, before and after spaCy<a class="headerlink" href="#textacy-nlp-before-and-after-spacy" title="Permalink to this headline">¶</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">textacy</span></code> is a Python library for performing a variety of natural language
+processing (NLP) tasks, built on the high-performance <code class="docutils literal notranslate"><span class="pre">spacy</span></code> library. With the
 fundamentals — tokenization, part-of-speech tagging, dependency parsing, etc. —
-offloaded to another library, <code class="docutils literal notranslate"><span class="pre">textacy</span></code> focuses on tasks facilitated by the
-ready availability of tokenized, POS-tagged, and parsed text.</p>
+delegated to another library, <code class="docutils literal notranslate"><span class="pre">textacy</span></code> focuses on the tasks that come before
+and follow after.</p>
 <a class="reference external image-reference" href="https://travis-ci.org/chartbeat-labs/textacy"><img alt="build status" src="https://img.shields.io/travis/chartbeat-labs/textacy/master.svg?style=flat-square" /></a>
 <a class="reference external image-reference" href="https://github.com/chartbeat-labs/textacy/releases"><img alt="current release version" src="https://img.shields.io/github/release/chartbeat-labs/textacy.svg?style=flat-square" /></a>
 <a class="reference external image-reference" href="https://pypi.python.org/pypi/textacy"><img alt="pypi version" src="https://img.shields.io/pypi/v/textacy.svg?style=flat-square" /></a>
@@ -171,281 +173,57 @@ ready availability of tokenized, POS-tagged, and parsed text.</p>
 <div class="section" id="features">
 <h2>Features<a class="headerlink" href="#features" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>Stream text, json, csv, and spaCy binary data to and from disk</li>
-<li>Clean and normalize raw text, <em>before</em> analyzing it</li>
-<li>Explore a variety of included datasets, with both text data and metadata from
-Congressional speeches to historical literature to Reddit comments</li>
-<li>Access and filter basic linguistic elements, such as words and ngrams, noun
-chunks and sentences</li>
-<li>Extract named entities, acronyms and their definitions, direct quotations,
-key terms, and more from documents</li>
+<li>Provide a convenient entry point and interface to one or many documents, with
+the core processing delegated to spaCy</li>
+<li>Stream text, json, csv, spaCy binary, and other data to and from disk</li>
+<li>Download and explore a variety of included datasets with both text content and
+metadata, from Congressional speeches to historical literature to Reddit comments</li>
+<li>Clean and normalize raw text, before analyzing it</li>
+<li>Access and filter basic linguistic elements, such as words, ngrams, and noun
+chunks; extract named entities, acronyms and their definitions, and key terms</li>
+<li>Flexibly tokenize and vectorize documents and corpora, then train, interpret,
+and visualize topic models using LSA, LDA, or NMF methods</li>
 <li>Compare strings, sets, and documents by a variety of similarity metrics</li>
-<li>Transform documents and corpora into vectorized and semantic network representations</li>
-<li>Train, interpret, visualize, and save <code class="docutils literal notranslate"><span class="pre">sklearn</span></code>-style topic models using
-LSA, LDA, or NMF methods</li>
-<li>Identify a text’s language, display key words in context (KWIC), true-case words,
-and navigate a parse tree</li>
+<li>Calculate common text statistics, including Flesch-Kincaid Grade Level,
+SMOG Index, and multilingual Flesch Reading Ease</li>
 </ul>
-<p>… and more!</p>
+<p>… <em>and more!</em></p>
 </div>
-<div class="section" id="project-links">
-<h2>Project Links<a class="headerlink" href="#project-links" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="links">
+<h2>Links<a class="headerlink" href="#links" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><a class="reference external" href="https://pypi.python.org/pypi/textacy">textacy &#64; PyPi</a></li>
+<li><a class="reference external" href="https://pypi.org/project/textacy/">textacy &#64; PyPi</a></li>
 <li><a class="reference external" href="https://github.com/chartbeat-labs/textacy">textacy &#64; GitHub</a></li>
 <li><a class="reference external" href="http://textacy.readthedocs.io/en/latest/">textacy &#64; ReadTheDocs</a></li>
 </ul>
-<p><strong>Note:</strong> ReadTheDocs builds are currently failing, so those docs are currently
-out-of-date. As a temporary workaround, I’ve built v0.5.0’s documentation and
-published it via GitHub Pages: <a class="reference external" href="https://chartbeat-labs.github.io/textacy">https://chartbeat-labs.github.io/textacy</a>.</p>
-</div>
-<div class="section" id="installation">
-<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
-<p>The simple way to install <code class="docutils literal notranslate"><span class="pre">textacy</span></code> is via <code class="docutils literal notranslate"><span class="pre">pip</span></code>:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> pip install textacy
-</pre></div>
-</div>
-<p>or <code class="docutils literal notranslate"><span class="pre">conda</span></code>:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> conda install -c conda-forge textacy
-</pre></div>
-</div>
-<p><strong>Note:</strong> If you use <code class="docutils literal notranslate"><span class="pre">pip</span></code>, some dependencies have been made optional, because
-they can be difficult to install and/or are only needed in certain uses cases.
-To use visualization functions, you’ll need <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code> installed; you can do
-so via <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">textacy[viz]</span></code>. For automatic language detection, you’ll
-need <code class="docutils literal notranslate"><span class="pre">cld2-cffi</span></code> installed; do <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">textacy[lang]</span></code>. To install all
-optional dependencies:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> pip install textacy<span class="o">[</span>all<span class="o">]</span>
-</pre></div>
-</div>
-<p>Otherwise, you can download and unzip the source <code class="docutils literal notranslate"><span class="pre">tar.gz</span></code> from  <a class="reference external" href="https://pypi.python.org/pypi/textacy">PyPi</a>,
-then install manually:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> python setup.py install
-</pre></div>
-</div>
-<div class="section" id="downloading-data">
-<h3>Downloading Data<a class="headerlink" href="#downloading-data" title="Permalink to this headline">¶</a></h3>
-<p>For most uses of <code class="docutils literal notranslate"><span class="pre">textacy</span></code>, language-specific model data in <code class="docutils literal notranslate"><span class="pre">spacy</span></code> is
-required. Follow the directions <a class="reference external" href="https://spacy.io/docs/usage/models">here</a>
-to download the necessary files. Currently available language models are listed
-<a class="reference external" href="https://spacy.io/usage/models#section-available">here</a>.</p>
-<p><code class="docutils literal notranslate"><span class="pre">textacy</span></code> features convenient access to several datasets comprised of thousands
-of text + metadata records. Data can be downloaded via the <code class="docutils literal notranslate"><span class="pre">.download()</span></code> method
-on corresponding dataset classes, <em>or</em> directly from the command line.
-For example:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> python -m textacy download capitol_words
-</pre></div>
-</div>
-<p>will download and save a compressed json file with ~11k speeches given by the
-main protagonists of the 2016 U.S. Presidential election (that had previously
-served in the U.S. Congress). For more details, do</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> python -m textacy --help
-</pre></div>
-</div>
-</div>
-</div>
-<div class="section" id="usage-example">
-<h2>Usage Example<a class="headerlink" href="#usage-example" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">textacy</span>
-</pre></div>
-</div>
-<p>Efficiently stream documents from disk and into a processed corpus:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">textacy.datasets</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">cw</span> <span class="o">=</span> <span class="n">textacy</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">CapitolWords</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">cw</span><span class="o">.</span><span class="n">download</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">records</span> <span class="o">=</span> <span class="n">cw</span><span class="o">.</span><span class="n">records</span><span class="p">(</span><span class="n">speaker_name</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;Hillary Clinton&#39;</span><span class="p">,</span> <span class="s1">&#39;Barack Obama&#39;</span><span class="p">})</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">text_stream</span><span class="p">,</span> <span class="n">metadata_stream</span> <span class="o">=</span> <span class="n">textacy</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">split_records</span><span class="p">(</span><span class="n">records</span><span class="p">,</span> <span class="s1">&#39;text&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">corpus</span> <span class="o">=</span> <span class="n">textacy</span><span class="o">.</span><span class="n">Corpus</span><span class="p">(</span><span class="s1">&#39;en&#39;</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="n">text_stream</span><span class="p">,</span> <span class="n">metadatas</span><span class="o">=</span><span class="n">metadata_stream</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">corpus</span>
-<span class="go">Corpus(1241 docs; 857058 tokens)</span>
-</pre></div>
-</div>
-<p>Represent corpus as a document-term matrix, with flexible weighting and filtering:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">vectorizer</span> <span class="o">=</span> <span class="n">textacy</span><span class="o">.</span><span class="n">Vectorizer</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="n">tf_type</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="n">apply_idf</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">idf_type</span><span class="o">=</span><span class="s1">&#39;smooth&#39;</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="s1">&#39;l2&#39;</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="n">min_df</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">max_df</span><span class="o">=</span><span class="mf">0.95</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">doc_term_matrix</span> <span class="o">=</span> <span class="n">vectorizer</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="p">(</span><span class="n">doc</span><span class="o">.</span><span class="n">to_terms_list</span><span class="p">(</span><span class="n">ngrams</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">named_entities</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">as_strings</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="gp">... </span>     <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">corpus</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">doc_term_matrix</span><span class="p">))</span>
-<span class="go">&lt;1241x11708 sparse matrix of type &#39;&lt;class &#39;numpy.float64&#39;&gt;&#39;</span>
-<span class="go">    with 215182 stored elements in Compressed Sparse Row format&gt;</span>
-</pre></div>
-</div>
-<p>Train and interpret a topic model:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">textacy</span><span class="o">.</span><span class="n">TopicModel</span><span class="p">(</span><span class="s1">&#39;nmf&#39;</span><span class="p">,</span> <span class="n">n_topics</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">doc_term_matrix</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">doc_topic_matrix</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">doc_term_matrix</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">doc_topic_matrix</span><span class="o">.</span><span class="n">shape</span>
-<span class="go">(1241, 10)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">topic_idx</span><span class="p">,</span> <span class="n">top_terms</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">top_topic_terms</span><span class="p">(</span><span class="n">vectorizer</span><span class="o">.</span><span class="n">id_to_term</span><span class="p">,</span> <span class="n">top_n</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
-<span class="gp">... </span>    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;topic&#39;</span><span class="p">,</span> <span class="n">topic_idx</span><span class="p">,</span> <span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="s1">&#39;   &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">top_terms</span><span class="p">))</span>
-<span class="go">topic 0 : new   people   &#39;s   american   senate   need   iraq   york   americans   work</span>
-<span class="go">topic 1 : rescind   quorum   order   consent   unanimous   ask   president   mr.   madam   aside</span>
-<span class="go">topic 2 : dispense   reading   amendment   unanimous   consent   ask   president   mr.   pending   aside</span>
-<span class="go">topic 3 : health   care   child   mental   quality   patient   medical   program   information   family</span>
-<span class="go">topic 4 : student   school   education   college   child   teacher   high   program   loan   year</span>
-<span class="go">topic 5 : senators   desiring   chamber   vote   4,600   amtrak   rail   airline   litigation   expedited</span>
-<span class="go">topic 6 : senate   thursday   wednesday   session   unanimous   consent   authorize   p.m.   committee   ask</span>
-<span class="go">topic 7 : medicare   drug   senior   medicaid   prescription   benefit   plan   cut   cost   fda</span>
-<span class="go">topic 8 : flu   vaccine   avian   pandemic   roberts   influenza   seasonal   outbreak   health   cdc</span>
-<span class="go">topic 9 : virginia   west virginia   west   senator   yield   question   thank   objection   inquiry   massachusetts</span>
-</pre></div>
-</div>
-<p>Basic indexing as well as flexible selection of documents in a corpus:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">obama_docs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">corpus</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="k">lambda</span> <span class="n">doc</span><span class="p">:</span> <span class="n">doc</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;speaker_name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Barack Obama&#39;</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">obama_docs</span><span class="p">)</span>
-<span class="go">411</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span> <span class="o">=</span> <span class="n">corpus</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span>
-<span class="go">Doc(2999 tokens; &quot;In the Federalist Papers, we often hear the ref...&quot;)</span>
-</pre></div>
-</div>
-<p>Preprocess plain text, or highlight particular terms in it:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">textacy</span><span class="o">.</span><span class="n">preprocess_text</span><span class="p">(</span><span class="n">doc</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="n">lowercase</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">no_punct</span><span class="o">=</span><span class="bp">True</span><span class="p">)[:</span><span class="mi">70</span><span class="p">]</span>
-<span class="go">&#39;in the federalist papers we often hear the reference to the senates ro&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">textacy</span><span class="o">.</span><span class="n">text_utils</span><span class="o">.</span><span class="n">keyword_in_context</span><span class="p">(</span><span class="n">doc</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="s1">&#39;America&#39;</span><span class="p">,</span> <span class="n">window_width</span><span class="o">=</span><span class="mi">35</span><span class="p">)</span>
-<span class="go">g on this tiny piece of Senate and  America n history. Some 10 years ago, I ask</span>
-<span class="go">o do the hard work in New York and  America , who get up every day and do the v</span>
-<span class="go">say: You know, you never can count  America  out. Whenever the chips are down,</span>
-<span class="go"> what we know will give our fellow  America ns a better shot at the kind of fut</span>
-<span class="go">aith in this body and in my fellow  America ns. I remain an optimist, that Amer</span>
-<span class="go">ricans. I remain an optimist, that  America &#39;s best days are still ahead of us.</span>
-</pre></div>
-</div>
-<p>Extract various elements of interest from parsed documents:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">textacy</span><span class="o">.</span><span class="n">extract</span><span class="o">.</span><span class="n">ngrams</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="n">doc</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">filter_stops</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">filter_punct</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">filter_nums</span><span class="o">=</span><span class="bp">False</span><span class="p">))[:</span><span class="mi">15</span><span class="p">]</span>
-<span class="go">[Federalist Papers,</span>
-<span class="go"> Senate&#39;s,</span>
-<span class="go"> &#39;s role,</span>
-<span class="go"> violent passions,</span>
-<span class="go"> pernicious resolutions,</span>
-<span class="go"> everlasting credit,</span>
-<span class="go"> common ground,</span>
-<span class="go"> 8 years,</span>
-<span class="go"> tiny piece,</span>
-<span class="go"> American history,</span>
-<span class="go"> 10 years,</span>
-<span class="go"> years ago,</span>
-<span class="go"> New York,</span>
-<span class="go"> fellow New,</span>
-<span class="go"> New Yorkers]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">textacy</span><span class="o">.</span><span class="n">extract</span><span class="o">.</span><span class="n">ngrams</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="n">doc</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">filter_stops</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">filter_punct</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">min_freq</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
-<span class="go">[fellow New Yorkers,</span>
-<span class="go"> World Trade Center,</span>
-<span class="go"> Senator from New,</span>
-<span class="go"> World Trade Center,</span>
-<span class="go"> Senator from New,</span>
-<span class="go"> lot of fun,</span>
-<span class="go"> fellow New Yorkers,</span>
-<span class="go"> lot of fun]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">textacy</span><span class="o">.</span><span class="n">extract</span><span class="o">.</span><span class="n">named_entities</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="n">doc</span><span class="p">,</span> <span class="n">drop_determiners</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">exclude_types</span><span class="o">=</span><span class="s1">&#39;numeric&#39;</span><span class="p">))[:</span><span class="mi">10</span><span class="p">]</span>
-<span class="go">[Senate,</span>
-<span class="go"> Senate,</span>
-<span class="go"> American,</span>
-<span class="go"> New York,</span>
-<span class="go"> New Yorkers,</span>
-<span class="go"> Senate,</span>
-<span class="go"> Barbara Mikulski,</span>
-<span class="go"> Senate,</span>
-<span class="go"> Pennsylvania Avenue,</span>
-<span class="go"> Senate]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">pattern</span> <span class="o">=</span> <span class="n">textacy</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">POS_REGEX_PATTERNS</span><span class="p">[</span><span class="s1">&#39;en&#39;</span><span class="p">][</span><span class="s1">&#39;NP&#39;</span><span class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">pattern</span>
-<span class="go">&lt;DET&gt;? &lt;NUM&gt;* (&lt;ADJ&gt; &lt;PUNCT&gt;? &lt;CONJ&gt;?)* (&lt;NOUN&gt;|&lt;PROPN&gt; &lt;PART&gt;?)+</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">textacy</span><span class="o">.</span><span class="n">extract</span><span class="o">.</span><span class="n">pos_regex_matches</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">pattern</span><span class="p">))[:</span><span class="mi">10</span><span class="p">]</span>
-<span class="go">[the Federalist Papers,</span>
-<span class="go"> the reference,</span>
-<span class="go"> the Senate&#39;s role,</span>
-<span class="go"> the consequences,</span>
-<span class="go"> sudden and violent passions,</span>
-<span class="go"> intemperate and pernicious resolutions,</span>
-<span class="go"> the everlasting credit,</span>
-<span class="go"> wisdom,</span>
-<span class="go"> our Founders,</span>
-<span class="go"> an effort]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">textacy</span><span class="o">.</span><span class="n">extract</span><span class="o">.</span><span class="n">semistructured_statements</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="s1">&#39;I&#39;</span><span class="p">,</span> <span class="n">cue</span><span class="o">=</span><span class="s1">&#39;be&#39;</span><span class="p">))</span>
-<span class="go">[(I, was, on the other end of Pennsylvania Avenue),</span>
-<span class="go"> (I, was, , a very new Senator, and my city and my State had been devastated),</span>
-<span class="go"> (I, am, grateful to have had Senator Schumer as my partner and my ally),</span>
-<span class="go"> (I, am, very excited about what can happen in the next 4 years),</span>
-<span class="go"> (I, been, a New Yorker, but I know I always will be one)]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">textacy.keyterms</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">textacy</span><span class="o">.</span><span class="n">keyterms</span><span class="o">.</span><span class="n">textrank</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">n_keyterms</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-<span class="go">[(&#39;day&#39;, 0.01608508275877894),</span>
-<span class="go"> (&#39;people&#39;, 0.015079868730811194),</span>
-<span class="go"> (&#39;year&#39;, 0.012330783590843065),</span>
-<span class="go"> (&#39;way&#39;, 0.011732786337383587),</span>
-<span class="go"> (&#39;colleague&#39;, 0.010794482493897155),</span>
-<span class="go"> (&#39;new&#39;, 0.0104941198408241),</span>
-<span class="go"> (&#39;time&#39;, 0.010016582029543003),</span>
-<span class="go"> (&#39;work&#39;, 0.0096498231660789),</span>
-<span class="go"> (&#39;lot&#39;, 0.008960478625039818),</span>
-<span class="go"> (&#39;great&#39;, 0.008552318032915361)]</span>
-</pre></div>
-</div>
-<p>Compute basic counts and readability statistics for a given text:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ts</span> <span class="o">=</span> <span class="n">textacy</span><span class="o">.</span><span class="n">TextStats</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ts</span><span class="o">.</span><span class="n">n_unique_words</span>
-<span class="go">1107</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ts</span><span class="o">.</span><span class="n">basic_counts</span>
-<span class="go">{&#39;n_chars&#39;: 11498,</span>
-<span class="go"> &#39;n_long_words&#39;: 512,</span>
-<span class="go"> &#39;n_monosyllable_words&#39;: 1785,</span>
-<span class="go"> &#39;n_polysyllable_words&#39;: 222,</span>
-<span class="go"> &#39;n_sents&#39;: 99,</span>
-<span class="go"> &#39;n_syllables&#39;: 3525,</span>
-<span class="go"> &#39;n_unique_words&#39;: 1107,</span>
-<span class="go"> &#39;n_words&#39;: 2516}</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ts</span><span class="o">.</span><span class="n">flesch_kincaid_grade_level</span>
-<span class="go">10.853709110179697</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ts</span><span class="o">.</span><span class="n">readability_stats</span>
-<span class="go">{&#39;automated_readability_index&#39;: 12.801546064781363,</span>
-<span class="go"> &#39;coleman_liau_index&#39;: 9.905629258346586,</span>
-<span class="go"> &#39;flesch_kincaid_grade_level&#39;: 10.853709110179697,</span>
-<span class="go"> &#39;flesch_readability_ease&#39;: 62.51222198133965,</span>
-<span class="go"> &#39;gulpease_index&#39;: 55.10492845786963,</span>
-<span class="go"> &#39;gunning_fog_index&#39;: 13.69506833036245,</span>
-<span class="go"> &#39;lix&#39;: 45.76390294037353,</span>
-<span class="go"> &#39;smog_index&#39;: 11.683781121521076,</span>
-<span class="go"> &#39;wiener_sachtextformel&#39;: 5.401029023140788}</span>
-</pre></div>
-</div>
-<p>Count terms individually, and represent documents as a bag-of-terms with flexible
-weighting and inclusion criteria:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">&#39;America&#39;</span><span class="p">)</span>
-<span class="go">3</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">bot</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">to_bag_of_terms</span><span class="p">(</span><span class="n">ngrams</span><span class="o">=</span><span class="p">{</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">},</span> <span class="n">as_strings</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">sorted</span><span class="p">(</span><span class="n">bot</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="bp">True</span><span class="p">)[:</span><span class="mi">10</span><span class="p">]</span>
-<span class="go">[(&#39;new york&#39;, 18),</span>
-<span class="go"> (&#39;senate&#39;, 8),</span>
-<span class="go"> (&#39;first&#39;, 6),</span>
-<span class="go"> (&#39;state&#39;, 4),</span>
-<span class="go"> (&#39;9/11&#39;, 3),</span>
-<span class="go"> (&#39;look forward&#39;, 3),</span>
-<span class="go"> (&#39;america&#39;, 3),</span>
-<span class="go"> (&#39;new yorkers&#39;, 3),</span>
-<span class="go"> (&#39;chuck&#39;, 3),</span>
-<span class="go"> (&#39;lot of fun&#39;, 2)]</span>
-</pre></div>
-</div>
-<p><strong>Note:</strong> In almost all cases, <code class="docutils literal notranslate"><span class="pre">textacy</span></code> expects to be working with unicode text.
-Docstrings indicate this as <code class="docutils literal notranslate"><span class="pre">str</span></code>, which is clear and correct for Python 3 but
-not Python 2. In the latter case, users should cast <code class="docutils literal notranslate"><span class="pre">str</span></code> bytes to <code class="docutils literal notranslate"><span class="pre">unicode</span></code>,
-as needed.</p>
+<p><strong>Note:</strong> ReadTheDocs builds have been failing for months, so those docs are
+currently out-of-date. <em>Very sorry</em>. As a (temporary?) workaround, docs for the
+latest version (v0.6.0) have been published via GitHub Pages:</p>
+<p><a class="reference external" href="https://chartbeat-labs.github.io/textacy">https://chartbeat-labs.github.io/textacy</a></p>
 </div>
 <div class="section" id="maintainer">
 <h2>Maintainer<a class="headerlink" href="#maintainer" title="Permalink to this headline">¶</a></h2>
+<p>Howdy, y’all. 👋</p>
 <ul class="simple">
-<li>Burton DeWilde (&lt;<a class="reference external" href="mailto:burton&#37;&#52;&#48;chartbeat&#46;net">burton<span>&#64;</span>chartbeat<span>&#46;</span>net</a>&gt;)</li>
+<li>Burton DeWilde (&lt;<a class="reference external" href="mailto:burton&#37;&#52;&#48;chartbeat&#46;com">burton<span>&#64;</span>chartbeat<span>&#46;</span>com</a>&gt;)</li>
 </ul>
 <div class="toctree-wrapper compound">
 <p class="caption"><span class="caption-text">Contents</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="getting_started/installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/installation.html#dependencies">Dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/installation.html#downloading-data">Downloading Data</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started/quickstart.html">Quickstart</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/quickstart.html#working-with-text">Working with Text</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/quickstart.html#make-a-doc">Make a Doc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/quickstart.html#analyze-a-doc">Analyze a Doc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/quickstart.html#working-with-many-texts">Working with <em>many</em> texts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/quickstart.html#make-a-corpus">Make a Corpus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/quickstart.html#analyze-a-corpus">Analyze a Corpus</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="api_reference.html">API Reference</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="api_reference.html#module-textacy.doc">Doc</a></li>
 <li class="toctree-l2"><a class="reference internal" href="api_reference.html#module-textacy.corpus">Corpus</a></li>
@@ -496,7 +274,7 @@ as needed.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="api_reference.html" class="btn btn-neutral float-right" title="API Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="getting_started/installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
     </div>

@@ -91,6 +91,8 @@
             
               <p class="caption"><span class="caption-text">Contents</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../api_reference.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
@@ -204,8 +206,8 @@
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">tfs</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1.0</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="s1">&#39;type_ = </span><span class="si">{}</span><span class="s1"> is invalid; value must be one of </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span></div>
-                <span class="n">type_</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="s1">&#39;sqrt&#39;</span><span class="p">,</span> <span class="s1">&#39;log&#39;</span><span class="p">}))</span>
+            <span class="s1">&#39;type_ = </span><span class="si">{}</span><span class="s1"> is invalid; value must be one of </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">type_</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="s1">&#39;sqrt&#39;</span><span class="p">,</span> <span class="s1">&#39;log&#39;</span><span class="p">}))</span></div>
 
 
 <div class="viewcode-block" id="get_doc_freqs"><a class="viewcode-back" href="../../../api_reference.html#textacy.vsm.matrix_utils.get_doc_freqs">[docs]</a><span class="k">def</span> <span class="nf">get_doc_freqs</span><span class="p">(</span><span class="n">doc_term_matrix</span><span class="p">):</span>
@@ -228,8 +230,8 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">doc_term_matrix</span><span class="o">.</span><span class="n">nnz</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;`doc_term_matrix` must have at least 1 non-zero entry&#39;</span><span class="p">)</span>
-    <span class="n">_</span><span class="p">,</span> <span class="n">n_terms</span> <span class="o">=</span> <span class="n">doc_term_matrix</span><span class="o">.</span><span class="n">shape</span></div>
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">doc_term_matrix</span><span class="o">.</span><span class="n">indices</span><span class="p">,</span> <span class="n">minlength</span><span class="o">=</span><span class="n">n_terms</span><span class="p">)</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">n_terms</span> <span class="o">=</span> <span class="n">doc_term_matrix</span><span class="o">.</span><span class="n">shape</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">doc_term_matrix</span><span class="o">.</span><span class="n">indices</span><span class="p">,</span> <span class="n">minlength</span><span class="o">=</span><span class="n">n_terms</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="get_inverse_doc_freqs"><a class="viewcode-back" href="../../../api_reference.html#textacy.vsm.matrix_utils.get_inverse_doc_freqs">[docs]</a><span class="k">def</span> <span class="nf">get_inverse_doc_freqs</span><span class="p">(</span><span class="n">doc_term_matrix</span><span class="p">,</span> <span class="n">type_</span><span class="o">=</span><span class="s1">&#39;smooth&#39;</span><span class="p">):</span>
@@ -269,8 +271,8 @@
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">((</span><span class="n">n_docs</span> <span class="o">-</span> <span class="n">dfs</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">dfs</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">))</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="s1">&#39;type_ = </span><span class="si">{}</span><span class="s1"> is invalid; value must be one of </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span></div>
-                <span class="n">type_</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;standard&#39;</span><span class="p">,</span> <span class="s1">&#39;smooth&#39;</span><span class="p">,</span> <span class="s1">&#39;bm25&#39;</span><span class="p">}))</span>
+            <span class="s1">&#39;type_ = </span><span class="si">{}</span><span class="s1"> is invalid; value must be one of </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">type_</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;standard&#39;</span><span class="p">,</span> <span class="s1">&#39;smooth&#39;</span><span class="p">,</span> <span class="s1">&#39;bm25&#39;</span><span class="p">}))</span></div>
 
 
 <div class="viewcode-block" id="get_doc_lengths"><a class="viewcode-back" href="../../../api_reference.html#textacy.vsm.matrix_utils.get_doc_lengths">[docs]</a><span class="k">def</span> <span class="nf">get_doc_lengths</span><span class="p">(</span><span class="n">doc_term_matrix</span><span class="p">,</span> <span class="n">type_</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">):</span>
@@ -302,8 +304,8 @@
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">dls</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1.0</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="s1">&#39;`type_` = </span><span class="si">{}</span><span class="s1"> invalid; must be one of </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span></div>
-                <span class="n">type_</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="s1">&#39;sqrt&#39;</span><span class="p">,</span> <span class="s1">&#39;log&#39;</span><span class="p">}))</span>
+            <span class="s1">&#39;`type_` = </span><span class="si">{}</span><span class="s1"> invalid; must be one of </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">type_</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="s1">&#39;sqrt&#39;</span><span class="p">,</span> <span class="s1">&#39;log&#39;</span><span class="p">}))</span></div>
 
 
 <div class="viewcode-block" id="get_information_content"><a class="viewcode-back" href="../../../api_reference.html#textacy.vsm.matrix_utils.get_information_content">[docs]</a><span class="k">def</span> <span class="nf">get_information_content</span><span class="p">(</span><span class="n">doc_term_matrix</span><span class="p">):</span>
@@ -331,8 +333,8 @@
     <span class="c1"># TODO: is this *really* what we want to do?</span>
     <span class="n">dfs</span> <span class="o">=</span> <span class="n">dfs</span> <span class="o">/</span> <span class="n">doc_term_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">ics</span> <span class="o">=</span> <span class="o">-</span><span class="n">dfs</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">dfs</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">dfs</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">dfs</span><span class="p">)</span>
-    <span class="n">ics</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">ics</span><span class="p">)]</span> <span class="o">=</span> <span class="mf">0.0</span>  <span class="c1"># NaN values not permitted!</span></div>
-    <span class="k">return</span> <span class="n">ics</span>
+    <span class="n">ics</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">ics</span><span class="p">)]</span> <span class="o">=</span> <span class="mf">0.0</span>  <span class="c1"># NaN values not permitted!</span>
+    <span class="k">return</span> <span class="n">ics</span></div>
 
 
 <div class="viewcode-block" id="apply_idf_weighting"><a class="viewcode-back" href="../../../api_reference.html#textacy.vsm.matrix_utils.apply_idf_weighting">[docs]</a><span class="k">def</span> <span class="nf">apply_idf_weighting</span><span class="p">(</span><span class="n">doc_term_matrix</span><span class="p">,</span> <span class="n">idf_type</span><span class="o">=</span><span class="s1">&#39;smooth&#39;</span><span class="p">):</span>
@@ -350,8 +352,8 @@
 <span class="sd">        :class:`scipy.sparse.csr_matrix`: Sparse matrix of shape (# docs, # unique terms),</span>
 <span class="sd">        where value (i, j) is the tfidf weight of term j in doc i</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">idfs</span> <span class="o">=</span> <span class="n">get_inverse_doc_freqs</span><span class="p">(</span><span class="n">doc_term_matrix</span><span class="p">,</span> <span class="n">idf_type</span><span class="o">=</span><span class="n">idf_type</span><span class="p">)</span></div>
-    <span class="k">return</span> <span class="n">doc_term_matrix</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">diags</span><span class="p">(</span><span class="n">idfs</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="n">idfs</span> <span class="o">=</span> <span class="n">get_inverse_doc_freqs</span><span class="p">(</span><span class="n">doc_term_matrix</span><span class="p">,</span> <span class="n">idf_type</span><span class="o">=</span><span class="n">idf_type</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">doc_term_matrix</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">diags</span><span class="p">(</span><span class="n">idfs</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="filter_terms_by_df"><a class="viewcode-back" href="../../../api_reference.html#textacy.vsm.matrix_utils.filter_terms_by_df">[docs]</a><span class="k">def</span> <span class="nf">filter_terms_by_df</span><span class="p">(</span><span class="n">doc_term_matrix</span><span class="p">,</span> <span class="n">term_to_id</span><span class="p">,</span>
@@ -423,8 +425,8 @@
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
             <span class="s1">&#39;After filtering, no terms remain; &#39;</span>
             <span class="s1">&#39;try a lower `min_df` or higher `max_df`&#39;</span><span class="p">)</span>
-</div>
-    <span class="k">return</span> <span class="p">(</span><span class="n">doc_term_matrix</span><span class="p">[:,</span> <span class="n">kept_indices</span><span class="p">],</span> <span class="n">term_to_id</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">doc_term_matrix</span><span class="p">[:,</span> <span class="n">kept_indices</span><span class="p">],</span> <span class="n">term_to_id</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="filter_terms_by_ic"><a class="viewcode-back" href="../../../api_reference.html#textacy.vsm.matrix_utils.filter_terms_by_ic">[docs]</a><span class="k">def</span> <span class="nf">filter_terms_by_ic</span><span class="p">(</span><span class="n">doc_term_matrix</span><span class="p">,</span> <span class="n">term_to_id</span><span class="p">,</span>
@@ -483,8 +485,8 @@
     <span class="n">kept_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">mask</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">kept_indices</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;After filtering, no terms remain; try a lower `min_ic`&#39;</span><span class="p">)</span>
-</div>
-    <span class="k">return</span> <span class="p">(</span><span class="n">doc_term_matrix</span><span class="p">[:,</span> <span class="n">kept_indices</span><span class="p">],</span> <span class="n">term_to_id</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">doc_term_matrix</span><span class="p">[:,</span> <span class="n">kept_indices</span><span class="p">],</span> <span class="n">term_to_id</span><span class="p">)</span></div>
 </pre></div>
 
            </div>
