@@ -1,0 +1,21 @@
+# compiled code
+*.py[co]
+
+# macOS
+.DS_Store
+
+# distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# documentation
+docs/build/*
+
+# testing
+.cache
+.coverage
+
+# textacy
+resources/
+data/
