@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>textacy: NLP, before and after spaCy &mdash; textacy 0.6.0 documentation</title>
+  <title>textacy: NLP, before and after spaCy &mdash; textacy 0.6.1 documentation</title>
   
 
   
@@ -25,25 +25,18 @@
   
 
   
-  
     <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="textacy 0.6.0 documentation" href="#"/>
-        <link rel="next" title="Installation" href="getting_started/installation.html"/> 
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation" href="getting_started/installation.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
@@ -107,7 +100,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="#">textacy</a>
@@ -115,9 +108,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -219,7 +213,7 @@ latest version (v0.6.0) have been published via GitHub Pages:</p>
 <li class="toctree-l2"><a class="reference internal" href="getting_started/quickstart.html#working-with-text">Working with Text</a></li>
 <li class="toctree-l2"><a class="reference internal" href="getting_started/quickstart.html#make-a-doc">Make a Doc</a></li>
 <li class="toctree-l2"><a class="reference internal" href="getting_started/quickstart.html#analyze-a-doc">Analyze a Doc</a></li>
-<li class="toctree-l2"><a class="reference internal" href="getting_started/quickstart.html#working-with-many-texts">Working with <em>many</em> texts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/quickstart.html#working-with-many-texts">Working with <em>Many</em> Texts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="getting_started/quickstart.html#make-a-corpus">Make a Corpus</a></li>
 <li class="toctree-l2"><a class="reference internal" href="getting_started/quickstart.html#analyze-a-corpus">Analyze a Corpus</a></li>
 </ul>
@@ -233,29 +227,31 @@ latest version (v0.6.0) have been published via GitHub Pages:</p>
 <li class="toctree-l2"><a class="reference internal" href="api_reference.html#module-textacy.vsm.vectorizers">Vectorization &amp; Topic Modeling</a></li>
 <li class="toctree-l2"><a class="reference internal" href="api_reference.html#module-textacy.io.utils">IO</a></li>
 <li class="toctree-l2"><a class="reference internal" href="api_reference.html#module-textacy.viz.termite">Visualization</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api_reference.html#module-textacy.text_utils">Utilities</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api_reference.html#module-textacy.network">Other Stuff!</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_reference.html#module-textacy.cache">Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_reference.html#module-textacy.network">Miscellany</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_reference.html#module-textacy.spacier.components">Spacier</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="changelog.html#id1">0.6.0 (2018-02-25)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="changelog.html#id2">0.5.0 (2017-12-04)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="changelog.html#id3">0.4.2 (2017-11-28)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="changelog.html#id4">0.4.1 (2017-07-27)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="changelog.html#id5">0.4.0 (2017-06-21)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="changelog.html#id6">0.3.4 (2017-04-17)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="changelog.html#id7">0.3.3 (2017-02-10)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="changelog.html#id8">0.3.2 (2016-11-15)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="changelog.html#id9">0.3.1 (2016-10-19)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="changelog.html#id10">0.3.0 (2016-08-23)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="changelog.html#id11">0.2.8 (2016-08-03)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="changelog.html#id12">0.2.5 (2016-07-14)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="changelog.html#id13">0.2.4 (2016-07-14)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="changelog.html#id14">0.2.3 (2016-06-20)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="changelog.html#id15">0.2.2 (2016-05-05)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="changelog.html#id16">0.2.0 (2016-04-11)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="changelog.html#id17">0.1.4 (2016-02-26)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="changelog.html#id18">0.1.3 (2016-02-22)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id1">0.6.1 (2018-04-11)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id2">0.6.0 (2018-02-25)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id3">0.5.0 (2017-12-04)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id4">0.4.2 (2017-11-28)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id5">0.4.1 (2017-07-27)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id6">0.4.0 (2017-06-21)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id7">0.3.4 (2017-04-17)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id8">0.3.3 (2017-02-10)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id9">0.3.2 (2016-11-15)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id10">0.3.1 (2016-10-19)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id11">0.3.0 (2016-08-23)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id12">0.2.8 (2016-08-03)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id13">0.2.5 (2016-07-14)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id14">0.2.4 (2016-07-14)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id15">0.2.3 (2016-06-20)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id16">0.2.2 (2016-05-05)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id17">0.2.0 (2016-04-11)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id18">0.1.4 (2016-02-26)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#id19">0.1.3 (2016-02-22)</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
@@ -266,9 +262,7 @@ latest version (v0.6.0) have been published via GitHub Pages:</p>
 
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -288,7 +282,7 @@ latest version (v0.6.0) have been published via GitHub Pages:</p>
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -306,7 +300,8 @@ latest version (v0.6.0) have been published via GitHub Pages:</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.6.0',
+            VERSION:'0.6.1',
+            LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -325,14 +320,13 @@ latest version (v0.6.0) have been published via GitHub Pages:</p>
     <script type="text/javascript" src="_static/js/theme.js"></script>
   
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          
+          SphinxRtdTheme.Navigation.enableSticky();
+          
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>

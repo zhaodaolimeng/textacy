@@ -1,0 +1,350 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>textacy.spacier.components &mdash; textacy 0.6.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> textacy
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.6
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">textacy</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>textacy.spacier.components</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for textacy.spacier.components</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Components</span>
+<span class="sd">----------</span>
+
+<span class="sd">Custom components to add to a spaCy language pipeline.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">from</span> <span class="nn">spacy.attrs</span> <span class="k">import</span> <span class="n">intify_attrs</span>
+<span class="kn">from</span> <span class="nn">spacy.tokens</span> <span class="k">import</span> <span class="n">Doc</span> <span class="k">as</span> <span class="n">SpacyDoc</span>
+
+<span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">compat</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">text_stats</span>
+
+<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="TextStatsComponent"><a class="viewcode-back" href="../../../api_reference.html#textacy.spacier.components.TextStatsComponent">[docs]</a><span class="k">class</span> <span class="nc">TextStatsComponent</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A custom component to be added to a spaCy language pipeline that computes</span>
+<span class="sd">    one, some, or all text stats for a parsed doc and sets the values</span>
+<span class="sd">    as custom attributes on a :obj:`SpacyDoc`.</span>
+
+<span class="sd">    Add the component to a pipeline, *after* the parser (as well as any</span>
+<span class="sd">    subsequent components that modify the tokens/sentences of the doc)::</span>
+
+<span class="sd">        &gt;&gt;&gt; en = spacy.load(&#39;en&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; text_stats_component = TextStatsComponent()</span>
+<span class="sd">        &gt;&gt;&gt; en.add_pipe(text_stats_component, after=&#39;parser&#39;)</span>
+
+<span class="sd">    Process a text with the pipeline and access the custom attributes via</span>
+<span class="sd">    spaCy&#39;s underscore syntax::</span>
+
+<span class="sd">        &gt;&gt;&gt; doc = en(u&quot;This is a test test someverylongword.&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; doc._.n_words</span>
+<span class="sd">        6</span>
+<span class="sd">        &gt;&gt;&gt; doc._.flesch_reading_ease</span>
+<span class="sd">        73.84500000000001</span>
+
+<span class="sd">    Specify which attributes of the :class:`textacy.text_stats.TextStats()`</span>
+<span class="sd">    to add to processed documents::</span>
+
+<span class="sd">        &gt;&gt;&gt; en = spacy.load(&#39;en&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; text_stats_component = TextStatsComponent(attrs=&#39;n_words&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; en.add_pipe(text_stats_component, last=True)</span>
+<span class="sd">        &gt;&gt;&gt; doc = en(u&quot;This is a test test someverylongword.&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; doc._.n_words</span>
+<span class="sd">        6</span>
+<span class="sd">        &gt;&gt;&gt; doc._.flesch_reading_ease</span>
+<span class="sd">        AttributeError: [E046] Can&#39;t retrieve unregistered extension attribute &#39;flesch_reading_ease&#39;. Did you forget to call the `set_extension` method?</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        attrs (str or Iterable[str] or None): If str, a single text stat</span>
+<span class="sd">            to compute and set on a :obj:`Doc`. If Iterable[str], multiple</span>
+<span class="sd">            text stats. If None, *all* text stats are computed and set as extensions.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        name (str): Default name of this component in a spaCy language pipeline,</span>
+<span class="sd">            used to get and modify the component via various ``spacy.Language``</span>
+<span class="sd">            methods, e.g. https://spacy.io/api/language#get_pipe.</span>
+
+<span class="sd">    See Also:</span>
+<span class="sd">        :class:`textacy.text_stats.TextStats`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;textacy_text_stats&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">attrs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">attrs</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s1">&#39;n_sents&#39;</span><span class="p">,</span> <span class="s1">&#39;n_words&#39;</span><span class="p">,</span> <span class="s1">&#39;n_chars&#39;</span><span class="p">,</span> <span class="s1">&#39;n_syllables&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;n_unique_words&#39;</span><span class="p">,</span> <span class="s1">&#39;n_long_words&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;n_monosyllable_words&#39;</span><span class="p">,</span> <span class="s1">&#39;n_polysyllable_words&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;flesch_kincaid_grade_level&#39;</span><span class="p">,</span> <span class="s1">&#39;flesch_reading_ease&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;smog_index&#39;</span><span class="p">,</span> <span class="s1">&#39;gunning_fog_index&#39;</span><span class="p">,</span> <span class="s1">&#39;coleman_liau_index&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;automated_readability_index&#39;</span><span class="p">,</span> <span class="s1">&#39;lix&#39;</span><span class="p">,</span> <span class="s1">&#39;gulpease_index&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;wiener_sachtextformel&#39;</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attrs</span><span class="p">,</span> <span class="n">compat</span><span class="o">.</span><span class="n">string_types</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">attrs</span> <span class="o">=</span> <span class="p">(</span><span class="n">attrs</span><span class="p">,)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">attrs</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">attrs</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">attrs</span><span class="p">:</span>
+            <span class="n">SpacyDoc</span><span class="o">.</span><span class="n">set_extension</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;&quot;</span><span class="si">%s</span><span class="s1">&quot; custom attribute added to `spacy.tokens.Doc`&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">doc</span><span class="p">):</span>
+        <span class="n">ts</span> <span class="o">=</span> <span class="n">text_stats</span><span class="o">.</span><span class="n">TextStats</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">attrs</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">doc</span><span class="o">.</span><span class="n">_</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ts</span><span class="p">,</span> <span class="n">attr</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="n">LOGGER</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span>
+                    <span class="s2">&quot;`TextStats` class doesn&#39;t have &#39;</span><span class="si">%s</span><span class="s2">&#39; attribute, so it can&#39;t &quot;</span>
+                    <span class="s2">&quot;be set on this `SpacyDoc`. Check the attrs used to initialize &quot;</span>
+                    <span class="s2">&quot;the `TextStatsComponent` in this pipeline for errors.&quot;</span><span class="p">,</span>
+                    <span class="n">attr</span><span class="p">)</span>
+                <span class="k">raise</span>
+        <span class="k">return</span> <span class="n">doc</span></div>
+
+
+<div class="viewcode-block" id="merge_entities"><a class="viewcode-back" href="../../../api_reference.html#textacy.spacier.components.merge_entities">[docs]</a><span class="k">def</span> <span class="nf">merge_entities</span><span class="p">(</span><span class="n">doc</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Merge named entities into single tokens in ``doc``, *in-place*. Can be used</span>
+<span class="sd">    as a stand-alone function, or as part of a spaCy language pipeline::</span>
+
+<span class="sd">        &gt;&gt;&gt; spacy_lang = textacy.load_spacy(&#39;en&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; spacy_lang.add_pipe(merge_entities, after=&#39;ner&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; doc = spacy_lang(&#39;The entity in this sentence is Burton DeWilde.&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; doc[-2]</span>
+<span class="sd">        Burton DeWilde</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        doc (``SpacyDoc``)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        ``SpacyDoc``: Input ``doc`` with merged entities.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>  <span class="c1"># retokenizer was added to spacy in v2.0.11</span>
+        <span class="k">with</span> <span class="n">doc</span><span class="o">.</span><span class="n">retokenize</span><span class="p">()</span> <span class="k">as</span> <span class="n">retokenizer</span><span class="p">:</span>
+            <span class="n">string_store</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">vocab</span><span class="o">.</span><span class="n">strings</span>
+            <span class="k">for</span> <span class="n">ent</span> <span class="ow">in</span> <span class="n">doc</span><span class="o">.</span><span class="n">ents</span><span class="p">:</span>
+                <span class="n">retokenizer</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
+                    <span class="n">doc</span><span class="p">[</span><span class="n">ent</span><span class="o">.</span><span class="n">start</span><span class="p">:</span> <span class="n">ent</span><span class="o">.</span><span class="n">end</span><span class="p">],</span>
+                    <span class="n">attrs</span><span class="o">=</span><span class="n">intify_attrs</span><span class="p">({</span><span class="s1">&#39;ent_type&#39;</span><span class="p">:</span> <span class="n">ent</span><span class="o">.</span><span class="n">label</span><span class="p">},</span> <span class="n">string_store</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="n">ents</span> <span class="o">=</span> <span class="p">[(</span><span class="n">ent</span><span class="o">.</span><span class="n">start_char</span><span class="p">,</span> <span class="n">ent</span><span class="o">.</span><span class="n">end_char</span><span class="p">,</span> <span class="n">ent</span><span class="o">.</span><span class="n">label</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">ent</span> <span class="ow">in</span> <span class="n">doc</span><span class="o">.</span><span class="n">ents</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">start_char</span><span class="p">,</span> <span class="n">end_char</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">ents</span><span class="p">:</span>
+            <span class="n">doc</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">start_char</span><span class="p">,</span> <span class="n">end_char</span><span class="p">,</span> <span class="n">ent_type</span><span class="o">=</span><span class="n">label</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">doc</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016 Chartbeat, Inc..
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'0.6.1',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          
+          SphinxRtdTheme.Navigation.enableSticky();
+          
+      });
+  </script> 
+
+</body>
+</html>

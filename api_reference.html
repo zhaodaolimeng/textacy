@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>API Reference &mdash; textacy 0.6.0 documentation</title>
+  <title>API Reference &mdash; textacy 0.6.1 documentation</title>
   
 
   
@@ -25,26 +25,19 @@
   
 
   
-  
     <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="textacy 0.6.0 documentation" href="index.html"/>
-        <link rel="next" title="Changelog" href="changelog.html"/>
-        <link rel="prev" title="Quickstart" href="getting_started/quickstart.html"/> 
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Changelog" href="changelog.html" />
+    <link rel="prev" title="Quickstart" href="getting_started/quickstart.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
@@ -124,13 +117,21 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-textacy.viz.termite">Visualization</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-textacy.text_utils">Utilities</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-textacy.network">Other Stuff!</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-textacy.cache">Utilities</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#cache">Cache</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#text-utils">Text Utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#spacy-utils">spaCy Utils</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-textacy.network">Miscellany</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#semantic-networks">Semantic Networks</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#similarity">Similarity</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#text-statistics">Text Statistics</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#cache">Cache</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#lexicon-methods">Lexicon Methods</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-textacy.spacier.components">Spacier</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#components">Components</a></li>
 </ul>
 </li>
 </ul>
@@ -148,7 +149,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">textacy</a>
@@ -156,9 +157,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -3768,9 +3770,9 @@ term frequency, document frequency, and document length, and filtering terms
 from a matrix by their document frequency.</p>
 <dl class="function">
 <dt id="textacy.vsm.matrix_utils.apply_idf_weighting">
-<code class="descclassname">textacy.vsm.matrix_utils.</code><code class="descname">apply_idf_weighting</code><span class="sig-paren">(</span><em>doc_term_matrix</em>, <em>idf_type='smooth'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/textacy/vsm/matrix_utils.html#apply_idf_weighting"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.vsm.matrix_utils.apply_idf_weighting" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">textacy.vsm.matrix_utils.</code><code class="descname">apply_idf_weighting</code><span class="sig-paren">(</span><em>doc_term_matrix</em>, <em>type_='smooth'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/textacy/vsm/matrix_utils.html#apply_idf_weighting"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.vsm.matrix_utils.apply_idf_weighting" title="Permalink to this definition">¶</a></dt>
 <dd><p>Apply inverse document frequency (idf) weighting to a term-frequency (tf)
-weighted document-term matrix, optionally smoothing idf values.</p>
+weighted document-term matrix, using one of several IDF formulations.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -3778,13 +3780,12 @@ weighted document-term matrix, optionally smoothing idf values.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>doc_term_matrix</strong> (<a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.csr_matrix.html#scipy.sparse.csr_matrix" title="(in SciPy v1.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scipy.sparse.csr_matrix</span></code></a>) – M x N sparse matrix,
 where M is the # of docs and N is the # of unique terms.</li>
-<li><strong>smooth_idf</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – if True, add 1 to all document frequencies, equivalent
-to adding a single document to the corpus containing every unique term</li>
+<li><strong>type</strong> (<em>{'standard'</em><em>, </em><em>'smooth'</em><em>, </em><em>'bm25'}</em>) – Type of IDF formulation to use.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Sparse matrix of shape (# docs, # unique terms),
-where value (i, j) is the tfidf weight of term j in doc i</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Sparse matrix of shape M x N,
+where value (i, j) is the tfidf weight of term j in doc i.</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.csr_matrix.html#scipy.sparse.csr_matrix" title="(in SciPy v1.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scipy.sparse.csr_matrix</span></code></a></p>
@@ -3792,6 +3793,10 @@ where value (i, j) is the tfidf weight of term j in doc i</p>
 </tr>
 </tbody>
 </table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#textacy.vsm.matrix_utils.get_inverse_doc_freqs" title="textacy.vsm.matrix_utils.get_inverse_doc_freqs"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_inverse_doc_freqs()</span></code></a></p>
+</div>
 </dd></dl>
 
 <dl class="function">
@@ -3973,7 +3978,7 @@ length equal to the # of unique terms (# of columns) in <code class="docutils li
 <dt id="textacy.vsm.matrix_utils.get_inverse_doc_freqs">
 <code class="descclassname">textacy.vsm.matrix_utils.</code><code class="descname">get_inverse_doc_freqs</code><span class="sig-paren">(</span><em>doc_term_matrix</em>, <em>type_='smooth'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/textacy/vsm/matrix_utils.html#get_inverse_doc_freqs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.vsm.matrix_utils.get_inverse_doc_freqs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute inverse document frequencies for all terms in a document-term matrix,
-optionally smoothing the values, where idf = log(n_docs / dfs) + 1.0 .</p>
+using one of several IDF formulations.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -5141,8 +5146,136 @@ this value based on the corresponding node weights compared to the max</li>
 </dd></dl>
 
 </div>
-<div class="section" id="module-textacy.text_utils">
-<span id="utilities"></span><h2>Utilities<a class="headerlink" href="#module-textacy.text_utils" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-textacy.cache">
+<span id="utilities"></span><h2>Utilities<a class="headerlink" href="#module-textacy.cache" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="cache">
+<h3>Cache<a class="headerlink" href="#cache" title="Permalink to this headline">¶</a></h3>
+<p>Functions to load and cache language data and other NLP resources. Loading data
+from disk can be slow; let’s just do it once and forget about it. :)</p>
+<dl class="data">
+<dt id="textacy.cache.LRU_CACHE">
+<code class="descclassname">textacy.cache.</code><code class="descname">LRU_CACHE</code><em class="property"> = LRUCache([], maxsize=2147483648, currsize=0)</em><a class="headerlink" href="#textacy.cache.LRU_CACHE" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="xref py py-class docutils literal notranslate"><span class="pre">cachetools.LRUCache</span></code> – Least Recently Used (LRU) cache for loaded data.</p>
+<p>The max cache size may be set by the <cite>TEXTACY_MAX_CACHE_SIZE</cite> environment variable,
+where the value must be an integer (in bytes). Otherwise, the max size is 2GB.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="textacy.cache.clear">
+<code class="descclassname">textacy.cache.</code><code class="descname">clear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/textacy/cache.html#clear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.cache.clear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clear textacy’s cache of loaded data.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="textacy.cache.load_depechemood">
+<code class="descclassname">textacy.cache.</code><code class="descname">load_depechemood</code><span class="sig-paren">(</span><em>data_dir=None</em>, <em>weighting='normfreq'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/textacy/cache.html#load_depechemood"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.cache.load_depechemood" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load DepecheMood lexicon text file from disk, munge into nested dictionary
+for convenient lookup by lemma#POS. NB: English only!</p>
+<p>Each version of DepecheMood is built starting from word-by-document matrices
+either using raw frequencies (DepecheMood_freq.txt), normalized frequencies
+(DepecheMood_normfreq.txt) or tf-idf (DepecheMood_tfidf.txt). The files are
+tab-separated; each row contains one Lemma#PoS followed by the scores for the
+following emotions: AFRAID, AMUSED, ANGRY, ANNOYED, DONT_CARE, HAPPY, INSPIRED, SAD.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data_dir</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – Directory on disk where DepecheMood lexicon text fields,
+i.e. the location of the ‘DepecheMood_V1.0’ directory created when
+unzipping the DM dataset.</li>
+<li><strong>weighting</strong> (<em>{'freq'</em><em>, </em><em>'normfreq'</em><em>, </em><em>'tfidf'}</em>) – Type of word
+weighting used in building DepecheMood matrix.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Top-level keys are Lemma#POS strings, values are nested dicts
+with emotion names as keys and weights as floats.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Dict[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#dict" title="(in Python v3.6)">dict</a>]</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">References</p>
+<p>Staiano, J., &amp; Guerini, M. (2014). “DepecheMood: a Lexicon for Emotion
+Analysis from Crowd-Annotated News”. Proceedings of ACL-2014. (arXiv:1405.1605)
+Data available at https://github.com/marcoguerini/DepecheMood/releases .</p>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#textacy.lexicon_methods.download_depechemood" title="textacy.lexicon_methods.download_depechemood"><code class="xref py py-func docutils literal notranslate"><span class="pre">download_depechemood</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="textacy.cache.load_hyphenator">
+<code class="descclassname">textacy.cache.</code><code class="descname">load_hyphenator</code><span class="sig-paren">(</span><em>lang</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/textacy/cache.html#load_hyphenator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.cache.load_hyphenator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load an object that hyphenates words at valid points, as used in LaTex typesetting.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>lang</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – <p>Standard 2-letter language abbreviation. To get a list of
+valid values:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyphen</span><span class="p">;</span> <span class="n">pyphen</span><span class="o">.</span><span class="n">LANGUAGES</span>
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyphen.Pyphen()</span></code></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">While hyphenation points always fall on syllable divisions,
+not all syllable divisions are valid hyphenation points. But it’s decent.</p>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="textacy.cache.load_spacy">
+<code class="descclassname">textacy.cache.</code><code class="descname">load_spacy</code><span class="sig-paren">(</span><em>name</em>, <em>disable=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/textacy/cache.html#load_spacy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.cache.load_spacy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a spaCy pipeline (model weights as binary data, ordered sequence of
+component functions, and language-specific data) for tokenizing and annotating
+text. An LRU cache saves pipelines in memory, up to 2GB.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (str or <a class="reference external" href="https://docs.python.org/3.6/library/pathlib.html#pathlib.Path" title="(in Python v3.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pathlib.Path</span></code></a>) – spaCy model to load, i.e. a shortcut
+link, full package name, or path to model directory.</li>
+<li><strong>disable</strong> (<em>Tuple</em><em>[</em><a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em>]</em>) – <p>Names of pipeline components to disable, if any.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Although spaCy’s API specifies this argument as a list,
+here we require a tuple. Pipelines are stored in the LRU cache
+with unique identifiers generated from the hash of the function
+name and args, and lists aren’t hashable.</p>
+</div>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A Language object with the loaded model.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="docutils literal notranslate"><span class="pre">spacy.&lt;lang&gt;.&lt;Language&gt;</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference external" href="https://spacy.io/api/top-level#spacy.load">https://spacy.io/api/top-level#spacy.load</a></p>
+</div>
+</dd></dl>
+
+</div>
+<span class="target" id="module-textacy.text_utils"></span><div class="section" id="text-utils">
+<h3>Text Utils<a class="headerlink" href="#text-utils" title="Permalink to this headline">¶</a></h3>
 <p>Set of small utility functions that take text strings as input.</p>
 <dl class="function">
 <dt id="textacy.text_utils.KWIC">
@@ -5248,7 +5381,10 @@ of raw strings</li>
 </table>
 </dd></dl>
 
-<span class="target" id="module-textacy.spacy_utils"></span><p>Set of small utility functions that take Spacy objects as input.</p>
+</div>
+<span class="target" id="module-textacy.spacy_utils"></span><div class="section" id="spacy-utils">
+<h3>spaCy Utils<a class="headerlink" href="#spacy-utils" title="Permalink to this headline">¶</a></h3>
+<p>Set of small utility functions that take Spacy objects as input.</p>
 <dl class="function">
 <dt id="textacy.spacy_utils.get_main_verbs_of_sent">
 <code class="descclassname">textacy.spacy_utils.</code><code class="descname">get_main_verbs_of_sent</code><span class="sig-paren">(</span><em>sent</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/textacy/spacy_utils.html#get_main_verbs_of_sent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.spacy_utils.get_main_verbs_of_sent" title="Permalink to this definition">¶</a></dt>
@@ -5364,31 +5500,10 @@ text for everything else.</p>
 </table>
 </dd></dl>
 
-<span class="target" id="module-textacy.math_utils"></span><p>Set of small utility functions that do mathy stuff.</p>
-<dl class="function">
-<dt id="textacy.math_utils.cosine_similarity">
-<code class="descclassname">textacy.math_utils.</code><code class="descname">cosine_similarity</code><span class="sig-paren">(</span><em>vec1</em>, <em>vec2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/textacy/math_utils.html#cosine_similarity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.math_utils.cosine_similarity" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the cosine similarity between two vectors.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>vec1</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.array</span></code>) – </li>
-<li><strong>vec2</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.array</span></code>) – </li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">float</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
+</div>
 </div>
 <div class="section" id="module-textacy.network">
-<span id="other-stuff"></span><h2>Other Stuff!<a class="headerlink" href="#module-textacy.network" title="Permalink to this headline">¶</a></h2>
+<span id="miscellany"></span><h2>Miscellany<a class="headerlink" href="#module-textacy.network" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="semantic-networks">
 <h3>Semantic Networks<a class="headerlink" href="#semantic-networks" title="Permalink to this headline">¶</a></h3>
 <p>Represent documents as semantic networks, where nodes are individual terms or
@@ -6008,132 +6123,6 @@ level required to understand a text. Higher value =&gt; more difficult text.</p>
 </dd></dl>
 
 </div>
-<span class="target" id="module-textacy.cache"></span><div class="section" id="cache">
-<h3>Cache<a class="headerlink" href="#cache" title="Permalink to this headline">¶</a></h3>
-<p>Functions to load and cache language data and other NLP resources. Loading data
-from disk can be slow; let’s just do it once and forget about it. :)</p>
-<dl class="data">
-<dt id="textacy.cache.LRU_CACHE">
-<code class="descclassname">textacy.cache.</code><code class="descname">LRU_CACHE</code><em class="property"> = LRUCache([], maxsize=2147483648, currsize=0)</em><a class="headerlink" href="#textacy.cache.LRU_CACHE" title="Permalink to this definition">¶</a></dt>
-<dd><p><code class="xref py py-class docutils literal notranslate"><span class="pre">cachetools.LRUCache</span></code> – Least Recently Used (LRU) cache for loaded data.</p>
-<p>The max cache size may be set by the <cite>TEXTACY_MAX_CACHE_SIZE</cite> environment variable,
-where the value must be an integer (in bytes). Otherwise, the max size is 2GB.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="textacy.cache.clear">
-<code class="descclassname">textacy.cache.</code><code class="descname">clear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/textacy/cache.html#clear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.cache.clear" title="Permalink to this definition">¶</a></dt>
-<dd><p>Clear textacy’s cache of loaded data.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="textacy.cache.load_depechemood">
-<code class="descclassname">textacy.cache.</code><code class="descname">load_depechemood</code><span class="sig-paren">(</span><em>data_dir=None</em>, <em>weighting='normfreq'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/textacy/cache.html#load_depechemood"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.cache.load_depechemood" title="Permalink to this definition">¶</a></dt>
-<dd><p>Load DepecheMood lexicon text file from disk, munge into nested dictionary
-for convenient lookup by lemma#POS. NB: English only!</p>
-<p>Each version of DepecheMood is built starting from word-by-document matrices
-either using raw frequencies (DepecheMood_freq.txt), normalized frequencies
-(DepecheMood_normfreq.txt) or tf-idf (DepecheMood_tfidf.txt). The files are
-tab-separated; each row contains one Lemma#PoS followed by the scores for the
-following emotions: AFRAID, AMUSED, ANGRY, ANNOYED, DONT_CARE, HAPPY, INSPIRED, SAD.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>data_dir</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – Directory on disk where DepecheMood lexicon text fields,
-i.e. the location of the ‘DepecheMood_V1.0’ directory created when
-unzipping the DM dataset.</li>
-<li><strong>weighting</strong> (<em>{'freq'</em><em>, </em><em>'normfreq'</em><em>, </em><em>'tfidf'}</em>) – Type of word
-weighting used in building DepecheMood matrix.</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Top-level keys are Lemma#POS strings, values are nested dicts
-with emotion names as keys and weights as floats.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Dict[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#dict" title="(in Python v3.6)">dict</a>]</p>
-</td>
-</tr>
-</tbody>
-</table>
-<p class="rubric">References</p>
-<p>Staiano, J., &amp; Guerini, M. (2014). “DepecheMood: a Lexicon for Emotion
-Analysis from Crowd-Annotated News”. Proceedings of ACL-2014. (arXiv:1405.1605)
-Data available at https://github.com/marcoguerini/DepecheMood/releases .</p>
-<div class="admonition seealso">
-<p class="first admonition-title">See also</p>
-<p class="last"><a class="reference internal" href="#textacy.lexicon_methods.download_depechemood" title="textacy.lexicon_methods.download_depechemood"><code class="xref py py-func docutils literal notranslate"><span class="pre">download_depechemood</span></code></a></p>
-</div>
-</dd></dl>
-
-<dl class="function">
-<dt id="textacy.cache.load_hyphenator">
-<code class="descclassname">textacy.cache.</code><code class="descname">load_hyphenator</code><span class="sig-paren">(</span><em>lang</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/textacy/cache.html#load_hyphenator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.cache.load_hyphenator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Load an object that hyphenates words at valid points, as used in LaTex typesetting.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>lang</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – <p>Standard 2-letter language abbreviation. To get a list of
-valid values:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyphen</span><span class="p">;</span> <span class="n">pyphen</span><span class="o">.</span><span class="n">LANGUAGES</span>
-</pre></div>
-</div>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyphen.Pyphen()</span></code></td>
-</tr>
-</tbody>
-</table>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">While hyphenation points always fall on syllable divisions,
-not all syllable divisions are valid hyphenation points. But it’s decent.</p>
-</div>
-</dd></dl>
-
-<dl class="function">
-<dt id="textacy.cache.load_spacy">
-<code class="descclassname">textacy.cache.</code><code class="descname">load_spacy</code><span class="sig-paren">(</span><em>name</em>, <em>disable=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/textacy/cache.html#load_spacy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.cache.load_spacy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Load a spaCy pipeline (model weights as binary data, ordered sequence of
-component functions, and language-specific data) for tokenizing and annotating
-text. An LRU cache saves pipelines in memory, up to 2GB.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>name</strong> (str or <a class="reference external" href="https://docs.python.org/3.6/library/pathlib.html#pathlib.Path" title="(in Python v3.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pathlib.Path</span></code></a>) – spaCy model to load, i.e. a shortcut
-link, full package name, or path to model directory.</li>
-<li><strong>disable</strong> (<em>Tuple</em><em>[</em><a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em>]</em>) – <p>Names of pipeline components to disable, if any.</p>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">Although spaCy’s API specifies this argument as a list,
-here we require a tuple. Pipelines are stored in the LRU cache
-with unique identifiers generated from the hash of the function
-name and args, and lists aren’t hashable.</p>
-</div>
-</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A Language object with the loaded model.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="docutils literal notranslate"><span class="pre">spacy.&lt;lang&gt;.&lt;Language&gt;</span></code></p>
-</td>
-</tr>
-</tbody>
-</table>
-<div class="admonition seealso">
-<p class="first admonition-title">See also</p>
-<p class="last"><a class="reference external" href="https://spacy.io/api/top-level#spacy.load">https://spacy.io/api/top-level#spacy.load</a></p>
-</div>
-</dd></dl>
-
-</div>
 <span class="target" id="module-textacy.lexicon_methods"></span><div class="section" id="lexicon-methods">
 <h3>Lexicon Methods<a class="headerlink" href="#lexicon-methods" title="Permalink to this headline">¶</a></h3>
 <p>Collection of lexicon-based methods for characterizing texts by sentiment,
@@ -6206,13 +6195,102 @@ Data available at <a class="reference external" href="https://github.com/marcogu
 
 </div>
 </div>
+<div class="section" id="module-textacy.spacier.components">
+<span id="spacier"></span><h2>Spacier<a class="headerlink" href="#module-textacy.spacier.components" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="components">
+<h3>Components<a class="headerlink" href="#components" title="Permalink to this headline">¶</a></h3>
+<p>Custom components to add to a spaCy language pipeline.</p>
+<dl class="class">
+<dt id="textacy.spacier.components.TextStatsComponent">
+<em class="property">class </em><code class="descclassname">textacy.spacier.components.</code><code class="descname">TextStatsComponent</code><span class="sig-paren">(</span><em>attrs=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/textacy/spacier/components.html#TextStatsComponent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.spacier.components.TextStatsComponent" title="Permalink to this definition">¶</a></dt>
+<dd><p>A custom component to be added to a spaCy language pipeline that computes
+one, some, or all text stats for a parsed doc and sets the values
+as custom attributes on a <code class="xref py py-obj docutils literal notranslate"><span class="pre">SpacyDoc</span></code>.</p>
+<p>Add the component to a pipeline, <em>after</em> the parser (as well as any
+subsequent components that modify the tokens/sentences of the doc):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">en</span> <span class="o">=</span> <span class="n">spacy</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;en&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">text_stats_component</span> <span class="o">=</span> <span class="n">TextStatsComponent</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">en</span><span class="o">.</span><span class="n">add_pipe</span><span class="p">(</span><span class="n">text_stats_component</span><span class="p">,</span> <span class="n">after</span><span class="o">=</span><span class="s1">&#39;parser&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Process a text with the pipeline and access the custom attributes via
+spaCy’s underscore syntax:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span> <span class="o">=</span> <span class="n">en</span><span class="p">(</span><span class="sa">u</span><span class="s2">&quot;This is a test test someverylongword.&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span><span class="o">.</span><span class="n">_</span><span class="o">.</span><span class="n">n_words</span>
+<span class="go">6</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span><span class="o">.</span><span class="n">_</span><span class="o">.</span><span class="n">flesch_reading_ease</span>
+<span class="go">73.84500000000001</span>
+</pre></div>
+</div>
+<p>Specify which attributes of the <a class="reference internal" href="#textacy.text_stats.TextStats" title="textacy.text_stats.TextStats"><code class="xref py py-class docutils literal notranslate"><span class="pre">textacy.text_stats.TextStats()</span></code></a>
+to add to processed documents:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">en</span> <span class="o">=</span> <span class="n">spacy</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;en&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">text_stats_component</span> <span class="o">=</span> <span class="n">TextStatsComponent</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="s1">&#39;n_words&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">en</span><span class="o">.</span><span class="n">add_pipe</span><span class="p">(</span><span class="n">text_stats_component</span><span class="p">,</span> <span class="n">last</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span> <span class="o">=</span> <span class="n">en</span><span class="p">(</span><span class="sa">u</span><span class="s2">&quot;This is a test test someverylongword.&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span><span class="o">.</span><span class="n">_</span><span class="o">.</span><span class="n">n_words</span>
+<span class="go">6</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span><span class="o">.</span><span class="n">_</span><span class="o">.</span><span class="n">flesch_reading_ease</span>
+<span class="go">AttributeError: [E046] Can&#39;t retrieve unregistered extension attribute &#39;flesch_reading_ease&#39;. Did you forget to call the `set_extension` method?</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>attrs</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em> or </em><em>Iterable</em><em>[</em><a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em>] or </em><em>None</em>) – If str, a single text stat
+to compute and set on a <code class="xref py py-obj docutils literal notranslate"><span class="pre">Doc</span></code>. If Iterable[str], multiple
+text stats. If None, <em>all</em> text stats are computed and set as extensions.</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="textacy.spacier.components.TextStatsComponent.name">
+<code class="descname">name</code><a class="headerlink" href="#textacy.spacier.components.TextStatsComponent.name" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – Default name of this component in a spaCy language pipeline,
+used to get and modify the component via various <code class="docutils literal notranslate"><span class="pre">spacy.Language</span></code>
+methods, e.g. <a class="reference external" href="https://spacy.io/api/language#get_pipe">https://spacy.io/api/language#get_pipe</a>.</p>
+</dd></dl>
+
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#textacy.text_stats.TextStats" title="textacy.text_stats.TextStats"><code class="xref py py-class docutils literal notranslate"><span class="pre">textacy.text_stats.TextStats</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="textacy.spacier.components.merge_entities">
+<code class="descclassname">textacy.spacier.components.</code><code class="descname">merge_entities</code><span class="sig-paren">(</span><em>doc</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/textacy/spacier/components.html#merge_entities"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.spacier.components.merge_entities" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merge named entities into single tokens in <code class="docutils literal notranslate"><span class="pre">doc</span></code>, <em>in-place</em>. Can be used
+as a stand-alone function, or as part of a spaCy language pipeline:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">spacy_lang</span> <span class="o">=</span> <span class="n">textacy</span><span class="o">.</span><span class="n">load_spacy</span><span class="p">(</span><span class="s1">&#39;en&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">spacy_lang</span><span class="o">.</span><span class="n">add_pipe</span><span class="p">(</span><span class="n">merge_entities</span><span class="p">,</span> <span class="n">after</span><span class="o">=</span><span class="s1">&#39;ner&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span> <span class="o">=</span> <span class="n">spacy_lang</span><span class="p">(</span><span class="s1">&#39;The entity in this sentence is Burton DeWilde.&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+<span class="go">Burton DeWilde</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>doc</strong> (<code class="docutils literal notranslate"><span class="pre">SpacyDoc</span></code>) – </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Input <code class="docutils literal notranslate"><span class="pre">doc</span></code> with merged entities.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="docutils literal notranslate"><span class="pre">SpacyDoc</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
 </div>
 
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -6234,7 +6312,7 @@ Data available at <a class="reference external" href="https://github.com/marcogu
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -6252,7 +6330,8 @@ Data available at <a class="reference external" href="https://github.com/marcogu
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.6.0',
+            VERSION:'0.6.1',
+            LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -6271,14 +6350,13 @@ Data available at <a class="reference external" href="https://github.com/marcogu
     <script type="text/javascript" src="_static/js/theme.js"></script>
   
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          
+          SphinxRtdTheme.Navigation.enableSticky();
+          
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>

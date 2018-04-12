@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>textacy.vsm.matrix_utils &mdash; textacy 0.6.0 documentation</title>
+  <title>textacy.vsm.matrix_utils &mdash; textacy 0.6.1 documentation</title>
   
 
   
@@ -25,25 +25,17 @@
   
 
   
-  
     <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="../../../genindex.html"/>
-        <link rel="search" title="Search" href="../../../search.html"/>
-    <link rel="top" title="textacy 0.6.0 documentation" href="../../../index.html"/>
-        <link rel="up" title="Module code" href="../../index.html"/> 
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
 
   
   <script src="../../../_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
@@ -107,7 +99,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../../index.html">textacy</a>
@@ -115,9 +107,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -146,8 +139,6 @@
     
     
       <li class="wy-breadcrumbs-aside">
-        
-            
         
       </li>
     
@@ -237,7 +228,7 @@
 <div class="viewcode-block" id="get_inverse_doc_freqs"><a class="viewcode-back" href="../../../api_reference.html#textacy.vsm.matrix_utils.get_inverse_doc_freqs">[docs]</a><span class="k">def</span> <span class="nf">get_inverse_doc_freqs</span><span class="p">(</span><span class="n">doc_term_matrix</span><span class="p">,</span> <span class="n">type_</span><span class="o">=</span><span class="s1">&#39;smooth&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute inverse document frequencies for all terms in a document-term matrix,</span>
-<span class="sd">    optionally smoothing the values, where idf = log(n_docs / dfs) + 1.0 .</span>
+<span class="sd">    using one of several IDF formulations.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        doc_term_matrix (:class:`scipy.sparse.csr_matrix`): M x N sparse matrix,</span>
@@ -337,22 +328,24 @@
     <span class="k">return</span> <span class="n">ics</span></div>
 
 
-<div class="viewcode-block" id="apply_idf_weighting"><a class="viewcode-back" href="../../../api_reference.html#textacy.vsm.matrix_utils.apply_idf_weighting">[docs]</a><span class="k">def</span> <span class="nf">apply_idf_weighting</span><span class="p">(</span><span class="n">doc_term_matrix</span><span class="p">,</span> <span class="n">idf_type</span><span class="o">=</span><span class="s1">&#39;smooth&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="apply_idf_weighting"><a class="viewcode-back" href="../../../api_reference.html#textacy.vsm.matrix_utils.apply_idf_weighting">[docs]</a><span class="k">def</span> <span class="nf">apply_idf_weighting</span><span class="p">(</span><span class="n">doc_term_matrix</span><span class="p">,</span> <span class="n">type_</span><span class="o">=</span><span class="s1">&#39;smooth&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Apply inverse document frequency (idf) weighting to a term-frequency (tf)</span>
-<span class="sd">    weighted document-term matrix, optionally smoothing idf values.</span>
+<span class="sd">    weighted document-term matrix, using one of several IDF formulations.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        doc_term_matrix (:class:`scipy.sparse.csr_matrix`): M x N sparse matrix,</span>
 <span class="sd">            where M is the # of docs and N is the # of unique terms.</span>
-<span class="sd">        smooth_idf (bool): if True, add 1 to all document frequencies, equivalent</span>
-<span class="sd">            to adding a single document to the corpus containing every unique term</span>
+<span class="sd">        type_ ({&#39;standard&#39;, &#39;smooth&#39;, &#39;bm25&#39;}): Type of IDF formulation to use.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        :class:`scipy.sparse.csr_matrix`: Sparse matrix of shape (# docs, # unique terms),</span>
-<span class="sd">        where value (i, j) is the tfidf weight of term j in doc i</span>
+<span class="sd">        :class:`scipy.sparse.csr_matrix`: Sparse matrix of shape M x N,</span>
+<span class="sd">        where value (i, j) is the tfidf weight of term j in doc i.</span>
+
+<span class="sd">    See Also:</span>
+<span class="sd">        :func:`get_inverse_doc_freqs()`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">idfs</span> <span class="o">=</span> <span class="n">get_inverse_doc_freqs</span><span class="p">(</span><span class="n">doc_term_matrix</span><span class="p">,</span> <span class="n">idf_type</span><span class="o">=</span><span class="n">idf_type</span><span class="p">)</span>
+    <span class="n">idfs</span> <span class="o">=</span> <span class="n">get_inverse_doc_freqs</span><span class="p">(</span><span class="n">doc_term_matrix</span><span class="p">,</span> <span class="n">type_</span><span class="o">=</span><span class="n">type_</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">doc_term_matrix</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">diags</span><span class="p">(</span><span class="n">idfs</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span></div>
 
 
@@ -490,9 +483,7 @@
 </pre></div>
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -505,7 +496,7 @@
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -523,7 +514,8 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../../',
-            VERSION:'0.6.0',
+            VERSION:'0.6.1',
+            LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -542,14 +534,13 @@
     <script type="text/javascript" src="../../../_static/js/theme.js"></script>
   
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          
+          SphinxRtdTheme.Navigation.enableSticky();
+          
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>

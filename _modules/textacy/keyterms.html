@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>textacy.keyterms &mdash; textacy 0.6.0 documentation</title>
+  <title>textacy.keyterms &mdash; textacy 0.6.1 documentation</title>
   
 
   
@@ -25,25 +25,17 @@
   
 
   
-  
     <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="../../genindex.html"/>
-        <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="textacy 0.6.0 documentation" href="../../index.html"/>
-        <link rel="up" title="Module code" href="../index.html"/> 
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
 
   
   <script src="../../_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
@@ -107,7 +99,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../index.html">textacy</a>
@@ -115,9 +107,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -146,8 +139,6 @@
     
     
       <li class="wy-breadcrumbs-aside">
-        
-            
         
       </li>
     
@@ -532,21 +523,20 @@
     <span class="n">bool_array_grp2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">invert</span><span class="p">(</span><span class="n">bool_array_grp1</span><span class="p">)</span>
 
     <span class="n">vectorizer</span> <span class="o">=</span> <span class="n">vsm</span><span class="o">.</span><span class="n">Vectorizer</span><span class="p">(</span>
-        <span class="n">weighting</span><span class="o">=</span><span class="s1">&#39;tf&#39;</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">sublinear_tf</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">smooth_idf</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">min_df</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">max_df</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span> <span class="n">min_ic</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">max_n_terms</span><span class="o">=</span><span class="n">max_n_terms</span><span class="p">)</span>
+        <span class="n">tf_type</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">idf_type</span><span class="o">=</span><span class="s1">&#39;smooth&#39;</span><span class="p">,</span>
+        <span class="n">min_df</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">max_df</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span> <span class="n">max_n_terms</span><span class="o">=</span><span class="n">max_n_terms</span><span class="p">)</span>
     <span class="n">dtm</span> <span class="o">=</span> <span class="n">vectorizer</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">terms_lists</span><span class="p">)</span>
     <span class="n">id2term</span> <span class="o">=</span> <span class="n">vectorizer</span><span class="o">.</span><span class="n">id_to_term</span>
 
     <span class="c1"># get doc freqs for all terms in grp1 documents</span>
     <span class="n">dtm_grp1</span> <span class="o">=</span> <span class="n">dtm</span><span class="p">[</span><span class="n">bool_array_grp1</span><span class="p">,</span> <span class="p">:]</span>
     <span class="n">n_docs_grp1</span> <span class="o">=</span> <span class="n">dtm_grp1</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">doc_freqs_grp1</span> <span class="o">=</span> <span class="n">vsm</span><span class="o">.</span><span class="n">get_doc_freqs</span><span class="p">(</span><span class="n">dtm_grp1</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">doc_freqs_grp1</span> <span class="o">=</span> <span class="n">vsm</span><span class="o">.</span><span class="n">get_doc_freqs</span><span class="p">(</span><span class="n">dtm_grp1</span><span class="p">)</span>
 
     <span class="c1"># get doc freqs for all terms in grp2 documents</span>
     <span class="n">dtm_grp2</span> <span class="o">=</span> <span class="n">dtm</span><span class="p">[</span><span class="n">bool_array_grp2</span><span class="p">,</span> <span class="p">:]</span>
     <span class="n">n_docs_grp2</span> <span class="o">=</span> <span class="n">dtm_grp2</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">doc_freqs_grp2</span> <span class="o">=</span> <span class="n">vsm</span><span class="o">.</span><span class="n">get_doc_freqs</span><span class="p">(</span><span class="n">dtm_grp2</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">doc_freqs_grp2</span> <span class="o">=</span> <span class="n">vsm</span><span class="o">.</span><span class="n">get_doc_freqs</span><span class="p">(</span><span class="n">dtm_grp2</span><span class="p">)</span>
 
     <span class="c1"># get terms that occur in a larger fraction of grp1 docs than grp2 docs</span>
     <span class="n">term_ids_grp1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">doc_freqs_grp1</span> <span class="o">/</span> <span class="n">n_docs_grp1</span> <span class="o">&gt;</span> <span class="n">doc_freqs_grp2</span> <span class="o">/</span> <span class="n">n_docs_grp2</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
@@ -884,9 +874,7 @@
 </pre></div>
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -899,7 +887,7 @@
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -917,7 +905,8 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'0.6.0',
+            VERSION:'0.6.1',
+            LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -936,14 +925,13 @@
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
   
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          
+          SphinxRtdTheme.Navigation.enableSticky();
+          
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>
