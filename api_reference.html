@@ -132,6 +132,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-textacy.spacier.components">Spacier</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#components">Components</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id10">spaCy Utils</a></li>
 </ul>
 </li>
 </ul>
@@ -6279,6 +6280,54 @@ as a stand-alone function, or as part of a spaCy language pipeline:</p>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Input <code class="docutils literal notranslate"><span class="pre">doc</span></code> with merged entities.</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="docutils literal notranslate"><span class="pre">SpacyDoc</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<span class="target" id="module-textacy.spacier.utils"></span><div class="section" id="id10">
+<h3>spaCy Utils<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h3>
+<p>Helper functions for working with / extending spaCy’s core functionality.</p>
+<dl class="function">
+<dt id="textacy.spacier.utils.make_doc_from_text_chunks">
+<code class="descclassname">textacy.spacier.utils.</code><code class="descname">make_doc_from_text_chunks</code><span class="sig-paren">(</span><em>text</em>, <em>lang</em>, <em>chunk_size=100000</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/textacy/spacier/utils.html#make_doc_from_text_chunks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.spacier.utils.make_doc_from_text_chunks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make a single spaCy-processed document from 1 or more chunks of <code class="docutils literal notranslate"><span class="pre">text</span></code>.
+This is a workaround for processing very long texts, for which spaCy
+is unable to allocate enough RAM.</p>
+<p>Although this function’s performance is <em>pretty good</em>, it’s inherently
+less performant that just processing the entire text in one shot.
+Only use it if necessary!</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – Text document to be chunked and processed by spaCy.</li>
+<li><strong>lang</strong> (str or <code class="docutils literal notranslate"><span class="pre">spacy.Language</span></code>) – A 2-letter language code (e.g. “en”),
+the name of a spaCy model for the desired language, or
+an already-instantiated spaCy language pipeline.</li>
+<li><strong>chunk_size</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – <p>Number of characters comprising each text chunk
+(excluding the last chunk, which is probably smaller). For best
+performance, value should be somewhere between 1e3 and 1e7,
+depending on how much RAM you have available.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Since chunking is done by character, chunks edges’ probably
+won’t respect natural language segmentation, which means that every
+<code class="docutils literal notranslate"><span class="pre">chunk_size</span></code> characters, spaCy will probably get tripped up and
+make weird parsing errors.</p>
+</div>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A single processed document, initialized from
+components accumulated chunk by chunk.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="docutils literal notranslate"><span class="pre">spacy.Doc</span></code></p>
+</td>
 </tr>
 </tbody>
 </table>

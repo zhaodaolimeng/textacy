@@ -22,6 +22,7 @@
 ./_modules/textacy/preprocess.html
 ./_modules/textacy/similarity.html
 ./_modules/textacy/spacier/components.html
+./_modules/textacy/spacier/utils.html
 ./_modules/textacy/spacy_utils.html
 ./_modules/textacy/text_stats.html
 ./_modules/textacy/text_utils.html
