@@ -6290,6 +6290,57 @@ as a stand-alone function, or as part of a spaCy language pipeline:</p>
 <h3>spaCy Utils<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h3>
 <p>Helper functions for working with / extending spaCy’s core functionality.</p>
 <dl class="function">
+<dt id="textacy.spacier.utils.get_main_verbs_of_sent">
+<code class="descclassname">textacy.spacier.utils.</code><code class="descname">get_main_verbs_of_sent</code><span class="sig-paren">(</span><em>sent</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/textacy/spacier/utils.html#get_main_verbs_of_sent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.spacier.utils.get_main_verbs_of_sent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the main (non-auxiliary) verbs in a sentence.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="textacy.spacier.utils.get_normalized_text">
+<code class="descclassname">textacy.spacier.utils.</code><code class="descname">get_normalized_text</code><span class="sig-paren">(</span><em>span_or_token</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/textacy/spacier/utils.html#get_normalized_text"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.spacier.utils.get_normalized_text" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the text of a spaCy span or token, normalized depending on its characteristics.
+For proper nouns and acronyms, text is returned as-is; for everything else,
+text is lemmatized.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>span_or_token</strong> (<code class="docutils literal notranslate"><span class="pre">spacy.Span</span></code> or <code class="docutils literal notranslate"><span class="pre">spacy.Token</span></code>) – </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="textacy.spacier.utils.get_objects_of_verb">
+<code class="descclassname">textacy.spacier.utils.</code><code class="descname">get_objects_of_verb</code><span class="sig-paren">(</span><em>verb</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/textacy/spacier/utils.html#get_objects_of_verb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.spacier.utils.get_objects_of_verb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return all objects of a verb according to the dependency parse,
+including open clausal complements.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="textacy.spacier.utils.get_span_for_compound_noun">
+<code class="descclassname">textacy.spacier.utils.</code><code class="descname">get_span_for_compound_noun</code><span class="sig-paren">(</span><em>noun</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/textacy/spacier/utils.html#get_span_for_compound_noun"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.spacier.utils.get_span_for_compound_noun" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return document indexes spanning all (adjacent) tokens
+in a compound noun.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="textacy.spacier.utils.get_span_for_verb_auxiliaries">
+<code class="descclassname">textacy.spacier.utils.</code><code class="descname">get_span_for_verb_auxiliaries</code><span class="sig-paren">(</span><em>verb</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/textacy/spacier/utils.html#get_span_for_verb_auxiliaries"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.spacier.utils.get_span_for_verb_auxiliaries" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return document indexes spanning all (adjacent) tokens
+around a verb that are auxiliary verbs or negations.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="textacy.spacier.utils.get_subjects_of_verb">
+<code class="descclassname">textacy.spacier.utils.</code><code class="descname">get_subjects_of_verb</code><span class="sig-paren">(</span><em>verb</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/textacy/spacier/utils.html#get_subjects_of_verb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.spacier.utils.get_subjects_of_verb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return all subjects of a verb according to the dependency parse.</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="textacy.spacier.utils.make_doc_from_text_chunks">
 <code class="descclassname">textacy.spacier.utils.</code><code class="descname">make_doc_from_text_chunks</code><span class="sig-paren">(</span><em>text</em>, <em>lang</em>, <em>chunk_size=100000</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/textacy/spacier/utils.html#make_doc_from_text_chunks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.spacier.utils.make_doc_from_text_chunks" title="Permalink to this definition">¶</a></dt>
 <dd><p>Make a single spaCy-processed document from 1 or more chunks of <code class="docutils literal notranslate"><span class="pre">text</span></code>.
@@ -6328,6 +6379,42 @@ components accumulated chunk by chunk.</p>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="docutils literal notranslate"><span class="pre">spacy.Doc</span></code></p>
 </td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="textacy.spacier.utils.merge_spans">
+<code class="descclassname">textacy.spacier.utils.</code><code class="descname">merge_spans</code><span class="sig-paren">(</span><em>spans</em>, <em>doc</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/textacy/spacier/utils.html#merge_spans"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.spacier.utils.merge_spans" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merge spans into single tokens in <code class="docutils literal notranslate"><span class="pre">doc</span></code>, <em>in-place</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>spans</strong> (Iterable[<code class="docutils literal notranslate"><span class="pre">spacy.Span</span></code>]) – </li>
+<li><strong>doc</strong> (<code class="docutils literal notranslate"><span class="pre">spacy.Doc</span></code>) – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="textacy.spacier.utils.preserve_case">
+<code class="descclassname">textacy.spacier.utils.</code><code class="descname">preserve_case</code><span class="sig-paren">(</span><em>token</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/textacy/spacier/utils.html#preserve_case"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.spacier.utils.preserve_case" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if <code class="docutils literal notranslate"><span class="pre">token</span></code> is a proper noun or acronym; otherwise, False.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>token</strong> (<code class="docutils literal notranslate"><span class="pre">spacy.Token</span></code>) – </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">bool</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3.6/library/exceptions.html#ValueError" title="(in Python v3.6)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> – If parent document has not been POS-tagged.</td>
 </tr>
 </tbody>
 </table>
