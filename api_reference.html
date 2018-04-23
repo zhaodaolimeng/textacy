@@ -6266,8 +6266,8 @@ methods, e.g. <a class="reference external" href="https://spacy.io/api/language#
 as a stand-alone function, or as part of a spaCy language pipeline:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">spacy_lang</span> <span class="o">=</span> <span class="n">textacy</span><span class="o">.</span><span class="n">load_spacy</span><span class="p">(</span><span class="s1">&#39;en&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">spacy_lang</span><span class="o">.</span><span class="n">add_pipe</span><span class="p">(</span><span class="n">merge_entities</span><span class="p">,</span> <span class="n">after</span><span class="o">=</span><span class="s1">&#39;ner&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span> <span class="o">=</span> <span class="n">spacy_lang</span><span class="p">(</span><span class="s1">&#39;The entity in this sentence is Burton DeWilde.&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span> <span class="o">=</span> <span class="n">spacy_lang</span><span class="p">(</span><span class="s1">&#39;Burton DeWilde is an entity in this sentence.&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 <span class="go">Burton DeWilde</span>
 </pre></div>
 </div>
@@ -6277,7 +6277,7 @@ as a stand-alone function, or as part of a spaCy language pipeline:</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>doc</strong> (<code class="docutils literal notranslate"><span class="pre">SpacyDoc</span></code>) – </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Input <code class="docutils literal notranslate"><span class="pre">doc</span></code> with merged entities.</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Input <code class="docutils literal notranslate"><span class="pre">doc</span></code> with entities merged.</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="docutils literal notranslate"><span class="pre">SpacyDoc</span></code></td>
 </tr>

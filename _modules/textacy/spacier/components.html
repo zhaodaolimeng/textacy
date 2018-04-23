@@ -164,6 +164,7 @@
 <span class="kn">from</span> <span class="nn">spacy.attrs</span> <span class="k">import</span> <span class="n">intify_attrs</span>
 <span class="kn">from</span> <span class="nn">spacy.tokens</span> <span class="k">import</span> <span class="n">Doc</span> <span class="k">as</span> <span class="n">SpacyDoc</span>
 
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">utils</span> <span class="k">as</span> <span class="n">spacier_utils</span>
 <span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">compat</span>
 <span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">text_stats</span>
 
@@ -261,28 +262,17 @@
 
 <span class="sd">        &gt;&gt;&gt; spacy_lang = textacy.load_spacy(&#39;en&#39;)</span>
 <span class="sd">        &gt;&gt;&gt; spacy_lang.add_pipe(merge_entities, after=&#39;ner&#39;)</span>
-<span class="sd">        &gt;&gt;&gt; doc = spacy_lang(&#39;The entity in this sentence is Burton DeWilde.&#39;)</span>
-<span class="sd">        &gt;&gt;&gt; doc[-2]</span>
+<span class="sd">        &gt;&gt;&gt; doc = spacy_lang(&#39;Burton DeWilde is an entity in this sentence.&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; doc[0]</span>
 <span class="sd">        Burton DeWilde</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        doc (``SpacyDoc``)</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        ``SpacyDoc``: Input ``doc`` with merged entities.</span>
+<span class="sd">        ``SpacyDoc``: Input ``doc`` with entities merged.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">try</span><span class="p">:</span>  <span class="c1"># retokenizer was added to spacy in v2.0.11</span>
-        <span class="k">with</span> <span class="n">doc</span><span class="o">.</span><span class="n">retokenize</span><span class="p">()</span> <span class="k">as</span> <span class="n">retokenizer</span><span class="p">:</span>
-            <span class="n">string_store</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">vocab</span><span class="o">.</span><span class="n">strings</span>
-            <span class="k">for</span> <span class="n">ent</span> <span class="ow">in</span> <span class="n">doc</span><span class="o">.</span><span class="n">ents</span><span class="p">:</span>
-                <span class="n">retokenizer</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
-                    <span class="n">doc</span><span class="p">[</span><span class="n">ent</span><span class="o">.</span><span class="n">start</span><span class="p">:</span> <span class="n">ent</span><span class="o">.</span><span class="n">end</span><span class="p">],</span>
-                    <span class="n">attrs</span><span class="o">=</span><span class="n">intify_attrs</span><span class="p">({</span><span class="s1">&#39;ent_type&#39;</span><span class="p">:</span> <span class="n">ent</span><span class="o">.</span><span class="n">label</span><span class="p">},</span> <span class="n">string_store</span><span class="p">))</span>
-    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-        <span class="n">ents</span> <span class="o">=</span> <span class="p">[(</span><span class="n">ent</span><span class="o">.</span><span class="n">start_char</span><span class="p">,</span> <span class="n">ent</span><span class="o">.</span><span class="n">end_char</span><span class="p">,</span> <span class="n">ent</span><span class="o">.</span><span class="n">label</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">ent</span> <span class="ow">in</span> <span class="n">doc</span><span class="o">.</span><span class="n">ents</span><span class="p">]</span>
-        <span class="k">for</span> <span class="n">start_char</span><span class="p">,</span> <span class="n">end_char</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">ents</span><span class="p">:</span>
-            <span class="n">doc</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">start_char</span><span class="p">,</span> <span class="n">end_char</span><span class="p">,</span> <span class="n">ent_type</span><span class="o">=</span><span class="n">label</span><span class="p">)</span>
+    <span class="n">spacier_utils</span><span class="o">.</span><span class="n">merge_spans</span><span class="p">(</span><span class="n">doc</span><span class="o">.</span><span class="n">ents</span><span class="p">,</span> <span class="n">doc</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">doc</span></div>
 </pre></div>
 
