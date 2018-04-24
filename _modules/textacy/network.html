@@ -189,7 +189,7 @@
 <span class="sd">        normalize (str or Callable): If &#39;lemma&#39;, lemmatize terms; if &#39;lower&#39;,</span>
 <span class="sd">            lowercase terms; if false-y, use the form of terms as they appear</span>
 <span class="sd">            in ``terms``; if a callable, must accept a ``spacy.Token`` and return</span>
-<span class="sd">            a str, e.g. :func:`textacy.spacy_utils.normalized_str()`.</span>
+<span class="sd">            a str, e.g. :func:`textacy.spacier.utils.get_normalized_text()`.</span>
 
 <span class="sd">            .. note:: This is applied to the elements of ``terms`` *only* if</span>
 <span class="sd">               it&#39;s a list of ``spacy.Token``.</span>
@@ -214,7 +214,7 @@
 <span class="sd">          into single strings or spacy.Tokens beforehand</span>
 <span class="sd">        - If terms are already strings, be sure to have normalized them so that</span>
 <span class="sd">          like terms are counted together; for example, by applying</span>
-<span class="sd">          :func:`normalized_str() &lt;textacy.spacy_utils.normalized_str&gt;`</span>
+<span class="sd">          :func:`textacy.spacier.utils.get_normalized_text()`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">window_width</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
@@ -284,7 +284,7 @@
 <span class="sd">        normalize (str or Callable): If &#39;lemma&#39;, lemmatize words in sents;</span>
 <span class="sd">            if &#39;lower&#39;, lowercase word in sents; if false-y, use the form of words</span>
 <span class="sd">            as they appear in sents; if a callable, must accept a ``spacy.Token``</span>
-<span class="sd">            and return a str, e.g. :func:`textacy.spacy_utils.normalized_str()`.</span>
+<span class="sd">            and return a str, e.g. :func:`textacy.spacier.utils.get_normalized_text()`.</span>
 
 <span class="sd">            .. note:: This is applied to the elements of ``sents`` *only* if</span>
 <span class="sd">               it&#39;s a list of ``spacy.Span``.</span>
@@ -304,7 +304,7 @@
 <span class="sd">        - If passing sentences as strings, be sure to filter out stopwords, punctuation,</span>
 <span class="sd">          certain parts of speech, etc. beforehand</span>
 <span class="sd">        - Consider normalizing the strings so that like terms are counted together</span>
-<span class="sd">          (see :func:`normalized_str() &lt;textacy.spacy_utils.normalized_str&gt;`)</span>
+<span class="sd">          (see :func:`textacy.spacier.utils.get_normalized_text()`)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sents</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">compat</span><span class="o">.</span><span class="n">unicode_</span><span class="p">):</span>
         <span class="k">pass</span>

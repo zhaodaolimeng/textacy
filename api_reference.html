@@ -473,7 +473,7 @@ overlap with an entity are skipped to prevent double-counting</li>
 <li><strong>normalize</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em> or </em><em>callable</em>) – if ‘lemma’, lemmatize terms; if ‘lower’,
 lowercase terms; if false-y, use the form of terms as they appear
 in doc; if a callable, must accept a <code class="docutils literal notranslate"><span class="pre">spacy.Token</span></code> or <code class="docutils literal notranslate"><span class="pre">spacy.Span</span></code>
-and return a str, e.g. <a class="reference internal" href="#textacy.spacy_utils.normalized_str" title="textacy.spacy_utils.normalized_str"><code class="xref py py-func docutils literal notranslate"><span class="pre">textacy.spacy_utils.normalized_str()</span></code></a></li>
+and return a str, e.g. <a class="reference internal" href="#textacy.spacier.utils.get_normalized_text" title="textacy.spacier.utils.get_normalized_text"><code class="xref py py-func docutils literal notranslate"><span class="pre">textacy.spacier.utils.get_normalized_text()</span></code></a></li>
 <li><strong>weighting</strong> (<em>{'count'</em><em>, </em><em>'freq'</em><em>, </em><em>'binary'}</em>) – Type of weight to assign to
 terms. If ‘count’ (default), weights are the absolute number of
 occurrences (count) of term in doc. If ‘binary’, all counts are
@@ -571,7 +571,7 @@ in the semantic network</li>
 lowercase terms; if false-y, use the form of terms as they appear
 in doc; if a callable, must accept a <code class="docutils literal notranslate"><span class="pre">spacy.Token</span></code> or <code class="docutils literal notranslate"><span class="pre">spacy.Span</span></code>
 (if <code class="docutils literal notranslate"><span class="pre">nodes</span></code> = ‘words’ or ‘sents’, respectively) and return a
-str, e.g. <a class="reference internal" href="#textacy.spacy_utils.normalized_str" title="textacy.spacy_utils.normalized_str"><code class="xref py py-func docutils literal notranslate"><span class="pre">textacy.spacy_utils.normalized_str()</span></code></a></li>
+str, e.g. <a class="reference internal" href="#textacy.spacier.utils.get_normalized_text" title="textacy.spacier.utils.get_normalized_text"><code class="xref py py-func docutils literal notranslate"><span class="pre">textacy.spacier.utils.get_normalized_text()</span></code></a></li>
 <li><strong>edge_weighting</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – type of weighting to apply to edges
 between nodes; if <code class="docutils literal notranslate"><span class="pre">nodes</span> <span class="pre">==</span> <span class="pre">'words'</span></code>, options are {‘cooc_freq’, ‘binary’},
 if <code class="docutils literal notranslate"><span class="pre">nodes</span> <span class="pre">==</span> <span class="pre">'sents'</span></code>, options are {‘cosine’, ‘jaccard’}; if
@@ -623,7 +623,7 @@ with an entity are skipped to prevent double-counting</li>
 <li><strong>normalize</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em> or </em><em>callable</em>) – if ‘lemma’, lemmatize terms; if ‘lower’,
 lowercase terms; if false-y, use the form of terms as they appear
 in doc; if a callable, must accept a <code class="docutils literal notranslate"><span class="pre">spacy.Token</span></code> or <code class="docutils literal notranslate"><span class="pre">spacy.Span</span></code>
-and return a str, e.g. <a class="reference internal" href="#textacy.spacy_utils.normalized_str" title="textacy.spacy_utils.normalized_str"><code class="xref py py-func docutils literal notranslate"><span class="pre">textacy.spacy_utils.normalized_str()</span></code></a></li>
+and return a str, e.g. <a class="reference internal" href="#textacy.spacier.utils.get_normalized_text" title="textacy.spacier.utils.get_normalized_text"><code class="xref py py-func docutils literal notranslate"><span class="pre">textacy.spacier.utils.get_normalized_text()</span></code></a></li>
 <li><strong>as_strings</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – if True, terms are returned as strings; if False
 (default), terms are returned as their unique integer ids</li>
 <li><strong>kwargs</strong> – <ul>
@@ -2764,7 +2764,7 @@ terms, connected by edges and weights specified by parameters.</p>
 <li><strong>normalize</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em> or </em><em>callable</em>) – if ‘lemma’, lemmatize terms; if ‘lower’,
 lowercase terms; if None, use the form of terms as they appeared in
 <code class="docutils literal notranslate"><span class="pre">doc</span></code>; if a callable, must accept a <code class="docutils literal notranslate"><span class="pre">spacy.Token</span></code> and return a str,
-e.g. <a class="reference internal" href="#textacy.spacy_utils.normalized_str" title="textacy.spacy_utils.normalized_str"><code class="xref py py-func docutils literal notranslate"><span class="pre">textacy.spacy_utils.normalized_str()</span></code></a></li>
+e.g. <a class="reference internal" href="#textacy.spacier.utils.get_normalized_text" title="textacy.spacier.utils.get_normalized_text"><code class="xref py py-func docutils literal notranslate"><span class="pre">textacy.spacier.utils.get_normalized_text()</span></code></a></li>
 <li><strong>window_width</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – width of sliding window in which term
 co-occurrences are said to occur</li>
 <li><strong>edge_weighting</strong> (<em>'binary'</em><em>, </em><em>'cooc_freq'}</em>) – method used to
@@ -2936,7 +2936,7 @@ if only bigrams are wanted</li>
 <li><strong>normalize</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em> or </em><em>callable</em>) – If ‘lemma’, lemmatize terms; if ‘lower’,
 lowercase terms; if None, use the form of terms as they appeared in
 <code class="docutils literal notranslate"><span class="pre">doc</span></code>; if a callable, must accept a <code class="docutils literal notranslate"><span class="pre">spacy.Span</span></code> and return a str,
-e.g. <a class="reference internal" href="#textacy.spacy_utils.normalized_str" title="textacy.spacy_utils.normalized_str"><code class="xref py py-func docutils literal notranslate"><span class="pre">textacy.spacy_utils.normalized_str()</span></code></a></li>
+e.g. <a class="reference internal" href="#textacy.spacier.utils.get_normalized_text" title="textacy.spacier.utils.get_normalized_text"><code class="xref py py-func docutils literal notranslate"><span class="pre">textacy.spacier.utils.get_normalized_text()</span></code></a></li>
 <li><strong>window_width</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – Width of sliding window in which term
 co-occurrences are determined to occur. Note: Larger values may
 dramatically increase runtime, owing to the larger number of
@@ -2989,7 +2989,7 @@ with the parameter values used in the <a class="reference internal" href="#singl
 <li><strong>normalize</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em> or </em><em>callable</em>) – if ‘lemma’, lemmatize terms; if ‘lower’,
 lowercase terms; if None, use the form of terms as they appeared in
 <code class="docutils literal notranslate"><span class="pre">doc</span></code>; if a callable, must accept a <code class="docutils literal notranslate"><span class="pre">spacy.Token</span></code> and return a str,
-e.g. <a class="reference internal" href="#textacy.spacy_utils.normalized_str" title="textacy.spacy_utils.normalized_str"><code class="xref py py-func docutils literal notranslate"><span class="pre">textacy.spacy_utils.normalized_str()</span></code></a></li>
+e.g. <a class="reference internal" href="#textacy.spacier.utils.get_normalized_text" title="textacy.spacier.utils.get_normalized_text"><code class="xref py py-func docutils literal notranslate"><span class="pre">textacy.spacier.utils.get_normalized_text()</span></code></a></li>
 <li><strong>n_keyterms</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – if int, number of top-ranked terms
 to return as keyterms; if float, must be in the open interval (0, 1),
 representing the fraction of top-ranked terms to return as keyterms</li>
@@ -3027,7 +3027,7 @@ with the parameter values used in the <a class="reference internal" href="#textr
 <li><strong>normalize</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em> or </em><em>callable</em>) – if ‘lemma’, lemmatize terms; if ‘lower’,
 lowercase terms; if None, use the form of terms as they appeared in
 <code class="docutils literal notranslate"><span class="pre">doc</span></code>; if a callable, must accept a <code class="docutils literal notranslate"><span class="pre">spacy.Token</span></code> and return a str,
-e.g. <a class="reference internal" href="#textacy.spacy_utils.normalized_str" title="textacy.spacy_utils.normalized_str"><code class="xref py py-func docutils literal notranslate"><span class="pre">textacy.spacy_utils.normalized_str()</span></code></a></li>
+e.g. <a class="reference internal" href="#textacy.spacier.utils.get_normalized_text" title="textacy.spacier.utils.get_normalized_text"><code class="xref py py-func docutils literal notranslate"><span class="pre">textacy.spacier.utils.get_normalized_text()</span></code></a></li>
 <li><strong>n_keyterms</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – if int, number of top-ranked terms
 to return as keyterms; if float, must be in the open interval (0, 1),
 representing the fraction of top-ranked terms to return as keyterms</li>
@@ -5525,7 +5525,7 @@ the (cosine or jaccard) similarity of their constituent words.</p>
 <li><strong>normalize</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em> or </em><em>Callable</em>) – <p>If ‘lemma’, lemmatize words in sents;
 if ‘lower’, lowercase word in sents; if false-y, use the form of words
 as they appear in sents; if a callable, must accept a <code class="docutils literal notranslate"><span class="pre">spacy.Token</span></code>
-and return a str, e.g. <a class="reference internal" href="#textacy.spacy_utils.normalized_str" title="textacy.spacy_utils.normalized_str"><code class="xref py py-func docutils literal notranslate"><span class="pre">textacy.spacy_utils.normalized_str()</span></code></a>.</p>
+and return a str, e.g. <a class="reference internal" href="#textacy.spacier.utils.get_normalized_text" title="textacy.spacier.utils.get_normalized_text"><code class="xref py py-func docutils literal notranslate"><span class="pre">textacy.spacier.utils.get_normalized_text()</span></code></a>.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">This is applied to the elements of <code class="docutils literal notranslate"><span class="pre">sents</span></code> <em>only</em> if
@@ -5555,7 +5555,7 @@ every node, with weights determined by <code class="docutils literal notranslate
 <li>If passing sentences as strings, be sure to filter out stopwords, punctuation,
 certain parts of speech, etc. beforehand</li>
 <li>Consider normalizing the strings so that like terms are counted together
-(see <a class="reference internal" href="#textacy.spacy_utils.normalized_str" title="textacy.spacy_utils.normalized_str"><code class="xref py py-func docutils literal notranslate"><span class="pre">normalized_str()</span></code></a>)</li>
+(see <a class="reference internal" href="#textacy.spacier.utils.get_normalized_text" title="textacy.spacier.utils.get_normalized_text"><code class="xref py py-func docutils literal notranslate"><span class="pre">textacy.spacier.utils.get_normalized_text()</span></code></a>)</li>
 </ul>
 </dd></dl>
 
@@ -5574,7 +5574,7 @@ other terms that co-occur within <code class="docutils literal notranslate"><spa
 <li><strong>normalize</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em> or </em><em>Callable</em>) – <p>If ‘lemma’, lemmatize terms; if ‘lower’,
 lowercase terms; if false-y, use the form of terms as they appear
 in <code class="docutils literal notranslate"><span class="pre">terms</span></code>; if a callable, must accept a <code class="docutils literal notranslate"><span class="pre">spacy.Token</span></code> and return
-a str, e.g. <a class="reference internal" href="#textacy.spacy_utils.normalized_str" title="textacy.spacy_utils.normalized_str"><code class="xref py py-func docutils literal notranslate"><span class="pre">textacy.spacy_utils.normalized_str()</span></code></a>.</p>
+a str, e.g. <a class="reference internal" href="#textacy.spacier.utils.get_normalized_text" title="textacy.spacier.utils.get_normalized_text"><code class="xref py py-func docutils literal notranslate"><span class="pre">textacy.spacier.utils.get_normalized_text()</span></code></a>.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">This is applied to the elements of <code class="docutils literal notranslate"><span class="pre">terms</span></code> <em>only</em> if
@@ -5609,7 +5609,7 @@ from the terms list before passing it to this function</li>
 into single strings or spacy.Tokens beforehand</li>
 <li>If terms are already strings, be sure to have normalized them so that
 like terms are counted together; for example, by applying
-<a class="reference internal" href="#textacy.spacy_utils.normalized_str" title="textacy.spacy_utils.normalized_str"><code class="xref py py-func docutils literal notranslate"><span class="pre">normalized_str()</span></code></a></li>
+<a class="reference internal" href="#textacy.spacier.utils.get_normalized_text" title="textacy.spacier.utils.get_normalized_text"><code class="xref py py-func docutils literal notranslate"><span class="pre">textacy.spacier.utils.get_normalized_text()</span></code></a></li>
 </ul>
 </dd></dl>
 

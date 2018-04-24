@@ -175,8 +175,8 @@
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">extract</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">io</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">network</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">spacy_utils</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">text_utils</span>
+<span class="kn">from</span> <span class="nn">.spacier</span> <span class="k">import</span> <span class="n">utils</span> <span class="k">as</span> <span class="n">spacy_utils</span>
 
 
 <div class="viewcode-block" id="Doc"><a class="viewcode-back" href="../../api_reference.html#textacy.doc.Doc">[docs]</a><span class="k">class</span> <span class="nc">Doc</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -543,7 +543,7 @@
 <span class="sd">            normalize (str or callable): if &#39;lemma&#39;, lemmatize terms; if &#39;lower&#39;,</span>
 <span class="sd">                lowercase terms; if false-y, use the form of terms as they appear</span>
 <span class="sd">                in doc; if a callable, must accept a ``spacy.Token`` or ``spacy.Span``</span>
-<span class="sd">                and return a str, e.g. :func:`textacy.spacy_utils.normalized_str()`</span>
+<span class="sd">                and return a str, e.g. :func:`textacy.spacier.utils.get_normalized_text()`</span>
 <span class="sd">            as_strings (bool): if True, terms are returned as strings; if False</span>
 <span class="sd">                (default), terms are returned as their unique integer ids</span>
 <span class="sd">            kwargs:</span>
@@ -744,7 +744,7 @@
 <span class="sd">            normalize (str or callable): if &#39;lemma&#39;, lemmatize terms; if &#39;lower&#39;,</span>
 <span class="sd">                lowercase terms; if false-y, use the form of terms as they appear</span>
 <span class="sd">                in doc; if a callable, must accept a ``spacy.Token`` or ``spacy.Span``</span>
-<span class="sd">                and return a str, e.g. :func:`textacy.spacy_utils.normalized_str()`</span>
+<span class="sd">                and return a str, e.g. :func:`textacy.spacier.utils.get_normalized_text()`</span>
 <span class="sd">            weighting ({&#39;count&#39;, &#39;freq&#39;, &#39;binary&#39;}): Type of weight to assign to</span>
 <span class="sd">                terms. If &#39;count&#39; (default), weights are the absolute number of</span>
 <span class="sd">                occurrences (count) of term in doc. If &#39;binary&#39;, all counts are</span>
@@ -802,7 +802,7 @@
 <span class="sd">                lowercase terms; if false-y, use the form of terms as they appear</span>
 <span class="sd">                in doc; if a callable, must accept a ``spacy.Token`` or ``spacy.Span``</span>
 <span class="sd">                (if ``nodes`` = &#39;words&#39; or &#39;sents&#39;, respectively) and return a</span>
-<span class="sd">                str, e.g. :func:`textacy.spacy_utils.normalized_str()`</span>
+<span class="sd">                str, e.g. :func:`textacy.spacier.utils.get_normalized_text()`</span>
 <span class="sd">            edge_weighting (str): type of weighting to apply to edges</span>
 <span class="sd">                between nodes; if ``nodes == &#39;words&#39;``, options are {&#39;cooc_freq&#39;, &#39;binary&#39;},</span>
 <span class="sd">                if ``nodes == &#39;sents&#39;``, options are {&#39;cosine&#39;, &#39;jaccard&#39;}; if</span>

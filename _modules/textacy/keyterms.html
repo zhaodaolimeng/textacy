@@ -192,7 +192,7 @@
 <span class="sd">        normalize (str or callable): If &#39;lemma&#39;, lemmatize terms; if &#39;lower&#39;,</span>
 <span class="sd">            lowercase terms; if None, use the form of terms as they appeared in</span>
 <span class="sd">            ``doc``; if a callable, must accept a ``spacy.Span`` and return a str,</span>
-<span class="sd">            e.g. :func:`textacy.spacy_utils.normalized_str()`</span>
+<span class="sd">            e.g. :func:`textacy.spacier.utils.get_normalized_text()`</span>
 <span class="sd">        window_width (int): Width of sliding window in which term</span>
 <span class="sd">            co-occurrences are determined to occur. Note: Larger values may</span>
 <span class="sd">            dramatically increase runtime, owing to the larger number of</span>
@@ -336,7 +336,7 @@
 <span class="sd">        normalize (str or callable): if &#39;lemma&#39;, lemmatize terms; if &#39;lower&#39;,</span>
 <span class="sd">            lowercase terms; if None, use the form of terms as they appeared in</span>
 <span class="sd">            ``doc``; if a callable, must accept a ``spacy.Token`` and return a str,</span>
-<span class="sd">            e.g. :func:`textacy.spacy_utils.normalized_str()`</span>
+<span class="sd">            e.g. :func:`textacy.spacier.utils.get_normalized_text()`</span>
 <span class="sd">        n_keyterms (int or float): if int, number of top-ranked terms</span>
 <span class="sd">            to return as keyterms; if float, must be in the open interval (0, 1),</span>
 <span class="sd">            representing the fraction of top-ranked terms to return as keyterms</span>
@@ -363,7 +363,7 @@
 <span class="sd">        normalize (str or callable): if &#39;lemma&#39;, lemmatize terms; if &#39;lower&#39;,</span>
 <span class="sd">            lowercase terms; if None, use the form of terms as they appeared in</span>
 <span class="sd">            ``doc``; if a callable, must accept a ``spacy.Token`` and return a str,</span>
-<span class="sd">            e.g. :func:`textacy.spacy_utils.normalized_str()`</span>
+<span class="sd">            e.g. :func:`textacy.spacier.utils.get_normalized_text()`</span>
 <span class="sd">        n_keyterms (int or float): if int, number of top-ranked terms</span>
 <span class="sd">            to return as keyterms; if float, must be in the open interval (0, 1),</span>
 <span class="sd">            representing the fraction of top-ranked terms to return as keyterms</span>
@@ -395,7 +395,7 @@
 <span class="sd">        normalize (str or callable): if &#39;lemma&#39;, lemmatize terms; if &#39;lower&#39;,</span>
 <span class="sd">            lowercase terms; if None, use the form of terms as they appeared in</span>
 <span class="sd">            ``doc``; if a callable, must accept a ``spacy.Token`` and return a str,</span>
-<span class="sd">            e.g. :func:`textacy.spacy_utils.normalized_str()`</span>
+<span class="sd">            e.g. :func:`textacy.spacier.utils.get_normalized_text()`</span>
 <span class="sd">        window_width (int): width of sliding window in which term</span>
 <span class="sd">            co-occurrences are said to occur</span>
 <span class="sd">        edge_weighting (&#39;binary&#39;, &#39;cooc_freq&#39;}): method used to</span>
