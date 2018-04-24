@@ -154,8 +154,8 @@
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Functions to extract various elements of interest from documents already parsed</span>
-<span class="sd">by `spaCy &lt;http://spacy.io/&gt;`_, such as n-grams, named entities, subject-verb-object</span>
-<span class="sd">triples, and acronyms.</span>
+<span class="sd">by spaCy, such as n-grams, named entities, subject-verb-object triples, and</span>
+<span class="sd">acronyms.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span>
 
@@ -192,20 +192,20 @@
 <span class="sd">            IS NOT included in this param</span>
 <span class="sd">        exclude_pos (str or Set[str]): remove words whose part-of-speech tag</span>
 <span class="sd">            IS in the specified tags</span>
-<span class="sd">        min_freq (int): remove words that occur in `doc` fewer than</span>
-<span class="sd">            `min_freq` times</span>
+<span class="sd">        min_freq (int): remove words that occur in ``doc`` fewer than</span>
+<span class="sd">            ``min_freq`` times</span>
 
 <span class="sd">    Yields:</span>
 <span class="sd">        ``spacy.Token``: the next token from ``doc`` passing specified filters</span>
 <span class="sd">        in order of appearance in the document</span>
 
 <span class="sd">    Raises:</span>
-<span class="sd">        TypeError: if `include_pos` or `exclude_pos` is not a str, a set of str,</span>
+<span class="sd">        TypeError: if ``include_pos`` or ``exclude_pos`` is not a str, a set of str,</span>
 <span class="sd">            or a falsy value</span>
 
 <span class="sd">    Note:</span>
-<span class="sd">        Filtering by part-of-speech tag uses the universal POS tag set,</span>
-<span class="sd">        http://universaldependencies.org/u/pos/.</span>
+<span class="sd">        Filtering by part-of-speech tag uses the universal POS tag set; for details,</span>
+<span class="sd">        check spaCy&#39;s docs: https://spacy.io/api/annotation#pos-tagging</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">words_</span> <span class="o">=</span> <span class="p">(</span><span class="n">w</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">doc</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">w</span><span class="o">.</span><span class="n">is_space</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">filter_stops</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
@@ -274,7 +274,7 @@
 
 <span class="sd">    Raises:</span>
 <span class="sd">        ValueError: if ``n`` &lt; 1</span>
-<span class="sd">        TypeError: if `include_pos` or `exclude_pos` is not a str, a set of str,</span>
+<span class="sd">        TypeError: if ``include_pos`` or ``exclude_pos`` is not a str, a set of str,</span>
 <span class="sd">            or a falsy value</span>
 
 <span class="sd">    Note:</span>
@@ -357,15 +357,15 @@
 <span class="sd">               big deal, but watch out if you&#39;re counting on determiner-less</span>
 <span class="sd">               entities associated with the doc downstream.</span>
 
-<span class="sd">        min_freq (int): remove named entities that occur in `doc` fewer</span>
-<span class="sd">            than `min_freq` times</span>
+<span class="sd">        min_freq (int): remove named entities that occur in ``doc`` fewer</span>
+<span class="sd">            than ``min_freq`` times</span>
 
 <span class="sd">    Yields:</span>
 <span class="sd">        ``spacy.Span``: the next named entity from ``doc`` passing all specified</span>
 <span class="sd">        filters in order of appearance in the document</span>
 
 <span class="sd">    Raises:</span>
-<span class="sd">        TypeError: if `include_types` or `exclude_types` is not a str, a set of</span>
+<span class="sd">        TypeError: if ``include_types`` or ``exclude_types`` is not a str, a set of</span>
 <span class="sd">            str, or a falsy value</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="s1">&#39;spacy_doc&#39;</span><span class="p">):</span>
@@ -421,8 +421,8 @@
 <span class="sd">        doc (``textacy.Doc`` or ``spacy.Doc``)</span>
 <span class="sd">        drop_determiners (bool): remove leading determiners (e.g. &quot;the&quot;)</span>
 <span class="sd">            from phrases (e.g. &quot;the quick brown fox&quot; =&gt; &quot;quick brown fox&quot;)</span>
-<span class="sd">        min_freq (int): remove chunks that occur in `doc` fewer than</span>
-<span class="sd">            `min_freq` times</span>
+<span class="sd">        min_freq (int): remove chunks that occur in ``doc`` fewer than</span>
+<span class="sd">            ``min_freq`` times</span>
 
 <span class="sd">    Yields:</span>
 <span class="sd">        ``spacy.Span``: the next noun chunk from ``doc`` in order of appearance</span>
@@ -783,7 +783,7 @@
 <span class="sd">        doc (``textacy.Doc`` or ``spacy.Doc``)</span>
 <span class="sd">        entity (str): a noun or noun phrase of some sort (e.g. &quot;President Obama&quot;,</span>
 <span class="sd">            &quot;global warming&quot;, &quot;Python&quot;)</span>
-<span class="sd">        cue (str): verb lemma with which `entity` is associated</span>
+<span class="sd">        cue (str): verb lemma with which ``entity`` is associated</span>
 <span class="sd">            (e.g. &quot;talk about&quot;, &quot;have&quot;, &quot;write&quot;)</span>
 <span class="sd">        ignore_entity_case (bool): if True, entity matching is case-independent</span>
 <span class="sd">        min_n_words (int): min number of tokens allowed in a matching fragment</span>

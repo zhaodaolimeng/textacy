@@ -112,7 +112,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#json">JSON</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#csv">CSV</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#matrix">Matrix</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id8">spaCy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id7">spaCy</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#http">HTTP</a></li>
 </ul>
 </li>
@@ -132,7 +132,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-textacy.spacier.components">Spacier</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#components">Components</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id10">spaCy Utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id9">spaCy Utils</a></li>
 </ul>
 </li>
 </ul>
@@ -2405,8 +2405,8 @@ so are left as-is.</p>
 <div class="section" id="module-textacy.extract">
 <span id="information-extraction"></span><h2>Information Extraction<a class="headerlink" href="#module-textacy.extract" title="Permalink to this headline">¶</a></h2>
 <p>Functions to extract various elements of interest from documents already parsed
-by <a class="reference external" href="http://spacy.io/">spaCy</a>, such as n-grams, named entities, subject-verb-object
-triples, and acronyms.</p>
+by spaCy, such as n-grams, named entities, subject-verb-object triples, and
+acronyms.</p>
 <dl class="function">
 <dt id="textacy.extract.acronyms_and_definitions">
 <code class="descclassname">textacy.extract.</code><code class="descname">acronyms_and_definitions</code><span class="sig-paren">(</span><em>doc</em>, <em>known_acro_defs=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/textacy/extract.html#acronyms_and_definitions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.extract.acronyms_and_definitions" title="Permalink to this definition">¶</a></dt>
@@ -2490,8 +2490,8 @@ big deal, but watch out if you’re counting on determiner-less
 entities associated with the doc downstream.</p>
 </div>
 </li>
-<li><strong>min_freq</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – remove named entities that occur in <cite>doc</cite> fewer
-than <cite>min_freq</cite> times</li>
+<li><strong>min_freq</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – remove named entities that occur in <code class="docutils literal notranslate"><span class="pre">doc</span></code> fewer
+than <code class="docutils literal notranslate"><span class="pre">min_freq</span></code> times</li>
 </ul>
 </td>
 </tr>
@@ -2499,7 +2499,7 @@ than <cite>min_freq</cite> times</li>
 filters in order of appearance in the document</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3.6/library/exceptions.html#TypeError" title="(in Python v3.6)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a> – if <cite>include_types</cite> or <cite>exclude_types</cite> is not a str, a set of
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3.6/library/exceptions.html#TypeError" title="(in Python v3.6)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a> – if <code class="docutils literal notranslate"><span class="pre">include_types</span></code> or <code class="docutils literal notranslate"><span class="pre">exclude_types</span></code> is not a str, a set of
 str, or a falsy value</p>
 </td>
 </tr>
@@ -2541,7 +2541,7 @@ filters, in order of appearance in the document</p>
 </tr>
 <tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
 <li><a class="reference external" href="https://docs.python.org/3.6/library/exceptions.html#ValueError" title="(in Python v3.6)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> – if <code class="docutils literal notranslate"><span class="pre">n</span></code> &lt; 1</li>
-<li><a class="reference external" href="https://docs.python.org/3.6/library/exceptions.html#TypeError" title="(in Python v3.6)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a> – if <cite>include_pos</cite> or <cite>exclude_pos</cite> is not a str, a set of str,
+<li><a class="reference external" href="https://docs.python.org/3.6/library/exceptions.html#TypeError" title="(in Python v3.6)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a> – if <code class="docutils literal notranslate"><span class="pre">include_pos</span></code> or <code class="docutils literal notranslate"><span class="pre">exclude_pos</span></code> is not a str, a set of str,
 or a falsy value</li>
 </ul>
 </td>
@@ -2568,8 +2568,8 @@ filtering by frequency and dropping leading determiners.</p>
 <li><strong>doc</strong> (<code class="docutils literal notranslate"><span class="pre">textacy.Doc</span></code> or <code class="docutils literal notranslate"><span class="pre">spacy.Doc</span></code>) – </li>
 <li><strong>drop_determiners</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – remove leading determiners (e.g. “the”)
 from phrases (e.g. “the quick brown fox” =&gt; “quick brown fox”)</li>
-<li><strong>min_freq</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – remove chunks that occur in <cite>doc</cite> fewer than
-<cite>min_freq</cite> times</li>
+<li><strong>min_freq</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – remove chunks that occur in <code class="docutils literal notranslate"><span class="pre">doc</span></code> fewer than
+<code class="docutils literal notranslate"><span class="pre">min_freq</span></code> times</li>
 </ul>
 </td>
 </tr>
@@ -2630,7 +2630,7 @@ parts-of-speech match <code class="docutils literal notranslate"><span class="pr
 <li><strong>doc</strong> (<code class="docutils literal notranslate"><span class="pre">textacy.Doc</span></code> or <code class="docutils literal notranslate"><span class="pre">spacy.Doc</span></code>) – </li>
 <li><strong>entity</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – a noun or noun phrase of some sort (e.g. “President Obama”,
 “global warming”, “Python”)</li>
-<li><strong>cue</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – verb lemma with which <cite>entity</cite> is associated
+<li><strong>cue</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – verb lemma with which <code class="docutils literal notranslate"><span class="pre">entity</span></code> is associated
 (e.g. “talk about”, “have”, “write”)</li>
 <li><strong>ignore_entity_case</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – if True, entity matching is case-independent</li>
 <li><strong>min_n_words</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – min number of tokens allowed in a matching fragment</li>
@@ -2690,8 +2690,8 @@ from word list</li>
 IS NOT included in this param</li>
 <li><strong>exclude_pos</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em> or </em><em>Set</em><em>[</em><a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em>]</em>) – remove words whose part-of-speech tag
 IS in the specified tags</li>
-<li><strong>min_freq</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – remove words that occur in <cite>doc</cite> fewer than
-<cite>min_freq</cite> times</li>
+<li><strong>min_freq</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – remove words that occur in <code class="docutils literal notranslate"><span class="pre">doc</span></code> fewer than
+<code class="docutils literal notranslate"><span class="pre">min_freq</span></code> times</li>
 </ul>
 </td>
 </tr>
@@ -2699,7 +2699,7 @@ IS in the specified tags</li>
 in order of appearance in the document</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3.6/library/exceptions.html#TypeError" title="(in Python v3.6)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a> – if <cite>include_pos</cite> or <cite>exclude_pos</cite> is not a str, a set of str,
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3.6/library/exceptions.html#TypeError" title="(in Python v3.6)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a> – if <code class="docutils literal notranslate"><span class="pre">include_pos</span></code> or <code class="docutils literal notranslate"><span class="pre">exclude_pos</span></code> is not a str, a set of str,
 or a falsy value</p>
 </td>
 </tr>
@@ -2707,8 +2707,8 @@ or a falsy value</p>
 </table>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">Filtering by part-of-speech tag uses the universal POS tag set,
-<a class="reference external" href="http://universaldependencies.org/u/pos/">http://universaldependencies.org/u/pos/</a>.</p>
+<p class="last">Filtering by part-of-speech tag uses the universal POS tag set; for details,
+check spaCy’s docs: <a class="reference external" href="https://spacy.io/api/annotation#pos-tagging">https://spacy.io/api/annotation#pos-tagging</a></p>
 </div>
 </dd></dl>
 
@@ -2842,7 +2842,7 @@ and Document Set Discovery from Unstructured Text.” (2014).
 <dl class="function">
 <dt id="textacy.keyterms.rank_nodes_by_bestcoverage">
 <code class="descclassname">textacy.keyterms.</code><code class="descname">rank_nodes_by_bestcoverage</code><span class="sig-paren">(</span><em>graph</em>, <em>k</em>, <em>c=1</em>, <em>alpha=1.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/textacy/keyterms.html#rank_nodes_by_bestcoverage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.keyterms.rank_nodes_by_bestcoverage" title="Permalink to this definition">¶</a></dt>
-<dd><p>Rank nodes in a network using the <a class="reference internal" href="#bestcoverage" id="id3">[BestCoverage]</a> algorithm that attempts to
+<dd><p>Rank nodes in a network using the <a class="reference internal" href="#bestcoverage" id="id2">[BestCoverage]</a> algorithm that attempts to
 balance between node centrality and diversity.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -2872,7 +2872,7 @@ identifiers, values as corresponding ranking scores</p>
 <table class="docutils citation" frame="void" id="bestcoverage" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id3">[BestCoverage]</a></td><td>Küçüktunç, O., Saule, E., Kaya, K., &amp; Çatalyürek, Ü. V.
+<tr><td class="label"><a class="fn-backref" href="#id2">[BestCoverage]</a></td><td>Küçüktunç, O., Saule, E., Kaya, K., &amp; Çatalyürek, Ü. V.
 (2013, May). Diversified recommendation on graphs: pitfalls, measures,
 and algorithms. In Proceedings of the 22nd international conference on
 World Wide Web (pp. 715-726). International World Wide Web Conferences
@@ -2884,7 +2884,7 @@ Steering Committee. <a class="reference external" href="http://www2013.wwwconfer
 <dl class="function">
 <dt id="textacy.keyterms.rank_nodes_by_divrank">
 <code class="descclassname">textacy.keyterms.</code><code class="descname">rank_nodes_by_divrank</code><span class="sig-paren">(</span><em>graph</em>, <em>r=None</em>, <em>lambda_=0.5</em>, <em>alpha=0.5</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/textacy/keyterms.html#rank_nodes_by_divrank"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.keyterms.rank_nodes_by_divrank" title="Permalink to this definition">¶</a></dt>
-<dd><p>Rank nodes in a network using the <a class="reference internal" href="#divrank" id="id4">[DivRank]</a> algorithm that attempts to
+<dd><p>Rank nodes in a network using the <a class="reference internal" href="#divrank" id="id3">[DivRank]</a> algorithm that attempts to
 balance between node centrality and diversity.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -2912,7 +2912,7 @@ must be in [0.0, 1.0]</li>
 <table class="docutils citation" frame="void" id="divrank" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id4">[DivRank]</a></td><td>Mei, Q., Guo, J., &amp; Radev, D. (2010, July). Divrank: the interplay
+<tr><td class="label"><a class="fn-backref" href="#id3">[DivRank]</a></td><td>Mei, Q., Guo, J., &amp; Radev, D. (2010, July). Divrank: the interplay
 of prestige and diversity in information networks. In Proceedings of the
 16th ACM SIGKDD international conference on Knowledge discovery and data
 mining (pp. 1009-1018). ACM. <a class="reference external" href="http://clair.si.umich.edu/~radev/papers/SIGKDD2010.pdf">http://clair.si.umich.edu/~radev/papers/SIGKDD2010.pdf</a></td></tr>
@@ -2923,7 +2923,7 @@ mining (pp. 1009-1018). ACM. <a class="reference external" href="http://clair.si
 <dl class="function">
 <dt id="textacy.keyterms.sgrank">
 <code class="descclassname">textacy.keyterms.</code><code class="descname">sgrank</code><span class="sig-paren">(</span><em>doc</em>, <em>ngrams=(1</em>, <em>2</em>, <em>3</em>, <em>4</em>, <em>5</em>, <em>6)</em>, <em>normalize='lemma'</em>, <em>window_width=1500</em>, <em>n_keyterms=10</em>, <em>idf=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/textacy/keyterms.html#sgrank"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.keyterms.sgrank" title="Permalink to this definition">¶</a></dt>
-<dd><p>Extract key terms from a document using the <a class="reference internal" href="#sgrank" id="id5">[SGRank]</a> algorithm.</p>
+<dd><p>Extract key terms from a document using the <a class="reference internal" href="#sgrank" id="id4">[SGRank]</a> algorithm.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -2968,7 +2968,7 @@ their corresponding SGRank scores</p>
 <table class="docutils citation" frame="void" id="sgrank" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id5">[SGRank]</a></td><td>Danesh, Sumner, and Martin. “SGRank: Combining Statistical and
+<tr><td class="label"><a class="fn-backref" href="#id4">[SGRank]</a></td><td>Danesh, Sumner, and Martin. “SGRank: Combining Statistical and
 Graphical Methods to Improve the State of the Art in Unsupervised Keyphrase
 Extraction”. Lexical and Computational Semantics (* SEM 2015) (2015): 117.</td></tr>
 </tbody>
@@ -2979,7 +2979,7 @@ Extraction”. Lexical and Computational Semantics (* SEM 2015) (2015): 117.</td
 <dt id="textacy.keyterms.singlerank">
 <code class="descclassname">textacy.keyterms.</code><code class="descname">singlerank</code><span class="sig-paren">(</span><em>doc</em>, <em>normalize='lemma'</em>, <em>n_keyterms=10</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/textacy/keyterms.html#singlerank"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.keyterms.singlerank" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convenience function for calling <a class="reference internal" href="#textacy.keyterms.key_terms_from_semantic_network" title="textacy.keyterms.key_terms_from_semantic_network"><code class="xref py py-func docutils literal notranslate"><span class="pre">key_terms_from_semantic_network</span></code></a>
-with the parameter values used in the <a class="reference internal" href="#singlerank" id="id6">[SingleRank]</a> algorithm.</p>
+with the parameter values used in the <a class="reference internal" href="#singlerank" id="id5">[SingleRank]</a> algorithm.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -3005,7 +3005,7 @@ representing the fraction of top-ranked terms to return as keyterms</li>
 <table class="docutils citation" frame="void" id="singlerank" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id6">[SingleRank]</a></td><td>Hasan, K. S., &amp; Ng, V. (2010, August). Conundrums in unsupervised
+<tr><td class="label"><a class="fn-backref" href="#id5">[SingleRank]</a></td><td>Hasan, K. S., &amp; Ng, V. (2010, August). Conundrums in unsupervised
 keyphrase extraction: making sense of the state-of-the-art. In Proceedings
 of the 23rd International Conference on Computational Linguistics:
 Posters (pp. 365-373). Association for Computational Linguistics.</td></tr>
@@ -3017,7 +3017,7 @@ Posters (pp. 365-373). Association for Computational Linguistics.</td></tr>
 <dt id="textacy.keyterms.textrank">
 <code class="descclassname">textacy.keyterms.</code><code class="descname">textrank</code><span class="sig-paren">(</span><em>doc</em>, <em>normalize='lemma'</em>, <em>n_keyterms=10</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/textacy/keyterms.html#textrank"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.keyterms.textrank" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convenience function for calling <a class="reference internal" href="#textacy.keyterms.key_terms_from_semantic_network" title="textacy.keyterms.key_terms_from_semantic_network"><code class="xref py py-func docutils literal notranslate"><span class="pre">key_terms_from_semantic_network</span></code></a>
-with the parameter values used in the <a class="reference internal" href="#textrank" id="id7">[TextRank]</a> algorithm.</p>
+with the parameter values used in the <a class="reference internal" href="#textrank" id="id6">[TextRank]</a> algorithm.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -3043,7 +3043,7 @@ representing the fraction of top-ranked terms to return as keyterms</li>
 <table class="docutils citation" frame="void" id="textrank" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id7">[TextRank]</a></td><td>Mihalcea, R., &amp; Tarau, P. (2004, July). TextRank: Bringing
+<tr><td class="label"><a class="fn-backref" href="#id6">[TextRank]</a></td><td>Mihalcea, R., &amp; Tarau, P. (2004, July). TextRank: Bringing
 order into texts. Association for Computational Linguistics.</td></tr>
 </tbody>
 </table>
@@ -4918,8 +4918,8 @@ not already present in order to write <code class="docutils literal notranslate"
 </dd></dl>
 
 </div>
-<span class="target" id="module-textacy.io.spacy"></span><div class="section" id="id8">
-<h3>spaCy<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
+<span class="target" id="module-textacy.io.spacy"></span><div class="section" id="id7">
+<h3>spaCy<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
 <p>Functions for reading from and writing to disk spacy documents in pickle format.</p>
 <dl class="function">
 <dt id="textacy.io.spacy.read_spacy_docs">
@@ -6153,7 +6153,7 @@ on disk under <code class="docutils literal notranslate"><span class="pre">data_
 <code class="descclassname">textacy.lexicon_methods.</code><code class="descname">emotional_valence</code><span class="sig-paren">(</span><em>words</em>, <em>threshold=0.0</em>, <em>dm_data_dir=None</em>, <em>dm_weighting='normfreq'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/textacy/lexicon_methods.html#emotional_valence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.lexicon_methods.emotional_valence" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get average emotional valence over all words for the following emotions –
 AFRAID, AMUSED, ANGRY, ANNOYED, DONT_CARE, HAPPY, INSPIRED, SAD – using
-the <a class="reference internal" href="#depechemood" id="id9">[DepecheMood]</a> dataset.</p>
+the <a class="reference internal" href="#depechemood" id="id8">[DepecheMood]</a> dataset.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -6183,7 +6183,7 @@ weighting used in building DepecheMood matrix</li>
 <table class="docutils citation" frame="void" id="depechemood" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id9">[DepecheMood]</a></td><td>Staiano and Guerini. DepecheMood: a Lexicon for Emotion
+<tr><td class="label"><a class="fn-backref" href="#id8">[DepecheMood]</a></td><td>Staiano and Guerini. DepecheMood: a Lexicon for Emotion
 Analysis from Crowd-Annotated News. 2014.
 Data available at <a class="reference external" href="https://github.com/marcoguerini/DepecheMood/releases">https://github.com/marcoguerini/DepecheMood/releases</a></td></tr>
 </tbody>
@@ -6286,8 +6286,8 @@ as a stand-alone function, or as part of a spaCy language pipeline:</p>
 </dd></dl>
 
 </div>
-<span class="target" id="module-textacy.spacier.utils"></span><div class="section" id="id10">
-<h3>spaCy Utils<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h3>
+<span class="target" id="module-textacy.spacier.utils"></span><div class="section" id="id9">
+<h3>spaCy Utils<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h3>
 <p>Helper functions for working with / extending spaCy’s core functionality.</p>
 <dl class="function">
 <dt id="textacy.spacier.utils.get_main_verbs_of_sent">
