@@ -151,7 +151,7 @@ class CapitolWords(Dataset):
         release_tag = 'capitol_words_py{py_version}_v{data_version}'.format(
             py_version=2 if compat.is_python2 else 3,
             data_version=1.0)
-        url = compat.urljoin(DOWNLOAD_ROOT, release_tag + '/' + self.filestub)
+        url = requests.compat.urljoin(DOWNLOAD_ROOT, release_tag + '/' + self.filestub)
         fname = self._filename
         if os.path.isfile(fname) and force is False:
             LOGGER.warning(
